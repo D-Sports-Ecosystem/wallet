@@ -1,6 +1,6 @@
 {
   "name": "@d-sports/wallet",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "A comprehensive wallet package with Rainbow Kit and Wagmi connectors, supporting both Next.js and React Native with social login functionality",
   "main": "dist/index.js",
