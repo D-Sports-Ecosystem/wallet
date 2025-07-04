@@ -1,6 +1,6 @@
 import React from 'react';
 import { DSportsWallet } from '../core/wallet';
-import { Web3AuthProvider } from '../providers/web3auth';
+import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 import { DSportsRainbowKitConnector } from '../connectors/rainbow-kit';
 import { DSportsWagmiConnector } from '../connectors/wagmi';
 import { nextjsPlatformAdapter } from '../utils/platform-adapters';
@@ -72,7 +72,7 @@ export declare function useDSportsWallet(wallet: DSportsWallet): {
     pendingConnector?: string;
     error?: Error;
 };
-export declare function useSocialLogin(socialProvider: Web3AuthProvider): {
+export declare function useSocialLogin(socialProvider: CustomSocialLoginProvider): {
     user: null;
     isLoading: boolean;
     error: Error | null;
@@ -82,7 +82,7 @@ export declare function useSocialLogin(socialProvider: Web3AuthProvider): {
 export declare function withDSportsWallet<T extends object>(Component: React.ComponentType<T>, walletOptions: DSportsWalletOptions): (props: T) => React.ReactElement<T, string | React.JSXElementConstructor<any>>;
 export * from '../types';
 export * from '../core/wallet';
-export * from '../providers/web3auth';
+export * from '../providers/custom-social-login';
 export { nextjsPlatformAdapter };
 export declare const mainnet: Chain;
 export declare const goerli: Chain;

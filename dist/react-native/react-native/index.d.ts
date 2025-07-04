@@ -1,6 +1,6 @@
 import React from 'react';
 import { DSportsWallet } from '../core/wallet';
-import { Web3AuthProvider } from '../providers/web3auth';
+import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 import { DSportsRainbowKitConnector } from '../connectors/rainbow-kit';
 import { DSportsWagmiConnector } from '../connectors/wagmi';
 import { reactNativePlatformAdapter } from '../utils/platform-adapters';
@@ -72,7 +72,7 @@ export declare function useDSportsWallet(wallet: DSportsWallet): {
     pendingConnector?: string;
     error?: Error;
 };
-export declare function useSocialLogin(socialProvider: Web3AuthProvider): {
+export declare function useSocialLogin(socialProvider: CustomSocialLoginProvider): {
     user: null;
     isLoading: boolean;
     error: Error | null;
@@ -87,7 +87,7 @@ export declare function removeSecureData(key: string): Promise<boolean>;
 export declare function setupURLPolyfill(): void;
 export * from '../types';
 export * from '../core/wallet';
-export * from '../providers/web3auth';
+export * from '../providers/custom-social-login';
 export { reactNativePlatformAdapter };
 export declare const mainnet: Chain;
 export declare const polygon: Chain;

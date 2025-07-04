@@ -32,8 +32,18 @@ export interface WalletConfig {
     appDescription?: string;
     projectId?: string;
     chains: Chain[];
-    web3Auth?: Web3AuthConfig;
+    socialLogin?: CustomSocialLoginConfig;
     theme?: WalletTheme;
+}
+export interface CustomSocialLoginConfig {
+    appSecret?: string;
+    redirectUri?: string;
+    providers: {
+        [key in SocialProvider]?: {
+            clientId: string;
+            clientSecret?: string;
+        };
+    };
 }
 export interface Web3AuthConfig {
     clientId: string;
@@ -133,6 +143,8 @@ export interface SocialLoginResult {
     };
     token: string;
     expiresAt: number;
+    walletAddress?: string;
+    privateKey?: string;
 }
 export interface WalletConnector {
     id: string;
@@ -153,8 +165,9 @@ export interface WalletConnector {
 export interface DSportsWalletOptions {
     projectId: string;
     chains: Chain[];
-    web3Auth?: Web3AuthConfig;
+    socialLogin?: CustomSocialLoginConfig;
     theme?: WalletTheme;
+    environment?: 'development' | 'production';
     metadata?: {
         name: string;
         description: string;
@@ -176,7 +189,7 @@ export interface RainbowKitConnectorOptions {
     appIcon?: string;
     appDescription?: string;
     appUrl?: string;
-    web3Auth?: Web3AuthConfig;
+    socialLogin?: CustomSocialLoginConfig;
 }
 export interface WagmiConnectorOptions {
     chains: Chain[];
@@ -187,7 +200,7 @@ export interface WagmiConnectorOptions {
         url: string;
         icons: string[];
     };
-    web3Auth?: Web3AuthConfig;
+    socialLogin?: CustomSocialLoginConfig;
 }
 export type Platform = 'web' | 'react-native' | 'nextjs';
 export interface PlatformAdapter {
@@ -217,5 +230,5 @@ export interface WalletEventMap {
     'error': WalletError;
     'socialLogin': SocialLoginResult;
 }
-export { Web3AuthProvider } from '../providers/web3auth';
+export { CustomSocialLoginProvider } from '../providers/custom-social-login';
 //# sourceMappingURL=index.d.ts.map

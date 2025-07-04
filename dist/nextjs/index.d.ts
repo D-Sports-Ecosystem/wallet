@@ -1,5 +1,6 @@
 export { DSportsWallet } from './core/wallet';
-export { Web3AuthProvider } from './providers/web3auth';
+export { CustomSocialLoginProvider } from './providers/custom-social-login';
+export { DSportsOAuthService, createQuickStartSocialLogin, validateSocialLoginConfig } from './providers/dsports-oauth-service';
 export { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from './connectors/rainbow-kit';
 export { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from './connectors/wagmi';
 export { webPlatformAdapter, nextjsPlatformAdapter, reactNativePlatformAdapter, getDefaultPlatformAdapter } from './utils/platform-adapters';
@@ -10,7 +11,8 @@ import { DSportsRainbowKitConnector } from './connectors/rainbow-kit';
 import { DSportsWagmiConnector } from './connectors/wagmi';
 import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions } from './types';
 export declare function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet;
-export declare function createUniversalRainbowKitConnector(options: RainbowKitConnectorOptions): () => {
+export declare function createDSportsWalletQuickStart(options: Omit<DSportsWalletOptions, 'socialLogin'>): DSportsWallet;
+export declare function createDSportsRainbowKitConnectorUniversal(options: RainbowKitConnectorOptions): () => {
     id: string;
     name: string;
     iconUrl: string;
@@ -22,8 +24,8 @@ export declare function createUniversalRainbowKitConnector(options: RainbowKitCo
         };
     };
 };
-export declare function createUniversalWagmiConnector(options: WagmiConnectorOptions): DSportsWagmiConnector;
-export declare function universalWagmiConnector(options: WagmiConnectorOptions): () => {
+export declare function createDSportsWagmiConnectorUniversal(options: WagmiConnectorOptions): DSportsWagmiConnector;
+export declare function dsportsWagmiConnectorUniversal(options: WagmiConnectorOptions): () => {
     id: string;
     name: string;
     type: string;
@@ -113,56 +115,7 @@ export declare const goerli: {
     };
     testnet: boolean;
 };
-export declare const sepolia: {
-    id: number;
-    name: string;
-    network: string;
-    nativeCurrency: {
-        name: string;
-        symbol: string;
-        decimals: number;
-    };
-    rpcUrls: {
-        default: {
-            http: string[];
-        };
-        public: {
-            http: string[];
-        };
-    };
-    blockExplorers: {
-        default: {
-            name: string;
-            url: string;
-        };
-    };
-    testnet: boolean;
-};
 export declare const polygon: {
-    id: number;
-    name: string;
-    network: string;
-    nativeCurrency: {
-        name: string;
-        symbol: string;
-        decimals: number;
-    };
-    rpcUrls: {
-        default: {
-            http: string[];
-        };
-        public: {
-            http: string[];
-        };
-    };
-    blockExplorers: {
-        default: {
-            name: string;
-            url: string;
-        };
-    };
-};
-export declare const bsc: {
     id: number;
     name: string;
     network: string;

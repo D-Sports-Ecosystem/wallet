@@ -1,6 +1,11 @@
 // Core wallet functionality
 export { DSportsWallet } from './core/wallet';
-export { Web3AuthProvider } from './providers/web3auth';
+export { CustomSocialLoginProvider } from './providers/custom-social-login';
+export { 
+  DSportsOAuthService, 
+  createQuickStartSocialLogin, 
+  validateSocialLoginConfig 
+} from './providers/dsports-oauth-service';
 
 // Connectors
 export { 
@@ -18,7 +23,7 @@ export {
   webPlatformAdapter, 
   nextjsPlatformAdapter, 
   reactNativePlatformAdapter, 
-  getDefaultPlatformAdapter 
+  getDefaultPlatformAdapter
 } from './utils/platform-adapters';
 
 // Event emitter utility
@@ -29,7 +34,8 @@ export * from './types';
 
 // Factory functions for easy setup
 import { DSportsWallet } from './core/wallet';
-import { Web3AuthProvider } from './providers/web3auth';
+import { CustomSocialLoginProvider } from './providers/custom-social-login';
+import { createQuickStartSocialLogin, validateSocialLoginConfig } from './providers/dsports-oauth-service';
 import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from './connectors/rainbow-kit';
 import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from './connectors/wagmi';
 import { getDefaultPlatformAdapter } from './utils/platform-adapters';
@@ -40,8 +46,10 @@ import {
   WagmiConnectorOptions 
 } from './types';
 
-// Universal wallet factory (auto-detects platform)
+// Universal wallet factory
 export function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet {
+  const platformAdapter = getDefaultPlatformAdapter();
+  
   const config: WalletConfig = {
     appName: options.metadata?.name || 'D-Sports App',
     appUrl: options.metadata?.url,
@@ -49,18 +57,22 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
     appDescription: options.metadata?.description,
     projectId: options.projectId,
     chains: options.chains,
-    web3Auth: options.web3Auth,
+    socialLogin: options.socialLogin,
     theme: options.theme
   };
 
-  const platformAdapter = getDefaultPlatformAdapter();
   const wallet = new DSportsWallet(config, platformAdapter);
 
-  // Add Web3Auth provider if configured
-  if (options.web3Auth) {
-    const web3AuthProvider = new Web3AuthProvider(options.web3Auth, platformAdapter);
+  // Add social login provider if configured
+  if (options.socialLogin) {
+    // Validate configuration if environment is specified
+    const validatedConfig = options.environment 
+      ? validateSocialLoginConfig(options.socialLogin, options.environment)
+      : options.socialLogin;
+
+    const socialProvider = new CustomSocialLoginProvider(validatedConfig, platformAdapter);
     
-    // Create connectors with Web3Auth
+    // Create connectors with social login
     const rainbowKitConnector = new DSportsRainbowKitConnector({
       chains: options.chains,
       projectId: options.projectId,
@@ -68,22 +80,22 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appIcon: config.appIcon,
       appDescription: config.appDescription,
       appUrl: config.appUrl,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: web3AuthProvider
+      socialLogin: validatedConfig,
+      customSocialLoginProvider: socialProvider
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
       chains: options.chains,
       projectId: options.projectId,
       metadata: options.metadata,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: web3AuthProvider
+      socialLogin: validatedConfig,
+      customSocialLoginProvider: socialProvider
     });
 
     wallet.addConnector(rainbowKitConnector);
     wallet.addConnector(wagmiConnector);
   } else {
-    // Create connectors without Web3Auth
+    // Create connectors without social login
     const rainbowKitConnector = new DSportsRainbowKitConnector({
       chains: options.chains,
       projectId: options.projectId,
@@ -106,42 +118,55 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
   return wallet;
 }
 
+// Quick start wallet factory (uses D-Sports managed OAuth)
+export function createDSportsWalletQuickStart(options: Omit<DSportsWalletOptions, 'socialLogin'>): DSportsWallet {
+  console.log('🚀 Creating D-Sports wallet with quick start OAuth!');
+  console.log('📝 This uses D-Sports managed credentials - perfect for development.');
+  console.log('🔧 For production, use createDSportsWallet() with your own OAuth apps.');
+  
+  return createDSportsWallet({
+    ...options,
+    socialLogin: createQuickStartSocialLogin(),
+    environment: 'development'
+  });
+}
+
 // Universal Rainbow Kit connector factory
-export function createUniversalRainbowKitConnector(options: RainbowKitConnectorOptions) {
+export function createDSportsRainbowKitConnectorUniversal(options: RainbowKitConnectorOptions) {
   const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin ? 
-    new SocialLoginProvider(options.socialLogin, platformAdapter) : 
+    new CustomSocialLoginProvider(options.socialLogin, platformAdapter) : 
     undefined;
 
   return createDSportsRainbowKitConnector({
     ...options,
-    socialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // Universal Wagmi connector factory
-export function createUniversalWagmiConnector(options: WagmiConnectorOptions) {
+export function createDSportsWagmiConnectorUniversal(options: WagmiConnectorOptions) {
   const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin ? 
-    new SocialLoginProvider(options.socialLogin, platformAdapter) : 
+    new CustomSocialLoginProvider(options.socialLogin, platformAdapter) : 
     undefined;
 
   return createDSportsWagmiConnector({
     ...options,
-    socialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // Universal Wagmi v2 connector
-export function universalWagmiConnector(options: WagmiConnectorOptions) {
+export function dsportsWagmiConnectorUniversal(options: WagmiConnectorOptions) {
   const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin ? 
-    new SocialLoginProvider(options.socialLogin, platformAdapter) : 
+    new CustomSocialLoginProvider(options.socialLogin, platformAdapter) : 
     undefined;
 
   return dsportsWagmiConnector({
     ...options,
-    socialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
@@ -175,21 +200,6 @@ export const goerli = {
   testnet: true
 };
 
-export const sepolia = {
-  id: 11155111,
-  name: 'Sepolia',
-  network: 'sepolia',
-  nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://eth-sepolia.g.alchemy.com/v2/demo'] },
-    public: { http: ['https://eth-sepolia.g.alchemy.com/v2/demo'] }
-  },
-  blockExplorers: {
-    default: { name: 'Etherscan', url: 'https://sepolia.etherscan.io' }
-  },
-  testnet: true
-};
-
 export const polygon = {
   id: 137,
   name: 'Polygon',
@@ -201,20 +211,6 @@ export const polygon = {
   },
   blockExplorers: {
     default: { name: 'PolygonScan', url: 'https://polygonscan.com' }
-  }
-};
-
-export const bsc = {
-  id: 56,
-  name: 'BNB Smart Chain',
-  network: 'bsc',
-  nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://bsc-dataseed.binance.org'] },
-    public: { http: ['https://bsc-dataseed.binance.org'] }
-  },
-  blockExplorers: {
-    default: { name: 'BscScan', url: 'https://bscscan.com' }
   }
 };
 

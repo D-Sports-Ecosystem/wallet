@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DSportsWallet } from '../core/wallet';
-import { Web3AuthProvider } from '../providers/web3auth';
+import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from '../connectors/rainbow-kit';
 import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from '../connectors/wagmi';
 import { nextjsPlatformAdapter } from '../utils/platform-adapters';
@@ -21,15 +21,15 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
     appDescription: options.metadata?.description,
     projectId: options.projectId,
     chains: options.chains,
-    web3Auth: options.web3Auth,
+    socialLogin: options.socialLogin,
     theme: options.theme
   };
 
   const wallet = new DSportsWallet(config, nextjsPlatformAdapter);
 
   // Add social login provider if configured
-  if (options.web3Auth) {
-    const socialProvider = new Web3AuthProvider(options.web3Auth, nextjsPlatformAdapter);
+  if (options.socialLogin) {
+    const socialProvider = new CustomSocialLoginProvider(options.socialLogin, nextjsPlatformAdapter);
     
     // Create connectors with social login
     const rainbowKitConnector = new DSportsRainbowKitConnector({
@@ -39,16 +39,16 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appIcon: config.appIcon,
       appDescription: config.appDescription,
       appUrl: config.appUrl,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: socialProvider
+      socialLogin: options.socialLogin,
+      customSocialLoginProvider: socialProvider
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
       chains: options.chains,
       projectId: options.projectId,
       metadata: options.metadata,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: socialProvider
+      socialLogin: options.socialLogin,
+      customSocialLoginProvider: socialProvider
     });
 
     wallet.addConnector(rainbowKitConnector);
@@ -79,37 +79,37 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
 
 // Next.js specific Rainbow Kit connector factory
 export function createDSportsRainbowKitConnectorForNextjs(options: RainbowKitConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, nextjsPlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, nextjsPlatformAdapter) : 
     undefined;
 
   return createDSportsRainbowKitConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // Next.js specific Wagmi connector factory
 export function createDSportsWagmiConnectorForNextjs(options: WagmiConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, nextjsPlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, nextjsPlatformAdapter) : 
     undefined;
 
   return createDSportsWagmiConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // Next.js specific Wagmi v2 connector
 export function dsportsWagmiConnectorForNextjs(options: WagmiConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, nextjsPlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, nextjsPlatformAdapter) : 
     undefined;
 
   return dsportsWagmiConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
@@ -143,7 +143,7 @@ export function useDSportsWallet(wallet: DSportsWallet) {
 }
 
 // Next.js Social Login Hook
-export function useSocialLogin(socialProvider: Web3AuthProvider) {
+export function useSocialLogin(socialProvider: CustomSocialLoginProvider) {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [error, setError] = useState<Error | null>(null);
@@ -208,7 +208,7 @@ export function withDSportsWallet<T extends object>(
 // Re-export common types and utilities
 export * from '../types';
 export * from '../core/wallet';
-export * from '../providers/web3auth';
+export * from '../providers/custom-social-login';
 export { nextjsPlatformAdapter };
 
 // Next.js specific imports are at the top of the file

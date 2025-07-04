@@ -1,7 +1,7 @@
 import { WalletConnector, ConnectorData, ConnectorEvents, WagmiConnectorOptions } from '../types';
-import { Web3AuthProvider } from '../providers/web3auth';
+import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 export interface DSportsWagmiConnectorConfig extends WagmiConnectorOptions {
-    web3AuthProvider?: Web3AuthProvider;
+    customSocialLoginProvider?: CustomSocialLoginProvider;
 }
 export declare class DSportsWagmiConnector implements WalletConnector {
     readonly id = "dsports-wallet";
@@ -13,7 +13,7 @@ export declare class DSportsWagmiConnector implements WalletConnector {
     private account?;
     private chainId?;
     private isConnected;
-    private web3AuthProvider?;
+    private customSocialLoginProvider?;
     private eventEmitter;
     constructor(config: DSportsWagmiConnectorConfig);
     on<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void;

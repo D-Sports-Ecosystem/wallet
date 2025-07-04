@@ -1,17 +1,19 @@
 # @d-sports/wallet
 
-A powerful, multi-platform wallet SDK for React, Next.js, and React Native applications with seamless Web3Auth integration and support for Rainbow Kit and Wagmi.
+A powerful, multi-platform wallet SDK for React, Next.js, and React Native applications with **free, custom social login** and support for Rainbow Kit and Wagmi. 100% D-Sports branded with no vendor dependencies.
 
 ## ✨ Features
 
 - 🌐 **Multi-platform support**: Works with React, Next.js, and React Native
-- 🔐 **Web3Auth integration**: Secure social login with Google, Facebook, Twitter, Discord, and more
+- 🔐 **Custom social login**: FREE OAuth integration with Google, Facebook, Twitter, Discord, GitHub, and Apple
+- 🏆 **D-Sports branded**: Fully customizable, no vendor lock-in
 - 🌈 **Rainbow Kit compatible**: Easy integration with Rainbow Kit's wallet connection UI
 - ⚡ **Wagmi compatible**: Full support for Wagmi v1 and v2
 - 🎨 **Customizable UI**: Flexible theming and styling options
 - 🔒 **Secure storage**: Platform-specific secure storage solutions
 - 📱 **Mobile-first**: Deep linking and mobile-optimized experience
 - 🔄 **Auto-reconnection**: Persistent wallet connections across sessions
+- 💰 **Zero cost**: No per-user fees or external dependencies
 - 🎯 **TypeScript**: Full TypeScript support with comprehensive type definitions
 
 ## 🚀 Installation
@@ -28,16 +30,50 @@ bun add @d-sports/wallet
 
 **For Next.js/React:**
 ```bash
-npm install @web3auth/modal @web3auth/base @web3auth/ethereum-provider @web3auth/openlogin-adapter
+# No additional dependencies required!
 ```
 
 **For React Native:**
 ```bash
-npm install @web3auth/no-modal @web3auth/base @web3auth/ethereum-provider @web3auth/openlogin-adapter
 npm install react-native-keychain react-native-url-polyfill
 ```
 
 ## 🏃‍♂️ Quick Start
+
+### 🚀 Super Quick Start (5 minutes)
+
+Get started immediately with **D-Sports managed OAuth credentials** - no OAuth setup required!
+
+```typescript
+import { createDSportsWalletQuickStart, mainnet, polygon } from '@d-sports/wallet';
+
+// 🎉 ONE LINE SETUP - No OAuth configuration needed!
+const wallet = createDSportsWalletQuickStart({
+  projectId: 'your-project-id',
+  chains: [mainnet, polygon],
+  metadata: {
+    name: 'My Awesome App',
+    description: 'Built with D-Sports Wallet',
+    url: 'https://my-app.com',
+    icons: ['https://my-app.com/icon.png']
+  }
+});
+
+// Connect with social login (Google, Facebook, Twitter, Discord, GitHub ready!)
+await wallet.connect({ socialLogin: true });
+
+console.log('🎊 Wallet connected with zero OAuth setup!');
+```
+
+**Perfect for:**
+- 🧪 **Prototyping** and proof of concepts
+- 👨‍💻 **Development** and testing
+- 🎓 **Learning** and tutorials
+- 🏁 **Getting started** quickly
+
+### Production Setup
+
+For production apps, set up your own OAuth applications:
 
 ### Next.js
 
@@ -48,28 +84,22 @@ import { createDSportsWallet } from '@d-sports/wallet/nextjs';
 const wallet = createDSportsWallet({
   projectId: 'your-project-id',
   chains: [/* your chains */],
-  web3Auth: {
-    clientId: 'your-web3auth-client-id',
-    web3AuthNetwork: 'testnet', // or 'mainnet'
-    chainConfig: {
-      chainNamespace: 'eip155',
-      chainId: '0x1', // Ethereum mainnet
-      rpcTarget: 'https://mainnet.infura.io/v3/your-infura-key',
-      displayName: 'Ethereum Mainnet',
-      blockExplorer: 'https://etherscan.io',
-      ticker: 'ETH',
-      tickerName: 'Ethereum',
-    },
-    loginConfig: {
+  environment: 'production', // Validates production config
+  socialLogin: {
+    appSecret: 'your-app-secret', // For deterministic key generation
+    redirectUri: 'https://your-app.com/auth/callback',
+    providers: {
       google: {
-        verifier: 'your-google-verifier',
-        typeOfLogin: 'google',
         clientId: 'your-google-client-id',
       },
       facebook: {
-        verifier: 'your-facebook-verifier',
-        typeOfLogin: 'facebook',
-        clientId: 'your-facebook-client-id',
+        clientId: 'your-facebook-app-id',
+      },
+      twitter: {
+        clientId: 'your-twitter-client-id',
+      },
+      discord: {
+        clientId: 'your-discord-client-id',
       },
     },
   },
@@ -91,17 +121,16 @@ setupURLPolyfill();
 const wallet = createDSportsWallet({
   projectId: 'your-project-id',
   chains: [/* your chains */],
-  web3Auth: {
-    clientId: 'your-web3auth-client-id',
-    web3AuthNetwork: 'testnet',
-    chainConfig: {
-      chainNamespace: 'eip155',
-      chainId: '0x89', // Polygon mainnet
-      rpcTarget: 'https://polygon-rpc.com',
-      displayName: 'Polygon',
-      blockExplorer: 'https://polygonscan.com',
-      ticker: 'MATIC',
-      tickerName: 'Polygon',
+  socialLogin: {
+    appSecret: 'your-app-secret',
+    redirectUri: 'dsports://auth/callback', // Deep link for mobile
+    providers: {
+      google: {
+        clientId: 'your-google-client-id',
+      },
+      apple: {
+        clientId: 'your-apple-client-id',
+      },
     },
   },
 });
@@ -148,52 +177,50 @@ await wallet.switchChain(137); // Polygon
 await wallet.disconnect();
 ```
 
-### Web3Auth Social Login
+### Custom Social Login
 
 ```typescript
-import { createDSportsWallet } from '@d-sports/wallet';
-import { Web3AuthProvider } from '@d-sports/wallet/web3auth';
+import { createDSportsWallet, CustomSocialLoginProvider } from '@d-sports/wallet';
 
 const wallet = createDSportsWallet({
   projectId: 'your-project-id',
   chains: [/* your chains */],
-  web3Auth: {
-    clientId: 'your-web3auth-client-id',
-    web3AuthNetwork: 'testnet',
-    chainConfig: {
-      chainNamespace: 'eip155',
-      chainId: '0x1',
-      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
-      displayName: 'Ethereum',
-      blockExplorer: 'https://etherscan.io',
-      ticker: 'ETH',
-      tickerName: 'Ethereum',
-    },
-    loginConfig: {
+  socialLogin: {
+    appSecret: 'your-unique-app-secret', // Used for deterministic key generation
+    redirectUri: 'https://your-app.com/auth/callback',
+    providers: {
       google: {
-        verifier: 'your-google-verifier',
-        typeOfLogin: 'google',
-        clientId: 'your-google-client-id',
+        clientId: 'your-google-oauth-client-id',
       },
       facebook: {
-        verifier: 'your-facebook-verifier', 
-        typeOfLogin: 'facebook',
-        clientId: 'your-facebook-client-id',
+        clientId: 'your-facebook-app-id',
+      },
+      twitter: {
+        clientId: 'your-twitter-oauth-client-id',
+      },
+      discord: {
+        clientId: 'your-discord-oauth-client-id',
+      },
+      github: {
+        clientId: 'your-github-oauth-client-id',
       },
     },
   },
 });
 
 // Connect with social login
-await wallet.connect();
+await wallet.connect({ socialLogin: true });
 
-// Get Web3Auth provider
-const provider = wallet.getConnector('dsports-wallet');
-const web3AuthProvider = provider.getProvider();
+// Get social login provider
+const socialProvider = wallet.getConnector('dsports-wallet').customSocialLoginProvider;
 
-// Get user info
-const userInfo = await web3AuthProvider.getUserInfo();
-console.log('User info:', userInfo);
+// Login with specific provider
+const result = await socialProvider.login('google');
+console.log('Social login result:', result);
+
+// Get wallet from social login
+const ethersWallet = await socialProvider.getWalletFromSocial(result);
+console.log('Generated wallet address:', ethersWallet.address);
 ```
 
 ### Rainbow Kit Integration
@@ -205,17 +232,16 @@ const connector = createDSportsRainbowKitConnector({
   chains: [/* your chains */],
   projectId: 'your-project-id',
   appName: 'My App',
-  web3Auth: {
-    clientId: 'your-web3auth-client-id',
-    web3AuthNetwork: 'testnet',
-    chainConfig: {
-      chainNamespace: 'eip155',
-      chainId: '0x1',
-      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
-      displayName: 'Ethereum',
-      blockExplorer: 'https://etherscan.io',
-      ticker: 'ETH',
-      tickerName: 'Ethereum',
+  socialLogin: {
+    appSecret: 'your-app-secret',
+    redirectUri: 'https://your-app.com/auth/callback',
+    providers: {
+      google: {
+        clientId: 'your-google-client-id',
+      },
+      facebook: {
+        clientId: 'your-facebook-client-id',
+      },
     },
   },
 });
@@ -235,17 +261,13 @@ import { dsportsWagmiConnector } from '@d-sports/wallet';
 const connector = dsportsWagmiConnector({
   chains: [/* your chains */],
   projectId: 'your-project-id',
-  web3Auth: {
-    clientId: 'your-web3auth-client-id',
-    web3AuthNetwork: 'testnet',
-    chainConfig: {
-      chainNamespace: 'eip155',
-      chainId: '0x1',
-      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
-      displayName: 'Ethereum',
-      blockExplorer: 'https://etherscan.io',
-      ticker: 'ETH',
-      tickerName: 'Ethereum',
+  socialLogin: {
+    appSecret: 'your-app-secret',
+    redirectUri: 'https://your-app.com/auth/callback',
+    providers: {
+      google: {
+        clientId: 'your-google-client-id',
+      },
     },
   },
 });
@@ -267,7 +289,7 @@ const connectors = [
 interface DSportsWalletOptions {
   projectId: string;
   chains: Chain[];
-  web3Auth?: Web3AuthConfig;
+  socialLogin?: CustomSocialLoginConfig;
   theme?: WalletTheme;
   metadata?: {
     name: string;
@@ -280,7 +302,7 @@ interface DSportsWalletOptions {
 
 #### Methods
 
-- `connect(connectorId?: string): Promise<WalletAccount>`
+- `connect(config?: { socialLogin?: boolean }): Promise<WalletAccount>`
 - `disconnect(): Promise<void>`
 - `switchChain(chainId: number): Promise<void>`
 - `getState(): WalletState`
@@ -324,40 +346,58 @@ const {
   error,
   login,
   logout
-} = useSocialLogin(web3AuthProvider);
+} = useSocialLogin(customSocialLoginProvider);
 ```
 
 ## ⚙️ Configuration
 
-### Web3Auth Configuration
+### Custom Social Login Configuration
 
 ```typescript
-interface Web3AuthConfig {
-  clientId: string;
-  web3AuthNetwork?: 'mainnet' | 'testnet' | 'cyan' | 'aqua';
-  chainConfig: {
-    chainNamespace: string;
-    chainId: string;
-    rpcTarget: string;
-    displayName: string;
-    blockExplorer: string;
-    ticker: string;
-    tickerName: string;
-  };
-  uiConfig?: {
-    theme?: 'light' | 'dark' | 'auto';
-    loginMethodsOrder?: string[];
-    appLogo?: string;
-    modalZIndex?: string;
-  };
-  loginConfig?: {
-    google?: LoginProvider;
-    facebook?: LoginProvider;
-    twitter?: LoginProvider;
-    discord?: LoginProvider;
+interface CustomSocialLoginConfig {
+  appSecret?: string; // Used for deterministic wallet generation
+  redirectUri?: string; // OAuth callback URL
+  providers: {
+    [key in SocialProvider]?: {
+      clientId: string;
+      clientSecret?: string; // For backend token exchange
+    };
   };
 }
 ```
+
+### Supported Social Providers
+
+- **Google** (`google`): OAuth 2.0
+- **Facebook** (`facebook`): Facebook Login
+- **Twitter** (`twitter`): OAuth 2.0
+- **Discord** (`discord`): OAuth 2.0
+- **GitHub** (`github`): OAuth 2.0
+- **Apple** (`apple`): Sign in with Apple
+
+### Setting Up OAuth Applications
+
+#### Google OAuth Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add your domain to authorized origins
+6. Copy the **Client ID**
+
+#### Facebook OAuth Setup
+1. Go to [Facebook Developers](https://developers.facebook.com/)
+2. Create a new app
+3. Set up Facebook Login
+4. Add your domain to valid OAuth redirect URIs
+5. Copy the **App ID**
+
+#### Twitter OAuth Setup
+1. Go to [Twitter Developer Portal](https://developer.twitter.com/)
+2. Create a new app
+3. Set up OAuth 2.0
+4. Configure callback URLs
+5. Copy the **Client ID**
 
 ### Theme Configuration
 
@@ -375,6 +415,58 @@ interface WalletTheme {
 }
 ```
 
+### OAuth Callback Page
+
+Create a callback page at your `redirectUri` to handle OAuth responses:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D-Sports Authentication</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    .loading { color: #666; }
+    .logo { width: 64px; height: 64px; margin: 20px auto; }
+  </style>
+</head>
+<body>
+  <div class="logo">🏆</div>
+  <h2>D-Sports Authentication</h2>
+  <p class="loading">Processing your login...</p>
+  <script>
+    // Handle OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    
+    if (error) {
+      window.parent.postMessage({
+        type: 'OAUTH_ERROR',
+        error: error
+      }, window.location.origin);
+    } else if (code) {
+      // Exchange code for user data (implement your backend logic)
+      window.parent.postMessage({
+        type: 'OAUTH_SUCCESS',
+        payload: {
+          code,
+          user: {
+            id: 'user-id-from-your-backend',
+            email: 'user@example.com',
+            name: 'User Name',
+            avatar: 'https://example.com/avatar.jpg'
+          },
+          token: 'access-token-from-your-backend',
+          expiresAt: Date.now() + 3600000
+        }
+      }, window.location.origin);
+    }
+  </script>
+</body>
+</html>
+```
+
 ### Deep Linking (React Native)
 
 ```typescript
@@ -383,6 +475,15 @@ import { handleDeepLink } from '@d-sports/wallet/react-native';
 // Handle deep link
 handleDeepLink('dsports://wallet/connect?connector=dsports-wallet', wallet);
 ```
+
+## 💰 Cost Comparison
+
+| Provider | Cost | Lock-in | Branding |
+|----------|------|---------|----------|
+| **@d-sports/wallet** | **FREE** | ❌ None | 🏆 Full D-Sports |
+| Web3Auth | $0.05/MAU | ✅ Yes | 🔒 Limited |
+| Magic | $0.02/MAU | ✅ Yes | 🔒 Limited |
+| Privy | $0.05/MAU | ✅ Yes | 🔒 Limited |
 
 ## 🛠️ Development
 
@@ -425,9 +526,17 @@ bun test
 ├── core              # Core wallet functionality
 ├── nextjs            # Next.js specific exports
 ├── react-native      # React Native specific exports
-├── web3auth          # Web3Auth provider
+├── custom-social-login # Custom social login provider
 └── types             # TypeScript type definitions
 ```
+
+## 🔒 Security Features
+
+- **Deterministic Key Generation**: Wallets are generated deterministically from social login data
+- **Secure Storage**: Platform-specific secure storage (localStorage, AsyncStorage, Keychain)
+- **No Private Key Transmission**: Keys are generated locally, never sent to servers
+- **Custom App Secret**: Use your own secret for additional security
+- **OAuth Best Practices**: Follows OAuth 2.0 security guidelines
 
 ## 🤝 Contributing
 
@@ -443,7 +552,79 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [Web3Auth](https://web3auth.io/) for social login infrastructure
+- [ethers.js](https://ethers.org/) for Ethereum interactions
 - [Rainbow Kit](https://www.rainbowkit.com/) for wallet connection UI
 - [Wagmi](https://wagmi.sh/) for React hooks for Ethereum
 - [Rollup](https://rollupjs.org/) for module bundling
+
+---
+
+**Made with ❤️ by the D-Sports team** - A free, open-source alternative to expensive wallet providers.
+
+## 🔄 Quick Start → Production Migration
+
+### Development to Production Path
+
+1. **Start with Quick Start** (5 minutes):
+   ```typescript
+   const wallet = createDSportsWalletQuickStart({
+     projectId: 'your-project-id',
+     chains: [mainnet, polygon]
+   });
+   ```
+
+2. **Create Your OAuth Apps** (30 minutes):
+   - [Google OAuth Setup](#google-oauth-setup)
+   - [Facebook OAuth Setup](#facebook-oauth-setup) 
+   - [Twitter OAuth Setup](#twitter-oauth-setup)
+
+3. **Switch to Production Config**:
+   ```typescript
+   const wallet = createDSportsWallet({
+     projectId: 'your-project-id',
+     chains: [mainnet, polygon],
+     environment: 'production', // Validates config
+     socialLogin: {
+       appSecret: 'your-production-secret',
+       redirectUri: 'https://your-app.com/auth/callback',
+       providers: {
+         google: { clientId: 'your-google-client-id' },
+         facebook: { clientId: 'your-facebook-app-id' },
+         // ... other providers
+       }
+     }
+   });
+   ```
+
+### D-Sports OAuth Service
+
+D-Sports provides **managed OAuth credentials** for instant development:
+
+```typescript
+import { DSportsOAuthService, createQuickStartSocialLogin } from '@d-sports/wallet';
+
+// Get managed credentials
+const managed = DSportsOAuthService.getManagedCredentials({ 
+  environment: 'development' 
+});
+
+// Quick start config (auto-generated)
+const quickStartConfig = createQuickStartSocialLogin();
+
+// Validate production config
+const productionConfig = validateSocialLoginConfig(myConfig, 'production');
+```
+
+**Managed OAuth includes:**
+- ✅ **Google** - Ready to use
+- ✅ **Facebook** - Ready to use  
+- ✅ **Twitter** - Ready to use
+- ✅ **Discord** - Ready to use
+- ✅ **GitHub** - Ready to use
+- ⚠️ **Apple** - Requires individual setup
+
+**Benefits:**
+- 🚀 **Instant setup** - No OAuth configuration
+- 🛡️ **Production warnings** - Automatic validation
+- 🔄 **Easy migration** - Same API, different config
+- 📚 **Perfect for demos** - Show features immediately

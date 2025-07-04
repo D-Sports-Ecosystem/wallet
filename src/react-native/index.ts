@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DSportsWallet } from '../core/wallet';
-import { Web3AuthProvider } from '../providers/web3auth';
+import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from '../connectors/rainbow-kit';
 import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from '../connectors/wagmi';
 import { reactNativePlatformAdapter } from '../utils/platform-adapters';
@@ -21,15 +21,15 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
     appDescription: options.metadata?.description,
     projectId: options.projectId,
     chains: options.chains,
-    web3Auth: options.web3Auth,
+    socialLogin: options.socialLogin,
     theme: options.theme
   };
 
   const wallet = new DSportsWallet(config, reactNativePlatformAdapter);
 
   // Add social login provider if configured
-  if (options.web3Auth) {
-    const socialProvider = new Web3AuthProvider(options.web3Auth, reactNativePlatformAdapter);
+  if (options.socialLogin) {
+    const socialProvider = new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter);
     
     // Create connectors with social login
     const rainbowKitConnector = new DSportsRainbowKitConnector({
@@ -39,16 +39,16 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appIcon: config.appIcon,
       appDescription: config.appDescription,
       appUrl: config.appUrl,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: socialProvider
+      socialLogin: options.socialLogin,
+      customSocialLoginProvider: socialProvider
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
       chains: options.chains,
       projectId: options.projectId,
       metadata: options.metadata,
-      web3Auth: options.web3Auth,
-      web3AuthProvider: socialProvider
+      socialLogin: options.socialLogin,
+      customSocialLoginProvider: socialProvider
     });
 
     wallet.addConnector(rainbowKitConnector);
@@ -79,37 +79,37 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
 
 // React Native specific Rainbow Kit connector factory
 export function createDSportsRainbowKitConnectorForReactNative(options: RainbowKitConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, reactNativePlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
     undefined;
 
   return createDSportsRainbowKitConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // React Native specific Wagmi connector factory
 export function createDSportsWagmiConnectorForReactNative(options: WagmiConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, reactNativePlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
     undefined;
 
   return createDSportsWagmiConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
 // React Native specific Wagmi v2 connector
 export function dsportsWagmiConnectorForReactNative(options: WagmiConnectorOptions) {
-  const socialProvider = options.web3Auth ? 
-    new Web3AuthProvider(options.web3Auth, reactNativePlatformAdapter) : 
+  const socialProvider = options.socialLogin ? 
+    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
     undefined;
 
   return dsportsWagmiConnector({
     ...options,
-    web3AuthProvider: socialProvider
+    customSocialLoginProvider: socialProvider
   });
 }
 
@@ -143,7 +143,7 @@ export function useDSportsWallet(wallet: DSportsWallet) {
 }
 
 // React Native Social Login Hook
-export function useSocialLogin(socialProvider: Web3AuthProvider) {
+export function useSocialLogin(socialProvider: CustomSocialLoginProvider) {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [error, setError] = useState<Error | null>(null);
@@ -266,7 +266,7 @@ export function setupURLPolyfill() {
 // Re-export common types and utilities
 export * from '../types';
 export * from '../core/wallet';
-export * from '../providers/web3auth';
+export * from '../providers/custom-social-login';
 export { reactNativePlatformAdapter };
 
 // Common chains for React Native
