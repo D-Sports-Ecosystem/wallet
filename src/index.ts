@@ -1,6 +1,6 @@
 // Core wallet functionality
 export { DSportsWallet } from './core/wallet';
-export { SocialLoginProvider } from './providers/social-login';
+export { Web3AuthProvider } from './providers/web3auth';
 
 // Connectors
 export { 
@@ -29,7 +29,7 @@ export * from './types';
 
 // Factory functions for easy setup
 import { DSportsWallet } from './core/wallet';
-import { SocialLoginProvider } from './providers/social-login';
+import { Web3AuthProvider } from './providers/web3auth';
 import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from './connectors/rainbow-kit';
 import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from './connectors/wagmi';
 import { getDefaultPlatformAdapter } from './utils/platform-adapters';
@@ -49,18 +49,18 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
     appDescription: options.metadata?.description,
     projectId: options.projectId,
     chains: options.chains,
-    socialLogin: options.socialLogin,
+    web3Auth: options.web3Auth,
     theme: options.theme
   };
 
   const platformAdapter = getDefaultPlatformAdapter();
   const wallet = new DSportsWallet(config, platformAdapter);
 
-  // Add social login provider if configured
-  if (options.socialLogin) {
-    const socialProvider = new SocialLoginProvider(options.socialLogin, platformAdapter);
+  // Add Web3Auth provider if configured
+  if (options.web3Auth) {
+    const web3AuthProvider = new Web3AuthProvider(options.web3Auth, platformAdapter);
     
-    // Create connectors with social login
+    // Create connectors with Web3Auth
     const rainbowKitConnector = new DSportsRainbowKitConnector({
       chains: options.chains,
       projectId: options.projectId,
@@ -68,22 +68,22 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appIcon: config.appIcon,
       appDescription: config.appDescription,
       appUrl: config.appUrl,
-      socialLogin: options.socialLogin,
-      socialLoginProvider: socialProvider
+      web3Auth: options.web3Auth,
+      web3AuthProvider: web3AuthProvider
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
       chains: options.chains,
       projectId: options.projectId,
       metadata: options.metadata,
-      socialLogin: options.socialLogin,
-      socialLoginProvider: socialProvider
+      web3Auth: options.web3Auth,
+      web3AuthProvider: web3AuthProvider
     });
 
     wallet.addConnector(rainbowKitConnector);
     wallet.addConnector(wagmiConnector);
   } else {
-    // Create connectors without social login
+    // Create connectors without Web3Auth
     const rainbowKitConnector = new DSportsRainbowKitConnector({
       chains: options.chains,
       projectId: options.projectId,

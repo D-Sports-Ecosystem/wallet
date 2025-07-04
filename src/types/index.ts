@@ -34,24 +34,53 @@ export interface WalletConfig {
   appDescription?: string;
   projectId?: string;
   chains: Chain[];
-  socialLogin?: SocialLoginConfig;
+  web3Auth?: Web3AuthConfig;
   theme?: WalletTheme;
 }
 
-export interface SocialLoginConfig {
-  providers: SocialProvider[];
-  redirectUrl?: string;
-  clientIds: {
-    google?: string;
-    facebook?: string;
-    apple?: string;
-    twitter?: string;
-    discord?: string;
-    github?: string;
+export interface Web3AuthConfig {
+  clientId: string;
+  web3AuthNetwork?: 'mainnet' | 'testnet' | 'cyan' | 'aqua';
+  chainConfig: {
+    chainNamespace: string;
+    chainId: string;
+    rpcTarget: string;
+    displayName: string;
+    blockExplorer: string;
+    ticker: string;
+    tickerName: string;
+  };
+  uiConfig?: {
+    theme?: 'light' | 'dark' | 'auto';
+    loginMethodsOrder?: string[];
+    appLogo?: string;
+    modalZIndex?: string;
+  };
+  loginConfig?: {
+    google?: {
+      verifier: string;
+      typeOfLogin: string;
+      clientId: string;
+    };
+    facebook?: {
+      verifier: string;
+      typeOfLogin: string;
+      clientId: string;
+    };
+    twitter?: {
+      verifier: string;
+      typeOfLogin: string;
+      clientId: string;
+    };
+    discord?: {
+      verifier: string;
+      typeOfLogin: string;
+      clientId: string;
+    };
   };
 }
 
-export type SocialProvider = 'google' | 'facebook' | 'apple' | 'twitter' | 'discord' | 'github';
+export type SocialProvider = 'google' | 'facebook' | 'apple' | 'twitter' | 'discord' | 'github' | 'email' | 'sms';
 
 export interface WalletTheme {
   colors?: {
@@ -136,7 +165,7 @@ export interface WalletConnector {
 export interface DSportsWalletOptions {
   projectId: string;
   chains: Chain[];
-  socialLogin?: SocialLoginConfig;
+  web3Auth?: Web3AuthConfig;
   theme?: WalletTheme;
   metadata?: {
     name: string;
@@ -161,7 +190,7 @@ export interface RainbowKitConnectorOptions {
   appIcon?: string;
   appDescription?: string;
   appUrl?: string;
-  socialLogin?: SocialLoginConfig;
+  web3Auth?: Web3AuthConfig;
 }
 
 export interface WagmiConnectorOptions {
@@ -173,7 +202,7 @@ export interface WagmiConnectorOptions {
     url: string;
     icons: string[];
   };
-  socialLogin?: SocialLoginConfig;
+  web3Auth?: Web3AuthConfig;
 }
 
 export type Platform = 'web' | 'react-native' | 'nextjs';
@@ -209,4 +238,4 @@ export interface WalletEventMap {
 }
 
 // Re-export for convenience
-export { SocialLoginProvider } from '../providers/social-login'; 
+export { Web3AuthProvider } from '../providers/web3auth'; 

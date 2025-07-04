@@ -8,10 +8,10 @@ import {
   SocialLoginResult,
   SocialProvider
 } from '../types';
-import { SocialLoginProvider } from '../providers/social-login';
+import { Web3AuthProvider } from '../providers/web3auth';
 
 export interface DSportsWagmiConnectorConfig extends WagmiConnectorOptions {
-  socialLoginProvider?: SocialLoginProvider;
+  web3AuthProvider?: Web3AuthProvider;
 }
 
 export class DSportsWagmiConnector implements WalletConnector {
@@ -25,7 +25,7 @@ export class DSportsWagmiConnector implements WalletConnector {
   private account?: string;
   private chainId?: number;
   private isConnected = false;
-  private socialLoginProvider?: SocialLoginProvider;
+  private web3AuthProvider?: Web3AuthProvider;
   private eventEmitter = new EventEmitter<{
     connect: ConnectorData;
     disconnect: void;
@@ -36,7 +36,7 @@ export class DSportsWagmiConnector implements WalletConnector {
 
   constructor(config: DSportsWagmiConnectorConfig) {
     this.config = config;
-    this.socialLoginProvider = config.socialLoginProvider;
+    this.web3AuthProvider = config.web3AuthProvider;
   }
 
   on<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void {
@@ -49,7 +49,7 @@ export class DSportsWagmiConnector implements WalletConnector {
 
   async connect(config?: { chainId?: number; socialLogin?: boolean }): Promise<ConnectorData> {
     try {
-      if (config?.socialLogin && this.socialLoginProvider) {
+      if (config?.socialLogin && this.web3AuthProvider) {
         return await this.connectWithSocialLogin();
       }
 
@@ -214,17 +214,17 @@ export class DSportsWagmiConnector implements WalletConnector {
   }
 
   private async connectWithSocialLogin(): Promise<ConnectorData> {
-    if (!this.socialLoginProvider) {
-      throw new Error('Social login provider not configured');
+    if (!this.web3AuthProvider) {
+      throw new Error('Web3Auth provider not configured');
     }
 
     // Check if user is already logged in
-    let socialResult = await this.socialLoginProvider.getStoredUser();
+    let socialResult = await this.web3AuthProvider.getStoredUser();
     
     if (!socialResult || socialResult.expiresAt < Date.now()) {
       // Prompt user to choose social login provider
       const provider = await this.promptSocialProvider();
-      socialResult = await this.socialLoginProvider.login(provider);
+      socialResult = await this.web3AuthProvider.login(provider);
     }
 
     // Generate wallet address based on social login

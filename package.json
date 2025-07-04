@@ -1,6 +1,7 @@
 {
   "name": "@d-sports/wallet",
   "version": "1.0.0",
+  "type": "module",
   "description": "A comprehensive wallet package with Rainbow Kit and Wagmi connectors, supporting both Next.js and React Native with social login functionality",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -70,14 +71,19 @@
     }
   },
   "dependencies": {
+    "@web3auth/modal": "^8.0.0",
+    "@web3auth/base": "^8.0.0",
+    "@web3auth/ethereum-provider": "^8.0.0",
+    "@web3auth/openlogin-adapter": "^8.0.0",
+    "@web3auth/wallet-connect-v2-adapter": "^8.0.0",
+    "@web3auth/metamask-adapter": "^8.0.0",
+    "@web3auth/no-modal": "^8.0.0",
     "@walletconnect/web3wallet": "^1.11.0",
     "@walletconnect/core": "^2.11.0",
     "@walletconnect/utils": "^2.11.0",
     "ethers": "^6.8.0",
     "viem": "^1.19.0",
-    "abitype": "^0.10.0",
-    "jose": "^5.1.0",
-    "eventemitter3": "^5.0.1"
+    "abitype": "^0.10.0"
   },
   "devDependencies": {
     "@rainbow-me/rainbowkit": "^1.3.0",
@@ -101,7 +107,7 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-replace": "^5.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-terser": "^7.0.2",
+    "@rollup/plugin-terser": "^0.4.0",
     "rimraf": "^5.0.0"
   },
   "optionalDependencies": {

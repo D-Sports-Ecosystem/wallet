@@ -1,403 +1,433 @@
 # @d-sports/wallet
 
-A comprehensive wallet package with Rainbow Kit and Wagmi connectors, supporting both Next.js and React Native with social login functionality.
+A powerful, multi-platform wallet SDK for React, Next.js, and React Native applications with seamless Web3Auth integration and support for Rainbow Kit and Wagmi.
 
 ## ✨ Features
 
-- 🎯 **Multi-platform Support**: Works seamlessly with Next.js and React Native
-- 🌈 **Rainbow Kit Integration**: Drop-in connector for Rainbow Kit
-- ⚡ **Wagmi Support**: Compatible with Wagmi v1 and v2
-- 🔐 **Social Login**: Built-in OAuth support (Google, Facebook, Apple, Twitter, Discord, GitHub)
-- 🎨 **Customizable Themes**: Fully customizable UI themes
-- 🔄 **Auto-reconnection**: Automatic wallet reconnection on app restart
-- 🛡️ **Type Safe**: Full TypeScript support with comprehensive type definitions
-- 📱 **Mobile Ready**: Deep linking and secure storage for React Native
+- 🌐 **Multi-platform support**: Works with React, Next.js, and React Native
+- 🔐 **Web3Auth integration**: Secure social login with Google, Facebook, Twitter, Discord, and more
+- 🌈 **Rainbow Kit compatible**: Easy integration with Rainbow Kit's wallet connection UI
+- ⚡ **Wagmi compatible**: Full support for Wagmi v1 and v2
+- 🎨 **Customizable UI**: Flexible theming and styling options
+- 🔒 **Secure storage**: Platform-specific secure storage solutions
+- 📱 **Mobile-first**: Deep linking and mobile-optimized experience
+- 🔄 **Auto-reconnection**: Persistent wallet connections across sessions
+- 🎯 **TypeScript**: Full TypeScript support with comprehensive type definitions
 
-## 📦 Installation
+## 🚀 Installation
 
 ```bash
 npm install @d-sports/wallet
 # or
 yarn add @d-sports/wallet
 # or
-pnpm add @d-sports/wallet
+bun add @d-sports/wallet
 ```
 
-### Peer Dependencies
+### Platform-specific Dependencies
 
+**For Next.js/React:**
 ```bash
-npm install react react-dom
+npm install @web3auth/modal @web3auth/base @web3auth/ethereum-provider @web3auth/openlogin-adapter
 ```
 
-For React Native, also install:
+**For React Native:**
 ```bash
-npm install react-native @react-native-async-storage/async-storage react-native-keychain react-native-url-polyfill
+npm install @web3auth/no-modal @web3auth/base @web3auth/ethereum-provider @web3auth/openlogin-adapter
+npm install react-native-keychain react-native-url-polyfill
 ```
 
-## 🚀 Quick Start
+## 🏃‍♂️ Quick Start
 
-### Next.js Setup
+### Next.js
 
 ```typescript
-// pages/_app.tsx or app/layout.tsx
-import { createDSportsWallet, mainnet, polygon } from '@d-sports/wallet/nextjs';
+import { createDSportsWallet } from '@d-sports/wallet/nextjs';
 
+// Create wallet instance
 const wallet = createDSportsWallet({
-  projectId: 'your-walletconnect-project-id',
-  chains: [mainnet, polygon],
-  metadata: {
-    name: 'My D-Sports App',
-    description: 'An awesome dApp',
-    url: 'https://mydapp.com',
-    icons: ['https://mydapp.com/icon.png']
+  projectId: 'your-project-id',
+  chains: [/* your chains */],
+  web3Auth: {
+    clientId: 'your-web3auth-client-id',
+    web3AuthNetwork: 'testnet', // or 'mainnet'
+    chainConfig: {
+      chainNamespace: 'eip155',
+      chainId: '0x1', // Ethereum mainnet
+      rpcTarget: 'https://mainnet.infura.io/v3/your-infura-key',
+      displayName: 'Ethereum Mainnet',
+      blockExplorer: 'https://etherscan.io',
+      ticker: 'ETH',
+      tickerName: 'Ethereum',
+    },
+    loginConfig: {
+      google: {
+        verifier: 'your-google-verifier',
+        typeOfLogin: 'google',
+        clientId: 'your-google-client-id',
+      },
+      facebook: {
+        verifier: 'your-facebook-verifier',
+        typeOfLogin: 'facebook',
+        clientId: 'your-facebook-client-id',
+      },
+    },
   },
-  socialLogin: {
-    providers: ['google', 'facebook', 'apple'],
-    clientIds: {
-      google: 'your-google-client-id',
-      facebook: 'your-facebook-app-id',
-      apple: 'your-apple-client-id'
-    }
-  }
 });
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} wallet={wallet} />;
-}
+// Connect wallet
+await wallet.connect();
 ```
 
-### React Native Setup
+### React Native
 
 ```typescript
-// App.tsx
-import { createDSportsWallet, mainnet, polygon, setupURLPolyfill } from '@d-sports/wallet/react-native';
+import { createDSportsWallet, setupURLPolyfill } from '@d-sports/wallet/react-native';
 
-// Required for URL parsing in React Native
+// Setup URL polyfill (required for React Native)
 setupURLPolyfill();
 
+// Create wallet instance
 const wallet = createDSportsWallet({
-  projectId: 'your-walletconnect-project-id',
-  chains: [mainnet, polygon],
-  metadata: {
-    name: 'My D-Sports App',
-    description: 'An awesome mobile dApp',
-    url: 'https://mydapp.com',
-    icons: ['https://mydapp.com/icon.png']
+  projectId: 'your-project-id',
+  chains: [/* your chains */],
+  web3Auth: {
+    clientId: 'your-web3auth-client-id',
+    web3AuthNetwork: 'testnet',
+    chainConfig: {
+      chainNamespace: 'eip155',
+      chainId: '0x89', // Polygon mainnet
+      rpcTarget: 'https://polygon-rpc.com',
+      displayName: 'Polygon',
+      blockExplorer: 'https://polygonscan.com',
+      ticker: 'MATIC',
+      tickerName: 'Polygon',
+    },
   },
-  socialLogin: {
-    providers: ['google', 'apple'],
-    clientIds: {
-      google: 'your-google-client-id',
-      apple: 'your-apple-client-id'
-    }
-  }
 });
 
-export default function App() {
-  return <YourAppComponent wallet={wallet} />;
-}
+// Connect wallet
+await wallet.connect();
 ```
 
-## 💡 Usage Examples
+## 📚 Usage Examples
 
 ### Basic Wallet Connection
 
 ```typescript
-import { useDSportsWallet } from '@d-sports/wallet/nextjs';
+import { createDSportsWallet } from '@d-sports/wallet';
 
-function WalletButton({ wallet }) {
-  const { 
-    account, 
-    isConnecting, 
-    isConnected, 
-    connect, 
-    disconnect 
-  } = useDSportsWallet(wallet);
+const wallet = createDSportsWallet({
+  projectId: 'your-project-id',
+  chains: [
+    {
+      id: 1,
+      name: 'Ethereum',
+      network: 'homestead',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: {
+        default: { http: ['https://mainnet.infura.io/v3/your-key'] },
+        public: { http: ['https://mainnet.infura.io/v3/your-key'] }
+      }
+    }
+  ]
+});
 
-  if (isConnected) {
-    return (
-      <div>
-        <p>Connected: {account?.address}</p>
-        <button onClick={disconnect}>Disconnect</button>
-      </div>
-    );
-  }
+// Connect to wallet
+const account = await wallet.connect();
+console.log('Connected account:', account);
 
-  return (
-    <button 
-      onClick={() => connect('dsports-wallet')} 
-      disabled={isConnecting}
-    >
-      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-    </button>
-  );
-}
+// Get wallet state
+const state = wallet.getState();
+console.log('Wallet state:', state);
+
+// Switch chain
+await wallet.switchChain(137); // Polygon
+
+// Disconnect
+await wallet.disconnect();
 ```
 
-### Social Login
+### Web3Auth Social Login
 
 ```typescript
-import { useSocialLogin, SocialLoginProvider } from '@d-sports/wallet/nextjs';
+import { createDSportsWallet } from '@d-sports/wallet';
+import { Web3AuthProvider } from '@d-sports/wallet/web3auth';
 
-function SocialLoginButton({ socialProvider }) {
-  const { user, isLoading, login, logout } = useSocialLogin(socialProvider);
+const wallet = createDSportsWallet({
+  projectId: 'your-project-id',
+  chains: [/* your chains */],
+  web3Auth: {
+    clientId: 'your-web3auth-client-id',
+    web3AuthNetwork: 'testnet',
+    chainConfig: {
+      chainNamespace: 'eip155',
+      chainId: '0x1',
+      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
+      displayName: 'Ethereum',
+      blockExplorer: 'https://etherscan.io',
+      ticker: 'ETH',
+      tickerName: 'Ethereum',
+    },
+    loginConfig: {
+      google: {
+        verifier: 'your-google-verifier',
+        typeOfLogin: 'google',
+        clientId: 'your-google-client-id',
+      },
+      facebook: {
+        verifier: 'your-facebook-verifier', 
+        typeOfLogin: 'facebook',
+        clientId: 'your-facebook-client-id',
+      },
+    },
+  },
+});
 
-  if (user) {
-    return (
-      <div>
-        <p>Welcome, {user.user.name}!</p>
-        <button onClick={logout}>Logout</button>
-      </div>
-    );
-  }
+// Connect with social login
+await wallet.connect();
 
-  return (
-    <button 
-      onClick={() => login('google')} 
-      disabled={isLoading}
-    >
-      {isLoading ? 'Signing in...' : 'Sign in with Google'}
-    </button>
-  );
-}
+// Get Web3Auth provider
+const provider = wallet.getConnector('dsports-wallet');
+const web3AuthProvider = provider.getProvider();
+
+// Get user info
+const userInfo = await web3AuthProvider.getUserInfo();
+console.log('User info:', userInfo);
 ```
 
 ### Rainbow Kit Integration
 
 ```typescript
-import '@rainbow-me/rainbowkit/styles.css';
-import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
-import { createDSportsRainbowKitConnectorForNextjs } from '@d-sports/wallet/nextjs';
+import { createDSportsRainbowKitConnector } from '@d-sports/wallet';
 
-const dsportsConnector = createDSportsRainbowKitConnectorForNextjs({
-  chains: [mainnet, polygon],
+const connector = createDSportsRainbowKitConnector({
+  chains: [/* your chains */],
   projectId: 'your-project-id',
   appName: 'My App',
-  socialLogin: {
-    providers: ['google', 'facebook'],
-    clientIds: {
-      google: 'your-google-client-id',
-      facebook: 'your-facebook-app-id'
-    }
-  }
+  web3Auth: {
+    clientId: 'your-web3auth-client-id',
+    web3AuthNetwork: 'testnet',
+    chainConfig: {
+      chainNamespace: 'eip155',
+      chainId: '0x1',
+      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
+      displayName: 'Ethereum',
+      blockExplorer: 'https://etherscan.io',
+      ticker: 'ETH',
+      tickerName: 'Ethereum',
+    },
+  },
 });
 
-const { connectors } = getDefaultWallets({
-  appName: 'My App',
-  projectId: 'your-project-id',
-  chains: [mainnet, polygon],
-  connectors: [dsportsConnector]
-});
+// Use with Rainbow Kit
+const connectors = [
+  connector,
+  // ... other connectors
+];
 ```
 
 ### Wagmi Integration
 
 ```typescript
-import { WagmiConfig, createConfig } from 'wagmi';
-import { dsportsWagmiConnectorForNextjs } from '@d-sports/wallet/nextjs';
+import { dsportsWagmiConnector } from '@d-sports/wallet';
 
-const dsportsConnector = dsportsWagmiConnectorForNextjs({
-  chains: [mainnet, polygon],
+const connector = dsportsWagmiConnector({
+  chains: [/* your chains */],
   projectId: 'your-project-id',
-  metadata: {
-    name: 'My App',
-    description: 'My awesome dApp',
-    url: 'https://mydapp.com',
-    icons: ['https://mydapp.com/icon.png']
-  }
-});
-
-const config = createConfig({
-  connectors: [dsportsConnector],
-  // ... other wagmi config
-});
-
-function App() {
-  return (
-    <WagmiConfig config={config}>
-      {/* Your app */}
-    </WagmiConfig>
-  );
-}
-```
-
-## 🎨 Theming
-
-```typescript
-const wallet = createDSportsWallet({
-  // ... other config
-  theme: {
-    colors: {
-      primary: '#6366F1',
-      secondary: '#8B5CF6',
-      background: '#FFFFFF',
-      text: '#1F2937',
-      border: '#E5E7EB'
+  web3Auth: {
+    clientId: 'your-web3auth-client-id',
+    web3AuthNetwork: 'testnet',
+    chainConfig: {
+      chainNamespace: 'eip155',
+      chainId: '0x1',
+      rpcTarget: 'https://mainnet.infura.io/v3/your-key',
+      displayName: 'Ethereum',
+      blockExplorer: 'https://etherscan.io',
+      ticker: 'ETH',
+      tickerName: 'Ethereum',
     },
-    borderRadius: 12,
-    fontFamily: 'Inter, sans-serif'
-  }
+  },
 });
+
+// Use with Wagmi
+const connectors = [
+  connector,
+  // ... other connectors
+];
 ```
 
 ## 🔧 API Reference
 
-### Core Classes
+### DSportsWallet
 
-#### `DSportsWallet`
-
-The main wallet class that manages connections and state.
+#### Constructor Options
 
 ```typescript
-class DSportsWallet {
-  constructor(config: WalletConfig, adapter: PlatformAdapter)
-  
-  // Methods
-  addConnector(connector: WalletConnector): void
-  connect(connectorId: string, config?: any): Promise<WalletAccount>
-  disconnect(): Promise<void>
-  switchChain(chainId: number): Promise<void>
-  getState(): WalletState
-  getAccount(): WalletAccount | undefined
-  isConnected(): boolean
-  
-  // Events
-  on(event: 'connect', listener: (account: WalletAccount) => void): void
-  on(event: 'disconnect', listener: () => void): void
-  on(event: 'accountsChanged', listener: (accounts: string[]) => void): void
-  on(event: 'chainChanged', listener: (chainId: number) => void): void
+interface DSportsWalletOptions {
+  projectId: string;
+  chains: Chain[];
+  web3Auth?: Web3AuthConfig;
+  theme?: WalletTheme;
+  metadata?: {
+    name: string;
+    description: string;
+    url: string;
+    icons: string[];
+  };
 }
 ```
 
-#### `SocialLoginProvider`
+#### Methods
 
-Handles OAuth authentication with various providers.
+- `connect(connectorId?: string): Promise<WalletAccount>`
+- `disconnect(): Promise<void>`
+- `switchChain(chainId: number): Promise<void>`
+- `getState(): WalletState`
+- `isConnected(): boolean`
+- `getConnector(id: string): WalletConnector | undefined`
+- `addConnector(connector: WalletConnector): void`
+- `removeConnector(id: string): void`
+
+#### Events
+
+- `connect`: Emitted when wallet connects
+- `disconnect`: Emitted when wallet disconnects
+- `accountsChanged`: Emitted when accounts change
+- `chainChanged`: Emitted when chain changes
+- `error`: Emitted when an error occurs
+
+### React Hooks
+
+#### useDSportsWallet
 
 ```typescript
-class SocialLoginProvider {
-  constructor(config: SocialLoginConfig, adapter: PlatformAdapter)
-  
-  login(provider: SocialProvider): Promise<SocialLoginResult>
-  logout(): Promise<void>
-  getStoredUser(): Promise<SocialLoginResult | null>
+const {
+  account,
+  isConnecting,
+  isReconnecting,
+  isDisconnected,
+  error,
+  connect,
+  disconnect,
+  switchChain,
+  isConnected
+} = useDSportsWallet(wallet);
+```
+
+#### useSocialLogin
+
+```typescript
+const {
+  user,
+  isLoading,
+  error,
+  login,
+  logout
+} = useSocialLogin(web3AuthProvider);
+```
+
+## ⚙️ Configuration
+
+### Web3Auth Configuration
+
+```typescript
+interface Web3AuthConfig {
+  clientId: string;
+  web3AuthNetwork?: 'mainnet' | 'testnet' | 'cyan' | 'aqua';
+  chainConfig: {
+    chainNamespace: string;
+    chainId: string;
+    rpcTarget: string;
+    displayName: string;
+    blockExplorer: string;
+    ticker: string;
+    tickerName: string;
+  };
+  uiConfig?: {
+    theme?: 'light' | 'dark' | 'auto';
+    loginMethodsOrder?: string[];
+    appLogo?: string;
+    modalZIndex?: string;
+  };
+  loginConfig?: {
+    google?: LoginProvider;
+    facebook?: LoginProvider;
+    twitter?: LoginProvider;
+    discord?: LoginProvider;
+  };
 }
 ```
 
-### Hooks (Next.js/React)
-
-#### `useDSportsWallet(wallet: DSportsWallet)`
-
-React hook for wallet state management.
-
-Returns:
-- `account`: Current wallet account
-- `isConnecting`: Connection loading state
-- `isConnected`: Connection status
-- `error`: Any connection errors
-- `connect()`: Function to connect wallet
-- `disconnect()`: Function to disconnect wallet
-- `switchChain()`: Function to switch chains
-
-#### `useSocialLogin(socialProvider: SocialLoginProvider)`
-
-React hook for social login state management.
-
-Returns:
-- `user`: Current logged-in user
-- `isLoading`: Login loading state
-- `error`: Any login errors
-- `login()`: Function to initiate login
-- `logout()`: Function to logout
-
-### Utilities
-
-#### React Native Specific
+### Theme Configuration
 
 ```typescript
-// Deep linking
-handleDeepLink(url: string, wallet: DSportsWallet): Promise<any> | null
-
-// Secure storage
-storeSecureData(key: string, value: string): Promise<boolean>
-getSecureData(key: string): Promise<string | null>
-removeSecureData(key: string): Promise<boolean>
-
-// URL polyfill setup
-setupURLPolyfill(): void
+interface WalletTheme {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    text?: string;
+    border?: string;
+  };
+  borderRadius?: number;
+  fontFamily?: string;
+}
 ```
 
-## 📱 React Native Deep Linking
+### Deep Linking (React Native)
 
-Add to your `android/app/src/main/AndroidManifest.xml`:
+```typescript
+import { handleDeepLink } from '@d-sports/wallet/react-native';
 
-```xml
-<intent-filter android:autoVerify="true">
-  <action android:name="android.intent.action.VIEW" />
-  <category android:name="android.intent.category.DEFAULT" />
-  <category android:name="android.intent.category.BROWSABLE" />
-  <data android:scheme="dsports" />
-</intent-filter>
+// Handle deep link
+handleDeepLink('dsports://wallet/connect?connector=dsports-wallet', wallet);
 ```
-
-Add to your `ios/YourApp/Info.plist`:
-
-```xml
-<key>CFBundleURLTypes</key>
-<array>
-  <dict>
-    <key>CFBundleURLName</key>
-    <string>dsports</string>
-    <key>CFBundleURLSchemes</key>
-    <array>
-      <string>dsports</string>
-    </array>
-  </dict>
-</array>
-```
-
-## 🔗 Supported Chains
-
-Pre-configured chains available:
-
-- `mainnet` - Ethereum Mainnet
-- `goerli` - Goerli Testnet
-- `sepolia` - Sepolia Testnet
-- `polygon` - Polygon Mainnet
-- `bsc` - BNB Smart Chain
-
-## 🌐 Social Login Providers
-
-Supported OAuth providers:
-
-- Google (`google`)
-- Facebook (`facebook`)
-- Apple (`apple`)
-- Twitter (`twitter`)
-- Discord (`discord`)
-- GitHub (`github`)
 
 ## 🛠️ Development
 
+### Setup
+
 ```bash
-# Install dependencies
-npm install
-
-# Build the package
-npm run build
-
-# Run tests
-npm test
-
-# Lint code
-npm run lint
-
-# Type check
-npm run typecheck
+git clone https://github.com/d-sports/wallet.git
+cd wallet
+bun install
 ```
 
-## 📄 License
+### Build
 
-MIT License - see [LICENSE](./LICENSE) file for details.
+```bash
+bun run build
+```
+
+### Test
+
+```bash
+bun test
+```
+
+### Development Scripts
+
+- `bun run dev`: Start development mode
+- `bun run build`: Build all packages
+- `bun run build:core`: Build core package
+- `bun run build:nextjs`: Build Next.js package
+- `bun run build:react-native`: Build React Native package
+- `bun run clean`: Clean build artifacts
+- `bun run lint`: Run ESLint
+- `bun run test`: Run tests
+- `bun run test:watch`: Run tests in watch mode
+
+## 📦 Package Structure
+
+```
+@d-sports/wallet/
+├── core              # Core wallet functionality
+├── nextjs            # Next.js specific exports
+├── react-native      # React Native specific exports
+├── web3auth          # Web3Auth provider
+└── types             # TypeScript type definitions
+```
 
 ## 🤝 Contributing
 
@@ -407,16 +437,13 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 🆘 Support
+## 📄 License
 
-- [Documentation](https://docs.d-sports.com/wallet)
-- [GitHub Issues](https://github.com/d-sports/wallet/issues)
-- [Discord Community](https://discord.gg/d-sports)
+MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔖 Changelog
+## 🙏 Acknowledgments
 
-See [CHANGELOG.md](./CHANGELOG.md) for version history and updates.
-
----
-
-Made with ❤️ by the [D-Sports](https://d-sports.com) team
+- [Web3Auth](https://web3auth.io/) for social login infrastructure
+- [Rainbow Kit](https://www.rainbowkit.com/) for wallet connection UI
+- [Wagmi](https://wagmi.sh/) for React hooks for Ethereum
+- [Rollup](https://rollupjs.org/) for module bundling
