@@ -33,7 +33,7 @@ export const webPlatformAdapter: PlatformAdapter = {
       return array;
     },
     sha256: async (data: Uint8Array) => {
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data as BufferSource);
       return new Uint8Array(hashBuffer);
     }
   },
@@ -92,7 +92,7 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
     },
     sha256: async (data: Uint8Array) => {
       if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data as BufferSource);
         return new Uint8Array(hashBuffer);
       } else {
         // Fallback for server-side (simplified)
@@ -184,17 +184,15 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
 
 // Auto-detect platform adapter
 export function getDefaultPlatformAdapter(): PlatformAdapter {
-  if (typeof window !== 'undefined') {
-    // Check if we're in Next.js
-    if (typeof window.next !== 'undefined' || typeof process !== 'undefined' && process.env.NODE_ENV) {
-      return nextjsPlatformAdapter;
-    }
-    return webPlatformAdapter;
-  } else {
-    // Check if we're in React Native
-    if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-      return reactNativePlatformAdapter;
-    }
-    return nextjsPlatformAdapter; // Default to Next.js for server-side
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return reactNativePlatformAdapter;
   }
-} 
+
+  if (typeof window !== 'undefined') {
+    // We are in a browser environment (either plain web or Next.js client side)
+    return webPlatformAdapter;
+  }
+
+  // If no window and not React Native, we're likely in a Node.js environment (Next.js server)
+  return nextjsPlatformAdapter;
+}
