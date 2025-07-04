@@ -1,3 +1,6 @@
+// Import CSS styles
+import './index.css';
+
 // Core wallet functionality
 export { DSportsWallet } from './core/wallet';
 export { CustomSocialLoginProvider } from './providers/custom-social-login';
@@ -214,5 +217,8 @@ export const polygon = {
   }
 };
 
+// UI Components (optional - only if React is available)
+export * from './ui';
+
 // Version
-export const version = '1.0.0'; 
+export const version = '1.0.0';

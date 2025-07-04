@@ -1,3 +1,4 @@
+import './index.css';
 export { DSportsWallet } from './core/wallet';
 export { CustomSocialLoginProvider } from './providers/custom-social-login';
 export { DSportsOAuthService, createQuickStartSocialLogin, validateSocialLoginConfig } from './providers/dsports-oauth-service';
@@ -139,5 +140,6 @@ export declare const polygon: {
         };
     };
 };
+export * from './ui';
 export declare const version = "1.0.0";
 //# sourceMappingURL=index.d.ts.map

@@ -5,6 +5,7 @@ import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import terser from '@rollup/plugin-terser';
+import postcss from 'rollup-plugin-postcss';
 
 export default {
   input: 'src/react-native/index.ts',
@@ -31,6 +32,11 @@ export default {
     }),
     commonjs(),
     json(),
+    postcss({
+      extract: false,
+      inject: false,
+      modules: false
+    }),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.PLATFORM': JSON.stringify('react-native'),
@@ -44,5 +50,5 @@ export default {
     }),
     terser()
   ],
-  external: ['react', 'react-native', 'ethers', 'viem']
+  external: ['react', 'react-native', 'framer-motion', 'lucide-react', 'ethers', 'viem']
 }; 

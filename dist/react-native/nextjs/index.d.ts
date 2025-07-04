@@ -87,4 +87,5 @@ export { nextjsPlatformAdapter };
 export declare const mainnet: Chain;
 export declare const goerli: Chain;
 export declare const sepolia: Chain;
+export * from '../ui';
 //# sourceMappingURL=index.d.ts.map

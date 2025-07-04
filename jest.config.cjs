@@ -11,7 +11,10 @@ module.exports = {
   ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx'
+      }
     }]
   },
   collectCoverageFrom: [
@@ -22,4 +25,10 @@ module.exports = {
   ],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   testTimeout: 10000,
-}; 
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx']
+};

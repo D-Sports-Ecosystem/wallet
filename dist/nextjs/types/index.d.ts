@@ -94,6 +94,7 @@ export interface WalletTheme {
         background?: string;
         text?: string;
         border?: string;
+        danger?: string;
     };
     borderRadius?: number;
     fontFamily?: string;

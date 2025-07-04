@@ -256,4 +256,7 @@ export const sepolia: Chain = {
     default: { name: 'Etherscan', url: 'https://sepolia.etherscan.io' }
   },
   testnet: true
-}; 
+};
+
+// UI Components
+export * from '../ui';

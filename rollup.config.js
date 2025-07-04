@@ -5,6 +5,7 @@ import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import terser from '@rollup/plugin-terser';
+import postcss from 'rollup-plugin-postcss';
 
 export default {
   input: 'src/index.ts',
@@ -31,6 +32,11 @@ export default {
     }),
     commonjs(),
     json(),
+    postcss({
+      extract: true,
+      minimize: true,
+      inject: false
+    }),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
       preventAssignment: true
@@ -43,5 +49,5 @@ export default {
     }),
     terser()
   ],
-  external: ['react', 'react-dom', 'ethers', 'viem']
+  external: ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem']
 }; 

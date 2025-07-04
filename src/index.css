@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for wallet components */
+.wallet-container {
+  @apply max-w-screen-xl mx-auto p-6;
+}
+
+.wallet-card {
+  @apply bg-white rounded-lg shadow-lg p-6 border border-gray-200;
+}
+
+.wallet-button {
+  @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+}
+
+.wallet-button-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.wallet-button-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
