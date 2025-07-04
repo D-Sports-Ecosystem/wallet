@@ -63,7 +63,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/d-sports/wallet.git"
+    "url": "git+https://github.com/D-Sports-Ecosystem/wallet.git"
+  },
+  "homepage": "https://github.com/D-Sports-Ecosystem/wallet#readme",
+  "bugs": {
+    "url": "https://github.com/D-Sports-Ecosystem/wallet/issues"
   },
   "dependencies": {
     "ethers": "^6.13.4",

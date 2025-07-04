@@ -490,7 +490,7 @@ handleDeepLink('dsports://wallet/connect?connector=dsports-wallet', wallet);
 ### Setup
 
 ```bash
-git clone https://github.com/d-sports/wallet.git
+git clone https://github.com/D-Sports-Ecosystem/wallet.git
 cd wallet
 bun install
 ```
