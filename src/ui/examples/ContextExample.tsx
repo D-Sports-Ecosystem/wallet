@@ -9,17 +9,15 @@ import { DSportsWallet } from '../../core/wallet';
 import { InventoryItem } from '../types';
 
 // Example of how to use the new WalletUIContext interface
-const ExampleApp: React.FC = () => {
+const ExampleApp: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   // Create a wallet instance (this would typically be done at the app level)
   const wallet = new DSportsWallet({
     projectId: 'example-project-id',
     chains: [],
-    metadata: {
-      name: 'Example D-Sports App',
-      description: 'Example app showcasing context-driven wallet UI',
-      url: 'https://example.com',
-      icons: ['https://example.com/icon.png']
-    }
+    appName: 'Example D-Sports App',
+    appDescription: 'Example app showcasing context-driven wallet UI',
+    appUrl: 'https://example.com',
+    appIcon: 'https://example.com/icon.png'
   }, {} as any); // Platform adapter would be provided
 
   // Example implementation of createUserWallet
@@ -212,6 +210,9 @@ const ExampleApp: React.FC = () => {
             onSwap={(token) => console.log('Swap token:', token)}
           />
         </div>
+        
+        {/* Render children if provided */}
+        {children}
       </div>
     </WalletUIProvider>
   );

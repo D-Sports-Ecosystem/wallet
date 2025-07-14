@@ -158,7 +158,6 @@ const usePWAPlatform = createPlatformHook({
           ...options,
           icon: options?.icon || '/icon-192x192.png',
           badge: '/badge-72x72.png',
-          vibrate: [200, 100, 200],
         });
         return true;
       }
@@ -213,12 +212,10 @@ const CustomWalletApp: React.FC = () => {
   const wallet = new DSportsWallet({
     projectId: 'custom-project-id',
     chains: [],
-    metadata: {
-      name: 'Custom Wallet App',
-      description: 'App with custom hook implementations',
-      url: 'https://custom-app.com',
-      icons: ['https://custom-app.com/icon.png']
-    }
+    appName: 'Custom Wallet App',
+    appDescription: 'App with custom hook implementations',
+    appUrl: 'https://custom-app.com',
+    appIcon: 'https://custom-app.com/icon.png'
   }, {} as any);
 
   const session = {

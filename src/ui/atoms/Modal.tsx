@@ -49,95 +49,44 @@ const Modal: React.FC<ModalProps> = ({
     }
   }, [isOpen]);
 
-  const getModalSize = () => {
+  const getModalSizeClasses = () => {
     switch (size) {
       case 'small':
-        return { maxWidth: '400px', width: '90%' };
+        return 'max-w-sm w-11/12';
       case 'large':
-        return { maxWidth: '800px', width: '90%' };
+        return 'max-w-4xl w-11/12';
       case 'fullscreen':
-        return { width: '100vw', height: '100vh', maxWidth: 'none', borderRadius: 0 };
+        return 'w-screen h-screen max-w-none rounded-none';
       default:
-        return { maxWidth: '600px', width: '90%' };
+        return 'max-w-2xl w-11/12';
     }
-  };
-
-  const modalStyles: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  };
-
-  const contentStyles: React.CSSProperties = {
-    backgroundColor: theme?.colors?.background || '#FFF',
-    borderRadius: theme?.borderRadius || '12px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
-    border: theme?.colors?.border ? `1px solid ${theme.colors.border}` : 'none',
-    fontFamily: theme?.fontFamily,
-    ...getModalSize(),
-  };
-
-  const headerStyles: React.CSSProperties = {
-    padding: '20px 20px 0 20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: title ? `1px solid ${theme?.colors?.border || '#E5E5E7'}` : 'none',
-    paddingBottom: title ? '20px' : '0',
-  };
-
-  const bodyStyles: React.CSSProperties = {
-    padding: '20px',
-    maxHeight: size === 'fullscreen' ? 'calc(100vh - 120px)' : '70vh',
-    overflowY: 'auto',
-  };
-
-  const footerStyles: React.CSSProperties = {
-    padding: '0 20px 20px 20px',
-    borderTop: footer ? `1px solid ${theme?.colors?.border || '#E5E5E7'}` : 'none',
-    paddingTop: footer ? '20px' : '0',
-  };
-
-  const closeButtonStyles: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer',
-    color: theme?.colors?.text || '#666',
-    padding: '0',
-    lineHeight: '1',
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      style={modalStyles}
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50"
       onClick={closeOnOverlayClick ? onClose : undefined}
     >
       <AnimatedContainer variant="scale" isVisible={isOpen}>
         <div
-          className={`wallet-modal ${className}`}
-          style={contentStyles}
+          className={`wallet-modal bg-white rounded-xl shadow-2xl border ${getModalSizeClasses()} ${className}`}
+          style={{
+            backgroundColor: theme?.colors?.background,
+            borderRadius: theme?.borderRadius,
+            borderColor: theme?.colors?.border,
+            fontFamily: theme?.fontFamily,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {(title || showCloseButton) && (
-            <div style={headerStyles}>
+            <div className={`px-5 pt-5 flex justify-between items-center ${title ? 'pb-5 border-b' : 'pb-0'}`}
+                 style={{ borderColor: theme?.colors?.border || '#E5E5E7' }}>
               {title && (
                 <h2
-                  style={{
-                    margin: 0,
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: theme?.colors?.text || '#000',
-                  }}
+                  className="m-0 text-lg font-semibold"
+                  style={{ color: theme?.colors?.text || '#000' }}
                 >
                   {title}
                 </h2>
@@ -145,7 +94,8 @@ const Modal: React.FC<ModalProps> = ({
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  style={closeButtonStyles}
+                  className="bg-none border-none text-2xl cursor-pointer p-0 leading-none hover:opacity-70"
+                  style={{ color: theme?.colors?.text || '#666' }}
                   aria-label="Close modal"
                 >
                   ×
@@ -154,12 +104,13 @@ const Modal: React.FC<ModalProps> = ({
             </div>
           )}
           
-          <div style={bodyStyles}>
+          <div className={`p-5 overflow-y-auto ${size === 'fullscreen' ? 'max-h-[calc(100vh-120px)]' : 'max-h-[70vh]'}`}>
             {children}
           </div>
           
           {footer && (
-            <div style={footerStyles}>
+            <div className={`px-5 pb-5 ${footer ? 'pt-5 border-t' : 'pt-0'}`}
+                 style={{ borderColor: theme?.colors?.border || '#E5E5E7' }}>
               {footer}
             </div>
           )}

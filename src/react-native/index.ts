@@ -1,36 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { DSportsWallet } from '../core/wallet';
-import { CustomSocialLoginProvider } from '../providers/custom-social-login';
-import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from '../connectors/rainbow-kit';
-import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from '../connectors/wagmi';
-import { reactNativePlatformAdapter } from '../utils/platform-adapters';
-import { 
-  WalletConfig, 
-  DSportsWalletOptions, 
-  RainbowKitConnectorOptions, 
+import React, { useState, useEffect } from "react";
+import { DSportsWallet } from "../core/wallet";
+import { CustomSocialLoginProvider } from "../providers/custom-social-login";
+import {
+  DSportsRainbowKitConnector,
+  createDSportsRainbowKitConnector,
+} from "../connectors/rainbow-kit";
+import {
+  DSportsWagmiConnector,
+  createDSportsWagmiConnector,
+  dsportsWagmiConnector,
+} from "../connectors/wagmi";
+import { reactNativePlatformAdapter } from "../utils/platform-adapters";
+import {
+  WalletConfig,
+  DSportsWalletOptions,
+  RainbowKitConnectorOptions,
   WagmiConnectorOptions,
-  Chain
-} from '../types';
+  Chain,
+} from "../types";
 
 // React Native specific wallet factory
-export function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet {
+export function createDSportsWallet(
+  options: DSportsWalletOptions,
+): DSportsWallet {
   const config: WalletConfig = {
-    appName: options.metadata?.name || 'D-Sports App',
+    appName: options.metadata?.name || "D-Sports App",
     appUrl: options.metadata?.url,
     appIcon: options.metadata?.icons?.[0],
     appDescription: options.metadata?.description,
     projectId: options.projectId,
     chains: options.chains,
     socialLogin: options.socialLogin,
-    theme: options.theme
+    theme: options.theme,
   };
 
   const wallet = new DSportsWallet(config, reactNativePlatformAdapter);
 
   // Add social login provider if configured
   if (options.socialLogin) {
-    const socialProvider = new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter);
-    
+    const socialProvider = new CustomSocialLoginProvider(
+      options.socialLogin,
+      reactNativePlatformAdapter,
+    );
+
     // Create connectors with social login
     const rainbowKitConnector = new DSportsRainbowKitConnector({
       chains: options.chains,
@@ -40,7 +52,7 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appDescription: config.appDescription,
       appUrl: config.appUrl,
       socialLogin: options.socialLogin,
-      customSocialLoginProvider: socialProvider
+      customSocialLoginProvider: socialProvider,
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
@@ -48,7 +60,7 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       projectId: options.projectId,
       metadata: options.metadata,
       socialLogin: options.socialLogin,
-      customSocialLoginProvider: socialProvider
+      customSocialLoginProvider: socialProvider,
     });
 
     wallet.addConnector(rainbowKitConnector);
@@ -61,13 +73,13 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
       appName: config.appName,
       appIcon: config.appIcon,
       appDescription: config.appDescription,
-      appUrl: config.appUrl
+      appUrl: config.appUrl,
     });
 
     const wagmiConnector = new DSportsWagmiConnector({
       chains: options.chains,
       projectId: options.projectId,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
 
     wallet.addConnector(rainbowKitConnector);
@@ -78,38 +90,53 @@ export function createDSportsWallet(options: DSportsWalletOptions): DSportsWalle
 }
 
 // React Native specific Rainbow Kit connector factory
-export function createDSportsRainbowKitConnectorForReactNative(options: RainbowKitConnectorOptions) {
-  const socialProvider = options.socialLogin ? 
-    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
-    undefined;
+export function createDSportsRainbowKitConnectorForReactNative(
+  options: RainbowKitConnectorOptions,
+) {
+  const socialProvider = options.socialLogin
+    ? new CustomSocialLoginProvider(
+        options.socialLogin,
+        reactNativePlatformAdapter,
+      )
+    : undefined;
 
   return createDSportsRainbowKitConnector({
     ...options,
-    customSocialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider,
   });
 }
 
 // React Native specific Wagmi connector factory
-export function createDSportsWagmiConnectorForReactNative(options: WagmiConnectorOptions) {
-  const socialProvider = options.socialLogin ? 
-    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
-    undefined;
+export function createDSportsWagmiConnectorForReactNative(
+  options: WagmiConnectorOptions,
+) {
+  const socialProvider = options.socialLogin
+    ? new CustomSocialLoginProvider(
+        options.socialLogin,
+        reactNativePlatformAdapter,
+      )
+    : undefined;
 
   return createDSportsWagmiConnector({
     ...options,
-    customSocialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider,
   });
 }
 
 // React Native specific Wagmi v2 connector
-export function dsportsWagmiConnectorForReactNative(options: WagmiConnectorOptions) {
-  const socialProvider = options.socialLogin ? 
-    new CustomSocialLoginProvider(options.socialLogin, reactNativePlatformAdapter) : 
-    undefined;
+export function dsportsWagmiConnectorForReactNative(
+  options: WagmiConnectorOptions,
+) {
+  const socialProvider = options.socialLogin
+    ? new CustomSocialLoginProvider(
+        options.socialLogin,
+        reactNativePlatformAdapter,
+      )
+    : undefined;
 
   return dsportsWagmiConnector({
     ...options,
-    customSocialLoginProvider: socialProvider
+    customSocialLoginProvider: socialProvider,
   });
 }
 
@@ -122,11 +149,11 @@ export function useDSportsWallet(wallet: DSportsWallet) {
       setState(wallet.getState());
     };
 
-    wallet.on('connect', handleStateChange);
-    wallet.on('disconnect', handleStateChange);
-    wallet.on('accountsChanged', handleStateChange);
-    wallet.on('chainChanged', handleStateChange);
-    wallet.on('error', handleStateChange);
+    wallet.on("connect", handleStateChange);
+    wallet.on("disconnect", handleStateChange);
+    wallet.on("accountsChanged", handleStateChange);
+    wallet.on("chainChanged", handleStateChange);
+    wallet.on("error", handleStateChange);
 
     return () => {
       wallet.removeAllListeners();
@@ -138,7 +165,7 @@ export function useDSportsWallet(wallet: DSportsWallet) {
     connect: wallet.connect.bind(wallet),
     disconnect: wallet.disconnect.bind(wallet),
     switchChain: wallet.switchChain.bind(wallet),
-    isConnected: wallet.isConnected.bind(wallet)
+    isConnected: wallet.isConnected.bind(wallet),
   };
 }
 
@@ -150,7 +177,7 @@ export function useSocialLogin(socialProvider: CustomSocialLoginProvider) {
 
   useEffect(() => {
     // Check for stored user on mount
-    socialProvider.getStoredUser().then(result => {
+    socialProvider.getStoredUser().then((result) => {
       if (result && result.expiresAt > Date.now()) {
         setUser(result as any);
       }
@@ -160,7 +187,7 @@ export function useSocialLogin(socialProvider: CustomSocialLoginProvider) {
   const login = async (provider: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await socialProvider.login(provider as any);
       setUser(result as any);
@@ -190,14 +217,14 @@ export function useSocialLogin(socialProvider: CustomSocialLoginProvider) {
     isLoading,
     error,
     login,
-    logout
+    logout,
   };
 }
 
 // React Native specific utilities
 export function withDSportsWallet<T extends object>(
   Component: React.ComponentType<T>,
-  walletOptions: DSportsWalletOptions
+  walletOptions: DSportsWalletOptions,
 ) {
   return function WrappedComponent(props: T) {
     const wallet = createDSportsWallet(walletOptions);
@@ -208,24 +235,30 @@ export function withDSportsWallet<T extends object>(
 // React Native Deep Linking utilities
 export function handleDeepLink(url: string, wallet: DSportsWallet) {
   const parsedUrl = new URL(url);
-  
-  if (parsedUrl.protocol === 'dsports:' && parsedUrl.pathname === '/wallet/connect') {
+
+  if (
+    parsedUrl.protocol === "dsports:" &&
+    parsedUrl.pathname === "/wallet/connect"
+  ) {
     // Handle wallet connection deep link
     const params = new URLSearchParams(parsedUrl.search);
-    const connectorId = params.get('connector');
-    
+    const connectorId = params.get("connector");
+
     if (connectorId) {
       return wallet.connect(connectorId);
     }
   }
-  
+
   return null;
 }
 
 // React Native Keychain utilities
-export async function storeSecureData(key: string, value: string): Promise<boolean> {
+export async function storeSecureData(
+  key: string,
+  value: string,
+): Promise<boolean> {
   try {
-    const Keychain = require('react-native-keychain');
+    const Keychain = require("react-native-keychain");
     await Keychain.setInternetCredentials(key, key, value);
     return true;
   } catch {
@@ -235,7 +268,7 @@ export async function storeSecureData(key: string, value: string): Promise<boole
 
 export async function getSecureData(key: string): Promise<string | null> {
   try {
-    const Keychain = require('react-native-keychain');
+    const Keychain = require("react-native-keychain");
     const credentials = await Keychain.getInternetCredentials(key);
     return credentials ? credentials.password : null;
   } catch {
@@ -245,7 +278,7 @@ export async function getSecureData(key: string): Promise<string | null> {
 
 export async function removeSecureData(key: string): Promise<boolean> {
   try {
-    const Keychain = require('react-native-keychain');
+    const Keychain = require("react-native-keychain");
     await Keychain.resetInternetCredentials(key);
     return true;
   } catch {
@@ -256,58 +289,61 @@ export async function removeSecureData(key: string): Promise<boolean> {
 // React Native URL polyfill setup
 export function setupURLPolyfill() {
   try {
-    require('react-native-url-polyfill/auto');
+    require("react-native-url-polyfill/auto");
   } catch {
     // Polyfill not available, URL might not work properly
-    console.warn('react-native-url-polyfill not available. URL parsing may not work correctly.');
+    console.warn(
+      "react-native-url-polyfill not available. URL parsing may not work correctly.",
+    );
   }
 }
 
 // Re-export common types and utilities
-export * from '../types';
-export * from '../core/wallet';
-export * from '../providers/custom-social-login';
+export * from "../types";
+export * from "../core/wallet";
+export * from "../providers/custom-social-login";
 export { reactNativePlatformAdapter };
 
 // Common chains for React Native
 export const mainnet: Chain = {
   id: 1,
-  name: 'Ethereum',
-  network: 'homestead',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  name: "Ethereum",
+  network: "homestead",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://eth-mainnet.g.alchemy.com/v2/demo'] },
-    public: { http: ['https://eth-mainnet.g.alchemy.com/v2/demo'] }
+    default: { http: ["https://eth-mainnet.g.alchemy.com/v2/demo"] },
+    public: { http: ["https://eth-mainnet.g.alchemy.com/v2/demo"] },
   },
   blockExplorers: {
-    default: { name: 'Etherscan', url: 'https://etherscan.io' }
-  }
+    default: { name: "Etherscan", url: "https://etherscan.io" },
+  },
 };
 
 export const polygon: Chain = {
   id: 137,
-  name: 'Polygon',
-  network: 'matic',
-  nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+  name: "Polygon",
+  network: "matic",
+  nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://polygon-rpc.com'] },
-    public: { http: ['https://polygon-rpc.com'] }
+    default: { http: ["https://polygon-rpc.com"] },
+    public: { http: ["https://polygon-rpc.com"] },
   },
   blockExplorers: {
-    default: { name: 'PolygonScan', url: 'https://polygonscan.com' }
-  }
+    default: { name: "PolygonScan", url: "https://polygonscan.com" },
+  },
 };
 
 export const bsc: Chain = {
   id: 56,
-  name: 'BNB Smart Chain',
-  network: 'bsc',
-  nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+  name: "BNB Smart Chain",
+  network: "bsc",
+  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://bsc-dataseed.binance.org'] },
-    public: { http: ['https://bsc-dataseed.binance.org'] }
+    default: { http: ["https://bsc-dataseed.binance.org"] },
+    public: { http: ["https://bsc-dataseed.binance.org"] },
   },
   blockExplorers: {
-    default: { name: 'BscScan', url: 'https://bscscan.com' }
-  }
-}; 
+    default: { name: "BscScan", url: "https://bscscan.com" },
+  },
+};
+

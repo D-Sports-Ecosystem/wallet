@@ -1,13 +1,14 @@
 // Example Next.js App with D-Sports Wallet Integration using WalletDashboard
 import React from 'react';
-import { createDSportsWallet, mainnet, polygon } from '@d-sports/wallet/nextjs';
+import { createDSportsWallet } from '@d-sports/wallet/nextjs';
+import { chains } from '@d-sports/wallet/chains';
 import { WalletUIProvider, WalletDashboard } from '@d-sports/wallet/ui';
 import { TokenBalance, NFTAsset, GameInventoryItem, WalletAccount, CreateWalletConfig, ImportWalletConfig } from '@d-sports/wallet/ui/types';
 
 // Create wallet instance
 const wallet = createDSportsWallet({
   projectId: 'your-walletconnect-project-id',
-  chains: [mainnet, polygon],
+  chains: [chains.ethereum, chains.polygon],
   metadata: {
     name: 'D-Sports Example App',
     description: 'Example app showcasing D-Sports wallet integration',

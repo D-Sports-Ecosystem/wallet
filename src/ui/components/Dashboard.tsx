@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { DashboardProps, TokenBalance, NFTAsset, GameInventoryItem } from '../types';
-import WalletOverviewCard from './WalletOverviewCard';
-import TokenTab from './TokenTab';
-import CollectiblesTab from './CollectiblesTab';
-import InventoryTab from './InventoryTab';
-import CreateWalletFlow from './CreateWalletFlow';
-import ImportWalletFlow from './ImportWalletFlow';
-import LoadingState from '../atoms/LoadingState';
-import EmptyState from '../atoms/EmptyState';
-import Modal from '../atoms/Modal';
-import AnimatedContainer from '../atoms/AnimatedContainer';
+import React, { useState, useEffect } from "react";
+import {
+  DashboardProps,
+  TokenBalance,
+  NFTAsset,
+  GameInventoryItem,
+} from "../types";
+import { WalletOverviewCard } from "./WalletOverviewCard";
+import TokenTab from "./TokenTab";
+import CollectiblesTab from "./CollectiblesTab";
+import InventoryTab from "./InventoryTab";
+import CreateWalletFlow from "./CreateWalletFlow";
+import ImportWalletFlow from "./ImportWalletFlow";
+import LoadingState from "../atoms/LoadingState";
+import EmptyState from "../atoms/EmptyState";
+import Modal from "../atoms/Modal";
+import AnimatedContainer from "../atoms/AnimatedContainer";
 
 /**
  * Dashboard - The main wallet dashboard component.
- * 
+ *
  * This component provides a comprehensive interface for managing wallet operations,
  * viewing assets (tokens, NFTs, inventory), and handling wallet creation/import flows.
  * It supports theming, data fetching, and various wallet operations.
- * 
+ *
  * @example
  * ```tsx
  * import { Dashboard } from '@d-sports/wallet';
- * 
+ *
  * function App() {
  *   return (
  *     <Dashboard
@@ -34,7 +39,7 @@ import AnimatedContainer from '../atoms/AnimatedContainer';
  *   );
  * }
  * ```
- * 
+ *
  * @param props - Configuration props for the dashboard
  * @returns A complete wallet dashboard interface
  */
@@ -51,11 +56,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   supportedChains = [],
   showCreateWallet = true,
   showImportWallet = true,
-  defaultTab = 'tokens',
-  className = '',
+  defaultTab = "tokens",
+  className = "",
   theme,
 }) => {
-  const [activeTab, setActiveTab] = useState<'tokens' | 'collectibles' | 'inventory'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<
+    "tokens" | "collectibles" | "inventory"
+  >(defaultTab);
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
   const [nfts, setNFTs] = useState<NFTAsset[]>([]);
   const [inventory, setInventory] = useState<GameInventoryItem[]>([]);
@@ -65,108 +72,116 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const containerStyles: React.CSSProperties = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '24px',
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "24px",
     fontFamily: theme?.fontFamily,
-    backgroundColor: theme?.colors?.background || '#FFF',
-    minHeight: '100vh',
+    backgroundColor: theme?.colors?.background || "#FFF",
+    minHeight: "100vh",
   };
 
   const headerStyles: React.CSSProperties = {
-    marginBottom: '32px',
+    marginBottom: "32px",
   };
 
   const titleStyles: React.CSSProperties = {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: theme?.colors?.text || '#000',
-    margin: '0 0 8px 0',
+    fontSize: "32px",
+    fontWeight: "700",
+    color: theme?.colors?.text || "#000",
+    margin: "0 0 8px 0",
   };
 
   const subtitleStyles: React.CSSProperties = {
-    fontSize: '18px',
-    color: theme?.colors?.text ? `${theme.colors.text}70` : '#666',
-    margin: '0',
+    fontSize: "18px",
+    color: theme?.colors?.text ? `${theme.colors.text}70` : "#666",
+    margin: "0",
   };
 
   const actionsContainerStyles: React.CSSProperties = {
-    display: 'flex',
-    gap: '16px',
-    marginTop: '24px',
-    flexWrap: 'wrap',
+    display: "flex",
+    gap: "16px",
+    marginTop: "24px",
+    flexWrap: "wrap",
   };
 
   const buttonStyles: React.CSSProperties = {
-    padding: '12px 24px',
-    border: 'none',
-    borderRadius: theme?.borderRadius || '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    padding: "12px 24px",
+    border: "none",
+    borderRadius: theme?.borderRadius || "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   };
 
   const primaryButtonStyles: React.CSSProperties = {
     ...buttonStyles,
-    backgroundColor: theme?.colors?.primary || '#007AFF',
-    color: '#FFF',
+    backgroundColor: theme?.colors?.primary || "#007AFF",
+    color: "#FFF",
   };
 
   const secondaryButtonStyles: React.CSSProperties = {
     ...buttonStyles,
-    backgroundColor: 'transparent',
-    color: theme?.colors?.text || '#666',
-    border: theme?.colors?.border ? `1px solid ${theme.colors.border}` : '1px solid #E5E5E7',
+    backgroundColor: "transparent",
+    color: theme?.colors?.text || "#666",
+    border: theme?.colors?.border
+      ? `1px solid ${theme.colors.border}`
+      : "1px solid #E5E5E7",
   };
 
   const dangerButtonStyles: React.CSSProperties = {
     ...buttonStyles,
-    backgroundColor: '#FF3B30',
-    color: '#FFF',
+    backgroundColor: "#FF3B30",
+    color: "#FFF",
   };
 
   const tabContainerStyles: React.CSSProperties = {
-    marginTop: '32px',
+    marginTop: "32px",
   };
 
   const tabHeaderStyles: React.CSSProperties = {
-    display: 'flex',
-    borderBottom: theme?.colors?.border ? `1px solid ${theme.colors.border}` : '1px solid #E5E5E7',
-    marginBottom: '24px',
+    display: "flex",
+    borderBottom: theme?.colors?.border
+      ? `1px solid ${theme.colors.border}`
+      : "1px solid #E5E5E7",
+    marginBottom: "24px",
   };
 
   const tabButtonStyles: React.CSSProperties = {
-    padding: '12px 24px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '500',
-    color: theme?.colors?.text ? `${theme.colors.text}60` : '#666',
-    borderBottom: '2px solid transparent',
-    transition: 'all 0.2s ease',
+    padding: "12px 24px",
+    border: "none",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: theme?.colors?.text ? `${theme.colors.text}60` : "#666",
+    borderBottom: "2px solid transparent",
+    transition: "all 0.2s ease",
   };
 
   const activeTabButtonStyles: React.CSSProperties = {
     ...tabButtonStyles,
-    color: theme?.colors?.primary || '#007AFF',
-    borderBottomColor: theme?.colors?.primary || '#007AFF',
-    fontWeight: '600',
+    color: theme?.colors?.primary || "#007AFF",
+    borderBottomColor: theme?.colors?.primary || "#007AFF",
+    fontWeight: "600",
   };
 
   const contentContainerStyles: React.CSSProperties = {
-    minHeight: '400px',
+    minHeight: "400px",
   };
 
   // Calculate totals for overview card
-  const totalBalance = tokens.reduce((sum, token) => {
-    return sum + parseFloat(token.balance || '0');
-  }, 0).toFixed(4);
+  const totalBalance = tokens
+    .reduce((sum, token) => {
+      return sum + parseFloat(token.balance || "0");
+    }, 0)
+    .toFixed(4);
 
-  const totalBalanceUSD = tokens.reduce((sum, token) => {
-    return sum + parseFloat(token.value || '0');
-  }, 0).toFixed(2);
+  const totalBalanceUSD = tokens
+    .reduce((sum, token) => {
+      return sum + parseFloat(token.value || "0");
+    }, 0)
+    .toFixed(2);
 
   const tokenCount = tokens.length;
   const nftCount = nfts.length;
@@ -179,7 +194,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       const fetchedTokens = await fetchTokens();
       setTokens(fetchedTokens);
     } catch (err) {
-      setError('Failed to load tokens');
+      setError("Failed to load tokens");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -193,7 +208,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       const fetchedNFTs = await fetchNFTs();
       setNFTs(fetchedNFTs);
     } catch (err) {
-      setError('Failed to load NFTs');
+      setError("Failed to load NFTs");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -207,7 +222,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       const fetchedInventory = await fetchInventory();
       setInventory(fetchedInventory);
     } catch (err) {
-      setError('Failed to load inventory');
+      setError("Failed to load inventory");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -216,7 +231,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const loadAllData = async () => {
     if (!session?.wallet) return;
-    
+
     setIsLoading(true);
     try {
       const promises = [];
@@ -225,28 +240,28 @@ const Dashboard: React.FC<DashboardProps> = ({
       if (fetchInventory) promises.push(fetchInventory());
 
       const results = await Promise.allSettled(promises);
-      
+
       let index = 0;
       if (fetchTokens) {
         const tokensResult = results[index++];
-        if (tokensResult.status === 'fulfilled') {
+        if (tokensResult.status === "fulfilled") {
           setTokens(tokensResult.value as TokenBalance[]);
         }
       }
       if (fetchNFTs) {
         const nftsResult = results[index++];
-        if (nftsResult.status === 'fulfilled') {
+        if (nftsResult.status === "fulfilled") {
           setNFTs(nftsResult.value as NFTAsset[]);
         }
       }
       if (fetchInventory) {
         const inventoryResult = results[index++];
-        if (inventoryResult.status === 'fulfilled') {
+        if (inventoryResult.status === "fulfilled") {
           setInventory(inventoryResult.value as GameInventoryItem[]);
         }
       }
     } catch (err) {
-      setError('Failed to load wallet data');
+      setError("Failed to load wallet data");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -261,14 +276,14 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [session?.wallet]);
 
   // Tab handlers
-  const handleTabChange = (tab: 'tokens' | 'collectibles' | 'inventory') => {
+  const handleTabChange = (tab: "tokens" | "collectibles" | "inventory") => {
     setActiveTab(tab);
     // Load data for the active tab if not already loaded
-    if (tab === 'tokens' && tokens.length === 0) {
+    if (tab === "tokens" && tokens.length === 0) {
       loadTokens();
-    } else if (tab === 'collectibles' && nfts.length === 0) {
+    } else if (tab === "collectibles" && nfts.length === 0) {
       loadNFTs();
-    } else if (tab === 'inventory' && inventory.length === 0) {
+    } else if (tab === "inventory" && inventory.length === 0) {
       loadInventory();
     }
   };
@@ -281,7 +296,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       }
       setShowCreateModal(false);
     } catch (err) {
-      console.error('Failed to create wallet:', err);
+      console.error("Failed to create wallet:", err);
       throw err;
     }
   };
@@ -293,7 +308,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       }
       setShowImportModal(false);
     } catch (err) {
-      console.error('Failed to import wallet:', err);
+      console.error("Failed to import wallet:", err);
       throw err;
     }
   };
@@ -308,7 +323,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       setNFTs([]);
       setInventory([]);
     } catch (err) {
-      console.error('Failed to disconnect:', err);
+      console.error("Failed to disconnect:", err);
     }
   };
 
@@ -320,7 +335,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         description="Get started by creating a new wallet or importing an existing one."
         variant="wallet"
         theme={theme}
-        icon={<span style={{ fontSize: '64px' }}>👛</span>}
+        icon={<span style={{ fontSize: "64px" }}>👛</span>}
       />
       <div style={actionsContainerStyles}>
         {showCreateWallet && (
@@ -328,10 +343,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             style={primaryButtonStyles}
             onClick={() => setShowCreateModal(true)}
             onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9';
+              e.currentTarget.style.opacity = "0.9";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.opacity = "1";
             }}
           >
             Create New Wallet
@@ -342,10 +357,12 @@ const Dashboard: React.FC<DashboardProps> = ({
             style={secondaryButtonStyles}
             onClick={() => setShowImportModal(true)}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme?.colors?.border ? `${theme.colors.border}20` : '#F0F0F0';
+              e.currentTarget.style.backgroundColor = theme?.colors?.border
+                ? `${theme.colors.border}20`
+                : "#F0F0F0";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
             Import Existing Wallet
@@ -363,9 +380,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         totalBalanceUSD={totalBalanceUSD}
         tokenCount={tokenCount}
         nftCount={nftCount}
-        onViewTokens={() => handleTabChange('tokens')}
-        onViewNFTs={() => handleTabChange('collectibles')}
-        onViewInventory={() => handleTabChange('inventory')}
+        onViewTokens={() => handleTabChange("tokens")}
+        onViewNFTs={() => handleTabChange("collectibles")}
+        onViewInventory={() => handleTabChange("inventory")}
         isLoading={isLoading}
         theme={theme}
       />
@@ -375,10 +392,12 @@ const Dashboard: React.FC<DashboardProps> = ({
           style={secondaryButtonStyles}
           onClick={loadAllData}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme?.colors?.border ? `${theme.colors.border}20` : '#F0F0F0';
+            e.currentTarget.style.backgroundColor = theme?.colors?.border
+              ? `${theme.colors.border}20`
+              : "#F0F0F0";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.backgroundColor = "transparent";
           }}
         >
           Refresh Data
@@ -387,10 +406,10 @@ const Dashboard: React.FC<DashboardProps> = ({
           style={dangerButtonStyles}
           onClick={handleDisconnect}
           onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '0.9';
+            e.currentTarget.style.opacity = "0.9";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.opacity = "1";
           }}
         >
           Disconnect
@@ -399,19 +418,24 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       <div style={tabContainerStyles}>
         <div style={tabHeaderStyles}>
-          {(['tokens', 'collectibles', 'inventory'] as const).map((tab) => (
+          {(["tokens", "collectibles", "inventory"] as const).map((tab) => (
             <button
               key={tab}
-              style={activeTab === tab ? activeTabButtonStyles : tabButtonStyles}
+              style={
+                activeTab === tab ? activeTabButtonStyles : tabButtonStyles
+              }
               onClick={() => handleTabChange(tab)}
               onMouseEnter={(e) => {
                 if (activeTab !== tab) {
-                  e.currentTarget.style.color = theme?.colors?.primary || '#007AFF';
+                  e.currentTarget.style.color =
+                    theme?.colors?.primary || "#007AFF";
                 }
               }}
               onMouseLeave={(e) => {
                 if (activeTab !== tab) {
-                  e.currentTarget.style.color = theme?.colors?.text ? `${theme.colors.text}60` : '#666';
+                  e.currentTarget.style.color = theme?.colors?.text
+                    ? `${theme.colors.text}60`
+                    : "#666";
                 }
               }}
             >
@@ -421,7 +445,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <div style={contentContainerStyles}>
-          {activeTab === 'tokens' && (
+          {activeTab === "tokens" && (
             <TokenTab
               tokens={tokens}
               isLoading={isLoading}
@@ -429,7 +453,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               theme={theme}
             />
           )}
-          {activeTab === 'collectibles' && (
+          {activeTab === "collectibles" && (
             <CollectiblesTab
               nfts={nfts}
               isLoading={isLoading}
@@ -437,7 +461,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               theme={theme}
             />
           )}
-          {activeTab === 'inventory' && (
+          {activeTab === "inventory" && (
             <InventoryTab
               items={inventory}
               isLoading={isLoading}
@@ -456,7 +480,9 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div style={headerStyles}>
         <h1 style={titleStyles}>D-Sports Wallet</h1>
         <p style={subtitleStyles}>
-          {session?.wallet ? 'Manage your digital assets' : 'Your gateway to Web3 gaming'}
+          {session?.wallet
+            ? "Manage your digital assets"
+            : "Your gateway to Web3 gaming"}
         </p>
       </div>
 
@@ -498,14 +524,14 @@ const Dashboard: React.FC<DashboardProps> = ({
       {error && (
         <div
           style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            backgroundColor: '#FF3B30',
-            color: '#FFF',
-            padding: '16px',
-            borderRadius: theme?.borderRadius || '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            backgroundColor: "#FF3B30",
+            color: "#FFF",
+            padding: "16px",
+            borderRadius: theme?.borderRadius || "8px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
             zIndex: 1000,
           }}
         >
@@ -513,12 +539,12 @@ const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={() => setError(null)}
             style={{
-              marginLeft: '12px',
-              background: 'none',
-              border: 'none',
-              color: '#FFF',
-              cursor: 'pointer',
-              fontSize: '16px',
+              marginLeft: "12px",
+              background: "none",
+              border: "none",
+              color: "#FFF",
+              cursor: "pointer",
+              fontSize: "16px",
             }}
           >
             ×

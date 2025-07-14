@@ -186,7 +186,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
 export function getDefaultPlatformAdapter(): PlatformAdapter {
   if (typeof window !== 'undefined') {
     // Check if we're in Next.js
-    if (typeof window.next !== 'undefined' || typeof process !== 'undefined' && process.env.NODE_ENV) {
+    if (typeof (window as any).next !== 'undefined' || typeof process !== 'undefined' && process.env.NODE_ENV) {
       return nextjsPlatformAdapter;
     }
     return webPlatformAdapter;

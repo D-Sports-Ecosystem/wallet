@@ -1,12 +1,19 @@
-import React from 'react';
-import { DSportsWallet } from '../core/wallet';
-import { CustomSocialLoginProvider } from '../providers/custom-social-login';
-import { DSportsRainbowKitConnector } from '../connectors/rainbow-kit';
-import { DSportsWagmiConnector } from '../connectors/wagmi';
-import { nextjsPlatformAdapter } from '../utils/platform-adapters';
-import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions, Chain } from '../types';
+import './index.css';
+export { DSportsWallet } from './core/wallet';
+export { CustomSocialLoginProvider } from './providers/custom-social-login';
+export { DSportsOAuthService, createQuickStartSocialLogin, validateSocialLoginConfig } from './providers/dsports-oauth-service';
+export { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from './connectors/rainbow-kit';
+export { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from './connectors/wagmi';
+export { webPlatformAdapter, nextjsPlatformAdapter, reactNativePlatformAdapter, getDefaultPlatformAdapter } from './utils/platform-adapters';
+export { EventEmitter } from './utils/event-emitter';
+export * from './types';
+import { DSportsWallet } from './core/wallet';
+import { DSportsRainbowKitConnector } from './connectors/rainbow-kit';
+import { DSportsWagmiConnector } from './connectors/wagmi';
+import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions } from './types';
 export declare function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet;
-export declare function createDSportsRainbowKitConnectorForNextjs(options: RainbowKitConnectorOptions): () => {
+export declare function createDSportsWalletQuickStart(options: Omit<DSportsWalletOptions, 'socialLogin'>): DSportsWallet;
+export declare function createDSportsRainbowKitConnectorUniversal(options: RainbowKitConnectorOptions): () => {
     id: string;
     name: string;
     iconUrl: string;
@@ -18,8 +25,8 @@ export declare function createDSportsRainbowKitConnectorForNextjs(options: Rainb
         };
     };
 };
-export declare function createDSportsWagmiConnectorForNextjs(options: WagmiConnectorOptions): DSportsWagmiConnector;
-export declare function dsportsWagmiConnectorForNextjs(options: WagmiConnectorOptions): () => {
+export declare function createDSportsWagmiConnectorUniversal(options: WagmiConnectorOptions): DSportsWagmiConnector;
+export declare function dsportsWagmiConnectorUniversal(options: WagmiConnectorOptions): () => {
     id: string;
     name: string;
     type: string;
@@ -57,35 +64,82 @@ export declare function dsportsWagmiConnectorForNextjs(options: WagmiConnectorOp
     }>;
     onAccountsChanged: (accounts: string[]) => void;
     onChainChanged: (chainId: number) => void;
-    onConnect: (data: import("../types").ConnectorData) => void;
+    onConnect: (data: import("./types").ConnectorData) => void;
     onDisconnect: () => void;
 };
-export declare function useDSportsWallet(wallet: DSportsWallet): {
-    connect: (connectorId: string, config?: any) => Promise<import("../types").WalletAccount>;
-    disconnect: () => Promise<void>;
-    switchChain: (chainId: number) => Promise<void>;
-    isConnected: () => boolean;
-    account?: import("../types").WalletAccount;
-    isConnecting: boolean;
-    isReconnecting: boolean;
-    isDisconnected: boolean;
-    pendingConnector?: string;
-    error?: Error;
+export declare const mainnet: {
+    id: number;
+    name: string;
+    network: string;
+    nativeCurrency: {
+        name: string;
+        symbol: string;
+        decimals: number;
+    };
+    rpcUrls: {
+        default: {
+            http: string[];
+        };
+        public: {
+            http: string[];
+        };
+    };
+    blockExplorers: {
+        default: {
+            name: string;
+            url: string;
+        };
+    };
 };
-export declare function useSocialLogin(socialProvider: CustomSocialLoginProvider): {
-    user: null;
-    isLoading: boolean;
-    error: Error | null;
-    login: (provider: string) => Promise<import("../types").SocialLoginResult>;
-    logout: () => Promise<void>;
+export declare const goerli: {
+    id: number;
+    name: string;
+    network: string;
+    nativeCurrency: {
+        name: string;
+        symbol: string;
+        decimals: number;
+    };
+    rpcUrls: {
+        default: {
+            http: string[];
+        };
+        public: {
+            http: string[];
+        };
+    };
+    blockExplorers: {
+        default: {
+            name: string;
+            url: string;
+        };
+    };
+    testnet: boolean;
 };
-export declare function withDSportsWallet<T extends object>(Component: React.ComponentType<T>, walletOptions: DSportsWalletOptions): (props: T) => React.ReactElement<T, string | React.JSXElementConstructor<any>>;
-export * from '../types';
-export * from '../core/wallet';
-export * from '../providers/custom-social-login';
-export { nextjsPlatformAdapter };
-export declare const mainnet: Chain;
-export declare const goerli: Chain;
-export declare const sepolia: Chain;
-export * from '../ui';
+export declare const polygon: {
+    id: number;
+    name: string;
+    network: string;
+    nativeCurrency: {
+        name: string;
+        symbol: string;
+        decimals: number;
+    };
+    rpcUrls: {
+        default: {
+            http: string[];
+        };
+        public: {
+            http: string[];
+        };
+    };
+    blockExplorers: {
+        default: {
+            name: string;
+            url: string;
+        };
+    };
+};
+export * from './ui';
+export declare const version = "1.0.0";
 //# sourceMappingURL=index.d.ts.map

@@ -61,15 +61,15 @@ export {
 
 // Injectable Hooks - for abstracting application-specific logic
 /** Injectable auth hook for authentication and session management */
-export { useAuth } from './hooks';
+export { useAuth, createAuthHook } from './hooks/useAuth';
 /** Injectable navigation hook for routing and navigation */
-export { useNavigation } from './hooks';
+export { useNavigation, createNavigationHook } from './hooks/useNavigation';
 /** Injectable server actions hook for API calls and server operations */
-export { useServerActions } from './hooks';
+export { useServerActions, createServerActionsHook } from './hooks/useServerActions';
 /** Injectable platform hook for platform-specific features */
-export { usePlatform } from './hooks';
+export { usePlatform, createPlatformHook } from './hooks/usePlatform';
 /** Injectable wallet actions hook for wallet-specific operations */
-export { useWalletActions } from './hooks';
+export { useWalletActions, createWalletActionsHook } from './hooks/useWalletActions';
 
 // Type Definitions
 /** All component and context type definitions */

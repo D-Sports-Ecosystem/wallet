@@ -1,5 +1,7 @@
 import React from 'react';
-declare const ExampleApp: React.FC;
+declare const ExampleApp: React.FC<{
+    children?: React.ReactNode;
+}>;
 declare const WalletStatus: React.FC;
 declare const FullExample: React.FC;
 export default FullExample;

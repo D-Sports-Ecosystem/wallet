@@ -51,7 +51,7 @@ export interface CustomSocialLoginConfig {
 
 export interface Web3AuthConfig {
   clientId: string;
-  web3AuthNetwork?: 'mainnet' | 'testnet' | 'cyan' | 'aqua';
+  web3AuthNetwork?: "mainnet" | "testnet" | "cyan" | "aqua";
   chainConfig: {
     chainNamespace: string;
     chainId: string;
@@ -62,7 +62,7 @@ export interface Web3AuthConfig {
     tickerName: string;
   };
   uiConfig?: {
-    theme?: 'light' | 'dark' | 'auto';
+    theme?: "light" | "dark" | "auto";
     loginMethodsOrder?: string[];
     appLogo?: string;
     modalZIndex?: string;
@@ -91,7 +91,15 @@ export interface Web3AuthConfig {
   };
 }
 
-export type SocialProvider = 'google' | 'facebook' | 'apple' | 'twitter' | 'discord' | 'github' | 'email' | 'sms';
+export type SocialProvider =
+  | "google"
+  | "facebook"
+  | "apple"
+  | "twitter"
+  | "discord"
+  | "github"
+  | "email"
+  | "sms";
 
 export interface WalletTheme {
   colors?: {
@@ -168,11 +176,11 @@ export interface WalletConnector {
   switchChain: (chainId: number) => Promise<void>;
   on: <K extends keyof ConnectorEvents>(
     event: K,
-    listener: ConnectorEvents[K]
+    listener: ConnectorEvents[K],
   ) => void;
   off: <K extends keyof ConnectorEvents>(
     event: K,
-    listener: ConnectorEvents[K]
+    listener: ConnectorEvents[K],
   ) => void;
 }
 
@@ -181,7 +189,7 @@ export interface DSportsWalletOptions {
   chains: Chain[];
   socialLogin?: CustomSocialLoginConfig;
   theme?: WalletTheme;
-  environment?: 'development' | 'production';
+  environment?: "development" | "production";
   metadata?: {
     name: string;
     description: string;
@@ -220,7 +228,7 @@ export interface WagmiConnectorOptions {
   socialLogin?: CustomSocialLoginConfig;
 }
 
-export type Platform = 'web' | 'react-native' | 'nextjs';
+export type Platform = "web" | "react-native" | "nextjs";
 
 export interface PlatformAdapter {
   platform: Platform;
@@ -244,13 +252,13 @@ export interface WalletError extends Error {
 }
 
 export interface WalletEventMap {
-  'connect': WalletAccount;
-  'disconnect': void;
-  'accountsChanged': string[];
-  'chainChanged': number;
-  'error': WalletError;
-  'socialLogin': SocialLoginResult;
+  connect: WalletAccount;
+  disconnect: void;
+  accountsChanged: string[];
+  chainChanged: number;
+  error: WalletError;
+  socialLogin: SocialLoginResult;
 }
 
 // Re-export for convenience
-export { CustomSocialLoginProvider } from '../providers/custom-social-login'; 
+export { CustomSocialLoginProvider } from "../providers/custom-social-login";

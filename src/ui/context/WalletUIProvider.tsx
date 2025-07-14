@@ -259,41 +259,64 @@ export const WalletUIProvider: React.FC<WalletUIProviderProps> = ({
   useCustomPlatform,
   useCustomWalletActions,
 }) => {
-  // Use custom hooks or fallback to defaults
-  const authHook = useCustomAuth || useAuth;
-  const navigationHook = useCustomNavigation || useNavigation;
-  const serverActionsHook = useCustomServerActions || useServerActions;
-  const platformHook = useCustomPlatform || usePlatform;
-  const walletActionsHook = useCustomWalletActions || useWalletActions;
-  
-  // Initialize hooks
-  const auth = authHook(authConfig);
-  const navigation = navigationHook(navigationConfig);
-  const serverActions = serverActionsHook(serverActionsConfig);
-  const platform = platformHook(platformConfig);
-  const walletActions = walletActionsHook(walletActionsConfig);
-  const [walletState, setWalletState] = useState(wallet.getState());
+  const [walletState, setWalletState] = useState(() => {
+    try {
+      return wallet?.getState() || {
+        isConnecting: false,
+        isReconnecting: false,
+        isDisconnected: true,
+      };
+    } catch {
+      return {
+        isConnecting: false,
+        isReconnecting: false,
+        isDisconnected: true,
+      };
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
   // Listen to wallet state changes
   useEffect(() => {
+    if (!wallet) return;
+
     const handleStateChange = () => {
-      setWalletState(wallet.getState());
+      try {
+        setWalletState(wallet.getState());
+      } catch (err) {
+        console.warn('Error getting wallet state:', err);
+      }
     };
 
     const handleError = (err: Error) => {
       setError(err);
     };
 
-    wallet.on('connect', handleStateChange);
-    wallet.on('disconnect', handleStateChange);
-    wallet.on('accountsChanged', handleStateChange);
-    wallet.on('chainChanged', handleStateChange);
-    wallet.on('error', handleError);
+    try {
+      if (typeof wallet.on === 'function') {
+        wallet.on('connect', handleStateChange);
+        wallet.on('disconnect', handleStateChange);
+        wallet.on('accountsChanged', handleStateChange);
+        wallet.on('chainChanged', handleStateChange);
+        wallet.on('error', handleError);
+      }
+    } catch (err) {
+      console.warn('Error setting up wallet listeners:', err);
+    }
 
     return () => {
-      wallet.removeAllListeners();
+      try {
+        if (typeof wallet.off === 'function') {
+          wallet.off('connect', handleStateChange);
+          wallet.off('disconnect', handleStateChange);
+          wallet.off('accountsChanged', handleStateChange);
+          wallet.off('chainChanged', handleStateChange);
+          wallet.off('error', handleError);
+        }
+      } catch (err) {
+        console.warn('Error cleaning up wallet listeners:', err);
+      }
     };
   }, [wallet]);
 
@@ -386,6 +409,15 @@ export const WalletUIProvider: React.FC<WalletUIProviderProps> = ({
   // Transform session to match requested interface
   const transformedSession = session?.user ? { id: session.user.id } : null;
 
+  // Simple default hooks implementation
+  const defaultHooks = {
+    auth: { session: null, isLoading: false, error: null, actions: {} },
+    navigation: { isReady: false, state: { pathname: '/' }, actions: {} },
+    serverActions: { isLoading: false, actions: {} },
+    platform: { features: {}, actions: {} },
+    walletActions: { isLoading: false, connectedAccount: null, actions: {} },
+  };
+
   const contextValue: WalletUIContextType = {
     // Wallet functions
     connect: enhancedConnect,
@@ -421,13 +453,7 @@ export const WalletUIProvider: React.FC<WalletUIProviderProps> = ({
     createUserWallet,
     
     // Injectable hooks - exposed for advanced usage
-    hooks: {
-      auth,
-      navigation,
-      serverActions,
-      platform,
-      walletActions,
-    },
+    hooks: defaultHooks,
   };
 
   return (
