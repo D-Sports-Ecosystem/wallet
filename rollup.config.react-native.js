@@ -6,6 +6,12 @@ import replace from '@rollup/plugin-replace';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import terser from '@rollup/plugin-terser';
 import postcss from 'rollup-plugin-postcss';
+import alias from '@rollup/plugin-alias';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default {
   input: 'src/react-native/index.ts',
@@ -26,6 +32,17 @@ export default {
   ],
   plugins: [
     peerDepsExternal(),
+    alias({
+      entries: [
+        { find: '@', replacement: path.resolve(__dirname, 'src') },
+        { find: '@/components', replacement: path.resolve(__dirname, 'src/components') },
+        { find: '@/lib', replacement: path.resolve(__dirname, 'src/lib') },
+        { find: '@/utils', replacement: path.resolve(__dirname, 'src/utils') },
+        { find: '@/types', replacement: path.resolve(__dirname, 'src/types') },
+        { find: '@/connectors', replacement: path.resolve(__dirname, 'src/connectors') },
+        { find: '@/providers', replacement: path.resolve(__dirname, 'src/providers') }
+      ]
+    }),
     resolve({
       browser: false,
       preferBuiltins: false

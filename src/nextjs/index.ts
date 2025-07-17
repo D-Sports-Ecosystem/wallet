@@ -259,4 +259,4 @@ export const sepolia: Chain = {
 };
 
 // UI Components
-export * from '../ui';
+export * from '../components/ui';

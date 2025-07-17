@@ -1,0 +1,1 @@
+{"version":3,"file":"receive-page.d.ts","sourceRoot":"","sources":["../../src/components/receive-page.tsx"],"names":[],"mappings":"AAMA,UAAU,gBAAgB;IACxB,mBAAmB,EAAE,OAAO,CAAA;IAC5B,oBAAoB,EAAE,GAAG,CAAA;IACzB,WAAW,EAAE,MAAM,IAAI,CAAA;IACvB,aAAa,EAAE,OAAO,CAAA;CACvB;AAED,wBAAgB,WAAW,CAAC,EAC1B,mBAAmB,EACnB,oBAAoB,EACpB,WAAW,EACX,aAAa,GACd,EAAE,gBAAgB,2CAkGlB"}

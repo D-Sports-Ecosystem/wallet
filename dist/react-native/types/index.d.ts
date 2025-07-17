@@ -47,7 +47,7 @@ export interface CustomSocialLoginConfig {
 }
 export interface Web3AuthConfig {
     clientId: string;
-    web3AuthNetwork?: 'mainnet' | 'testnet' | 'cyan' | 'aqua';
+    web3AuthNetwork?: "mainnet" | "testnet" | "cyan" | "aqua";
     chainConfig: {
         chainNamespace: string;
         chainId: string;
@@ -58,7 +58,7 @@ export interface Web3AuthConfig {
         tickerName: string;
     };
     uiConfig?: {
-        theme?: 'light' | 'dark' | 'auto';
+        theme?: "light" | "dark" | "auto";
         loginMethodsOrder?: string[];
         appLogo?: string;
         modalZIndex?: string;
@@ -86,7 +86,7 @@ export interface Web3AuthConfig {
         };
     };
 }
-export type SocialProvider = 'google' | 'facebook' | 'apple' | 'twitter' | 'discord' | 'github' | 'email' | 'sms';
+export type SocialProvider = "google" | "facebook" | "apple" | "twitter" | "discord" | "github" | "email" | "sms";
 export interface WalletTheme {
     colors?: {
         primary?: string;
@@ -168,7 +168,7 @@ export interface DSportsWalletOptions {
     chains: Chain[];
     socialLogin?: CustomSocialLoginConfig;
     theme?: WalletTheme;
-    environment?: 'development' | 'production';
+    environment?: "development" | "production";
     metadata?: {
         name: string;
         description: string;
@@ -203,7 +203,7 @@ export interface WagmiConnectorOptions {
     };
     socialLogin?: CustomSocialLoginConfig;
 }
-export type Platform = 'web' | 'react-native' | 'nextjs';
+export type Platform = "web" | "react-native" | "nextjs";
 export interface PlatformAdapter {
     platform: Platform;
     storage: {
@@ -224,12 +224,12 @@ export interface WalletError extends Error {
     details?: any;
 }
 export interface WalletEventMap {
-    'connect': WalletAccount;
-    'disconnect': void;
-    'accountsChanged': string[];
-    'chainChanged': number;
-    'error': WalletError;
-    'socialLogin': SocialLoginResult;
+    connect: WalletAccount;
+    disconnect: void;
+    accountsChanged: string[];
+    chainChanged: number;
+    error: WalletError;
+    socialLogin: SocialLoginResult;
 }
-export { CustomSocialLoginProvider } from '../providers/custom-social-login';
+export { CustomSocialLoginProvider } from "../providers/custom-social-login";
 //# sourceMappingURL=index.d.ts.map

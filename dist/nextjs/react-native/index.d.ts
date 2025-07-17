@@ -1,10 +1,10 @@
-import React from 'react';
-import { DSportsWallet } from '../core/wallet';
-import { CustomSocialLoginProvider } from '../providers/custom-social-login';
-import { DSportsRainbowKitConnector } from '../connectors/rainbow-kit';
-import { DSportsWagmiConnector } from '../connectors/wagmi';
-import { reactNativePlatformAdapter } from '../utils/platform-adapters';
-import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions, Chain } from '../types';
+import React from "react";
+import { DSportsWallet } from "../core/wallet";
+import { CustomSocialLoginProvider } from "../providers/custom-social-login";
+import { DSportsRainbowKitConnector } from "../connectors/rainbow-kit";
+import { DSportsWagmiConnector } from "../connectors/wagmi";
+import { reactNativePlatformAdapter } from "../utils/platform-adapters";
+import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions, Chain } from "../types";
 export declare function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet;
 export declare function createDSportsRainbowKitConnectorForReactNative(options: RainbowKitConnectorOptions): () => {
     id: string;
@@ -85,9 +85,9 @@ export declare function storeSecureData(key: string, value: string): Promise<boo
 export declare function getSecureData(key: string): Promise<string | null>;
 export declare function removeSecureData(key: string): Promise<boolean>;
 export declare function setupURLPolyfill(): void;
-export * from '../types';
-export * from '../core/wallet';
-export * from '../providers/custom-social-login';
+export * from "../types";
+export * from "../core/wallet";
+export * from "../providers/custom-social-login";
 export { reactNativePlatformAdapter };
 export declare const mainnet: Chain;
 export declare const polygon: Chain;

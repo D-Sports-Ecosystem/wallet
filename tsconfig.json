@@ -22,15 +22,15 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@/types/*": ["./types/*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
       "@/utils/*": ["./utils/*"],
+      "@/types/*": ["./types/*"],
       "@/connectors/*": ["./connectors/*"],
       "@/providers/*": ["./providers/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     "dist",
@@ -39,4 +39,4 @@
     "**/*.spec.ts",
     "**/*.spec.tsx"
   ]
-} 
+}

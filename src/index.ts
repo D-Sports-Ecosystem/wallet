@@ -243,7 +243,7 @@ export const polygon = {
 };
 
 // UI Components (optional - only if React is available)
-export * from "./ui";
+export * from "./components/ui";
 
 // Version
 export const version = "1.0.0";

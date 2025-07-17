@@ -1,18 +1,18 @@
-import './index.css';
-export { DSportsWallet } from './core/wallet';
-export { CustomSocialLoginProvider } from './providers/custom-social-login';
-export { DSportsOAuthService, createQuickStartSocialLogin, validateSocialLoginConfig } from './providers/dsports-oauth-service';
-export { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from './connectors/rainbow-kit';
-export { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from './connectors/wagmi';
-export { webPlatformAdapter, nextjsPlatformAdapter, reactNativePlatformAdapter, getDefaultPlatformAdapter } from './utils/platform-adapters';
-export { EventEmitter } from './utils/event-emitter';
-export * from './types';
-import { DSportsWallet } from './core/wallet';
-import { DSportsRainbowKitConnector } from './connectors/rainbow-kit';
-import { DSportsWagmiConnector } from './connectors/wagmi';
-import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions } from './types';
+import "./index.css";
+export { DSportsWallet } from "./core/wallet";
+export { CustomSocialLoginProvider } from "./providers/custom-social-login";
+export { DSportsOAuthService, createQuickStartSocialLogin, validateSocialLoginConfig, } from "./providers/dsports-oauth-service";
+export { DSportsRainbowKitConnector, createDSportsRainbowKitConnector, } from "./connectors/rainbow-kit";
+export { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector, } from "./connectors/wagmi";
+export { webPlatformAdapter, nextjsPlatformAdapter, reactNativePlatformAdapter, getDefaultPlatformAdapter, } from "./utils/platform-adapters";
+export { EventEmitter } from "./utils/event-emitter";
+export * from "./types";
+import { DSportsWallet } from "./core/wallet";
+import { DSportsRainbowKitConnector } from "./connectors/rainbow-kit";
+import { DSportsWagmiConnector } from "./connectors/wagmi";
+import { DSportsWalletOptions, RainbowKitConnectorOptions, WagmiConnectorOptions } from "./types";
 export declare function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet;
-export declare function createDSportsWalletQuickStart(options: Omit<DSportsWalletOptions, 'socialLogin'>): DSportsWallet;
+export declare function createDSportsWalletQuickStart(options: Omit<DSportsWalletOptions, "socialLogin">): DSportsWallet;
 export declare function createDSportsRainbowKitConnectorUniversal(options: RainbowKitConnectorOptions): () => {
     id: string;
     name: string;
@@ -140,6 +140,6 @@ export declare const polygon: {
         };
     };
 };
-export * from './ui';
+export * from "./components/ui";
 export declare const version = "1.0.0";
 //# sourceMappingURL=index.d.ts.map
