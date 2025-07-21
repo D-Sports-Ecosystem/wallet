@@ -245,7 +245,7 @@ export const polygon = {
 // UI Components (optional - only if React is available)
 export * from "./components/ui";
 export { TokenUpdateStatus } from "./components/token-update-status";
-export { TokenUpdateConfig } from "./components/token-update-config";
+export { TokenUpdateConfig as TokenUpdateConfigComponent } from "./components/token-update-config";
 
 // Token data and context
 export { TokenProvider, useTokens } from "./contexts/token-context";

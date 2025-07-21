@@ -118,16 +118,15 @@ declare module 'react-native-reanimated' {
   export function withSequence(...animations: any[]): any;
   export function withRepeat(animation: any, numberOfReps?: number, reverse?: boolean): any;
   
-  // Animations
-  export const FadeIn: {
-    duration?: (duration: number) => any;
-    delay?: (delay: number) => any;
-  };
+  // Animation interface
+  interface AnimationBuilder {
+    duration(duration: number): AnimationBuilder;
+    delay(delay: number): AnimationBuilder;
+  }
   
-  export const FadeOut: {
-    duration?: (duration: number) => any;
-    delay?: (delay: number) => any;
-  };
+  // Animations
+  export const FadeIn: AnimationBuilder;
+  export const FadeOut: AnimationBuilder;
   
   export const SlideInRight: {
     duration?: (duration: number) => any;

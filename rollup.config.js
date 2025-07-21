@@ -41,7 +41,8 @@ export default {
         { find: '@/types', replacement: path.resolve(__dirname, 'src/types') },
         { find: '@/connectors', replacement: path.resolve(__dirname, 'src/connectors') },
         { find: '@/providers', replacement: path.resolve(__dirname, 'src/providers') },
-        { find: '@/data', replacement: path.resolve(__dirname, 'data') }
+        { find: '@/data', replacement: path.resolve(__dirname, 'data') },
+        { find: '~/data', replacement: path.resolve(__dirname, 'data') }
       ]
     }),
     resolve({
@@ -67,5 +68,5 @@ export default {
     }),
     terser()
   ],
-  external: ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem']
+  external: ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem', 'react-native', 'react-native-reanimated']
 }; 

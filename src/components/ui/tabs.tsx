@@ -1,36 +1,67 @@
 import * as React from 'react';
-import { Pressable, View, ViewProps } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
-
 import { cn } from '~/lib/utils';
+import { isReactNative } from '../../utils/platform-detection';
 
-const Tabs = React.forwardRef<
-  React.ElementRef<typeof View>,
-  ViewProps & {
-    value: string;
-    onValueChange: (value: string) => void;
-    className?: string;
+const TabsContext = React.createContext<{
+  value: string;
+  onValueChange: (value: string) => void;
+} | null>(null);
+
+interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string;
+  onValueChange: (value: string) => void;
+  className?: string;
+}
+
+const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
+  ({ value, onValueChange, className, children, ...props }, ref) => {
+    return (
+      <TabsContext.Provider value={{ value, onValueChange }}>
+        {isReactNative() ? (
+          (() => {
+            const { View } = require('react-native');
+            return <View ref={ref} className={cn('', className)} {...props}>{children}</View>;
+          })()
+        ) : (
+          <div ref={ref} className={cn('', className)} {...props}>
+            {children}
+          </div>
+        )}
+      </TabsContext.Provider>
+    );
   }
->(({ value, onValueChange, className, ...props }, ref) => {
-  return (
-    <View ref={ref} className={cn('', className)} {...props} />
-  );
-});
+);
 Tabs.displayName = 'Tabs';
 
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof View>,
-  ViewProps & { className?: string }
->(({ className, ...props }, ref) => (
-  <View
-    ref={ref}
-    className={cn(
-      'bg-muted inline-flex h-10 items-center justify-center rounded-md p-1',
-      className
-    )}
-    {...props}
-  />
-));
+const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { className?: string }>(
+  ({ className, ...props }, ref) => {
+    if (isReactNative()) {
+      const { View } = require('react-native');
+      return (
+        <View
+          ref={ref}
+          className={cn(
+            'bg-muted inline-flex h-10 items-center justify-center rounded-md p-1',
+            className
+          )}
+          {...props}
+        />
+      );
+    }
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 TabsList.displayName = 'TabsList';
 
 const tabsTriggerVariants = cva(
@@ -47,68 +78,96 @@ const tabsTriggerVariants = cva(
   }
 );
 
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof Pressable>,
-  React.ComponentPropsWithoutRef<typeof Pressable> & {
-    value: string;
-    className?: string;
-    variant?: VariantProps<typeof tabsTriggerVariants>['variant'];
-  }
->(({ className, variant, value, ...props }, ref) => {
-  const context = React.useContext(TabsContext);
-  if (!context) {
-    throw new Error('TabsTrigger must be used within a Tabs');
-  }
-  const { value: selectedValue, onValueChange } = context;
-  const isSelected = selectedValue === value;
+interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  value: string;
+  className?: string;
+  variant?: VariantProps<typeof tabsTriggerVariants>['variant'];
+}
 
-  return (
-    <Pressable
-      ref={ref}
-      className={cn(
-        tabsTriggerVariants({ variant }),
-        isSelected ? 'bg-background shadow-sm' : 'bg-transparent',
-        className
-      )}
-      onPress={() => onValueChange(value)}
-      {...props}
-    />
-  );
-});
+const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
+  ({ className, variant, value, ...props }, ref) => {
+    const context = React.useContext(TabsContext);
+    if (!context) {
+      throw new Error('TabsTrigger must be used within a Tabs');
+    }
+    const { value: selectedValue, onValueChange } = context;
+    const isSelected = selectedValue === value;
+
+    if (isReactNative()) {
+      const { Pressable } = require('react-native');
+      return (
+        <Pressable
+          ref={ref}
+          className={cn(
+            tabsTriggerVariants({ variant }),
+            isSelected ? 'bg-background shadow-sm' : 'bg-transparent',
+            className
+          )}
+          onPress={() => onValueChange(value)}
+          {...props}
+        />
+      );
+    }
+
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          tabsTriggerVariants({ variant }),
+          isSelected ? 'bg-background text-foreground shadow-sm' : '',
+          className
+        )}
+        onClick={() => onValueChange(value)}
+        data-state={isSelected ? 'active' : 'inactive'}
+        {...props}
+      />
+    );
+  }
+);
 TabsTrigger.displayName = 'TabsTrigger';
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof View>,
-  ViewProps & {
-    value: string;
-    className?: string;
-  }
->(({ className, value, ...props }, ref) => {
-  const context = React.useContext(TabsContext);
-  if (!context) {
-    throw new Error('TabsContent must be used within a Tabs');
-  }
-  const { value: selectedValue } = context;
-  const isSelected = selectedValue === value;
-
-  if (!isSelected) return null;
-
-  return (
-    <View
-      ref={ref}
-      className={cn(
-        'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        className
-      )}
-      {...props}
-    />
-  );
-});
-TabsContent.displayName = 'TabsContent';
-
-const TabsContext = React.createContext<{
+interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;
-  onValueChange: (value: string) => void;
-} | null>(null);
+  className?: string;
+}
+
+const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
+  ({ className, value, ...props }, ref) => {
+    const context = React.useContext(TabsContext);
+    if (!context) {
+      throw new Error('TabsContent must be used within a Tabs');
+    }
+    const { value: selectedValue } = context;
+    const isSelected = selectedValue === value;
+
+    if (!isSelected) return null;
+
+    if (isReactNative()) {
+      const { View } = require('react-native');
+      return (
+        <View
+          ref={ref}
+          className={cn(
+            'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            className
+          )}
+          {...props}
+        />
+      );
+    }
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+TabsContent.displayName = 'TabsContent';
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };
