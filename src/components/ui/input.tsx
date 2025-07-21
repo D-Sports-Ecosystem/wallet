@@ -1,19 +1,24 @@
 import * as React from 'react';
-// Import types only to avoid direct dependency on react-native
-import type { TextInputProps } from 'react-native';
-
 import { cn } from '../../lib/utils';
 
-export interface InputProps extends TextInputProps {
+export interface InputProps {
   className?: string;
   placeholder?: string;
   value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeText?: (text: string) => void;
   placeholderClassName?: string;
+  keyboardType?: string;
+  style?: React.CSSProperties;
 }
 
-const Input = React.forwardRef<any, InputProps>(
-  ({ className, placeholderClassName, placeholder, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, placeholderClassName, placeholder, onChange, onChangeText, keyboardType, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onChange) onChange(e);
+      if (onChangeText) onChangeText(e.target.value);
+    };
+
     return (
       <input
         ref={ref}
@@ -22,6 +27,8 @@ const Input = React.forwardRef<any, InputProps>(
           className
         )}
         placeholder={placeholder}
+        onChange={handleChange}
+        type={keyboardType === 'decimal-pad' ? 'number' : 'text'}
         {...props}
       />
     );

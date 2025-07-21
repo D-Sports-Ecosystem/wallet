@@ -1,9 +1,5 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-
-// Import types only to avoid direct dependency on react-native
-import type { PressableProps } from 'react-native';
-
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
@@ -33,26 +29,35 @@ const buttonVariants = cva(
   }
 );
 
-export interface ButtonProps
-  extends PressableProps,
-    VariantProps<typeof buttonVariants> {
+export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   onPress?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  style?: React.CSSProperties;
 }
 
-const Button = React.forwardRef<any, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    // Using a div for web rendering
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, onClick, onPress, disabled, children, ...props }, ref) => {
+    const handleClick = () => {
+      if (onClick) onClick();
+      if (onPress) onPress();
+    };
+
     return (
-      <div
-        className={cn(buttonVariants({ variant, size, className }))}
+      <button
+        className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
+        onClick={handleClick}
+        disabled={disabled}
         {...props}
-      />
+      >
+        {children}
+      </button>
     );
   }
 );

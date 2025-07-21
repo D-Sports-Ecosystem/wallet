@@ -51,7 +51,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build",
-    "release": "np"
+    "release": "np",
+    "update-tokens": "node scripts/update-token-data.js"
   },
   "keywords": [
     "wallet",
@@ -87,6 +88,7 @@
     "@studio-freight/lenis": "^1.0.42",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^16.6.1",
     "ethers": "^6.13.4",
     "framer-motion": "^10.0.0",
     "lucide-react": "^0.525.0",

@@ -18,7 +18,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "~/*": ["*"],
@@ -28,10 +28,10 @@
       "~/types/*": ["src/types/*"],
       "~/connectors/*": ["src/connectors/*"],
       "~/providers/*": ["src/providers/*"],
-      "~/data/*": ["src/data/*"]
+      "~/data/*": ["data/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "data/**/*", "scripts/**/*"],
   "exclude": [
     "node_modules",
     "dist",

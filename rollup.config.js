@@ -40,7 +40,8 @@ export default {
         { find: '@/utils', replacement: path.resolve(__dirname, 'src/utils') },
         { find: '@/types', replacement: path.resolve(__dirname, 'src/types') },
         { find: '@/connectors', replacement: path.resolve(__dirname, 'src/connectors') },
-        { find: '@/providers', replacement: path.resolve(__dirname, 'src/providers') }
+        { find: '@/providers', replacement: path.resolve(__dirname, 'src/providers') },
+        { find: '@/data', replacement: path.resolve(__dirname, 'data') }
       ]
     }),
     resolve({

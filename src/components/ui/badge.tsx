@@ -1,9 +1,5 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-
-// Import types only to avoid direct dependency on react-native
-import type { ViewProps } from 'react-native';
-
 import { cn } from '../../lib/utils';
 
 const badgeVariants = cva(
@@ -23,9 +19,10 @@ const badgeVariants = cva(
   }
 );
 
-export interface BadgeProps extends ViewProps, VariantProps<typeof badgeVariants> {
+export interface BadgeProps extends VariantProps<typeof badgeVariants> {
   className?: string;
   children?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 function Badge({ className, variant, children, ...props }: BadgeProps) {
