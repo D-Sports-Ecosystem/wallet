@@ -1,4 +1,32 @@
-export const availableTokens = [
+// Enhanced token data structure with real-time support
+export interface TokenData {
+  name: string;
+  symbol: string;
+  network: string;
+  amount: string;
+  value: string;
+  change: { positive: string; negative: string };
+  icon: string;
+  bgColor: string;
+  balance: string;
+  address: string;
+  price?: number;
+  percentChange24h?: number;
+  marketCap?: number;
+  lastUpdated?: string;
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  type: "send" | "receive";
+  amount: string;
+  value: string;
+  time: string;
+  to?: string;
+  from?: string;
+}
+
+export const availableTokens: TokenData[] = [
   {
     name: "Bitcoin",
     symbol: "BTC",
@@ -10,6 +38,10 @@ export const availableTokens = [
     bgColor: "bg-orange-500",
     balance: "0.0234",
     address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [
       { type: "send", amount: "-0.005 BTC", value: "-$125.50", time: "2 hours ago", to: "0x1234...5678" },
       { type: "receive", amount: "+0.01 BTC", value: "+$251.00", time: "1 day ago", from: "0x9876...4321" },
@@ -26,6 +58,10 @@ export const availableTokens = [
     bgColor: "bg-gray-700",
     balance: "1.2456",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [
       { type: "receive", amount: "+0.5 ETH", value: "+$1,250.00", time: "1 hour ago", from: "0xabcd...efgh" },
       { type: "send", amount: "-0.2 ETH", value: "-$500.00", time: "6 hours ago", to: "0x1111...2222" },
@@ -42,6 +78,10 @@ export const availableTokens = [
     bgColor: "bg-blue-600",
     balance: "0.5678",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [
       { type: "receive", amount: "+0.1 ETH", value: "+$250.00", time: "2 hours ago", from: "0x7777...8888" },
     ],
@@ -57,6 +97,10 @@ export const availableTokens = [
     bgColor: "bg-purple-600",
     balance: "2.1234",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [{ type: "send", amount: "-0.3 ETH", value: "-$750.00", time: "4 hours ago", to: "0x9999...0000" }],
   },
   {
@@ -70,6 +114,10 @@ export const availableTokens = [
     bgColor: "bg-purple-600",
     balance: "245.67",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [{ type: "send", amount: "-50 MATIC", value: "-$45.50", time: "3 hours ago", to: "0x7777...8888" }],
   },
   {
@@ -83,6 +131,10 @@ export const availableTokens = [
     bgColor: "bg-blue-600",
     balance: "1250.00",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [
       { type: "receive", amount: "+500 USDC", value: "+$500.00", time: "30 min ago", from: "0xaaaa...bbbb" },
     ],
@@ -98,6 +150,10 @@ export const availableTokens = [
     bgColor: "bg-purple-600",
     balance: "750.00",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [{ type: "send", amount: "-200 USDC", value: "-$200.00", time: "4 hours ago", to: "0xcccc...dddd" }],
   },
   {
@@ -111,9 +167,29 @@ export const availableTokens = [
     bgColor: "bg-yellow-500",
     balance: "5.432",
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
+    price: 0,
+    percentChange24h: 0,
+    marketCap: 0,
+    lastUpdated: new Date().toISOString(),
     transactions: [{ type: "receive", amount: "+2 BNB", value: "+$600.00", time: "1 day ago", from: "0xdddd...eeee" }],
   },
 ]
+
+// Token data management functions
+export function updateTokenData(symbol: string, updates: Partial<TokenData>): void {
+  const tokenIndex = availableTokens.findIndex(token => token.symbol === symbol);
+  if (tokenIndex !== -1) {
+    availableTokens[tokenIndex] = { ...availableTokens[tokenIndex], ...updates };
+  }
+}
+
+export function getTokenBySymbol(symbol: string): TokenData | undefined {
+  return availableTokens.find(token => token.symbol === symbol);
+}
+
+export function getAllTokenSymbols(): string[] {
+  return [...new Set(availableTokens.map(token => token.symbol))];
+}
 
 // Original tokens for main page (keeping existing functionality)
 export const tokens = availableTokens.slice(0, 4)

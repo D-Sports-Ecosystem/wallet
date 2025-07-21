@@ -113,7 +113,17 @@ Object.defineProperty(globalThis, 'window', {
 });
 
 // Mock fetch
-globalThis.fetch = jest.fn();
+globalThis.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({
+      status: { error_code: 0, error_message: null },
+      data: {}
+    }),
+    headers: new Map(),
+  })
+) as jest.Mock;
 
 // Suppress React 18 warnings for tests
 const originalError = console.error;

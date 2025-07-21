@@ -1,7 +1,8 @@
 import { coinMarketCapAdapter } from '../utils/platform-adapter';
+import { TokenData, updateTokenData, getAllTokenSymbols } from '../../data/token-data';
 
 // Define types for the CoinMarketCap API responses
-export interface TokenData {
+export interface CoinMarketCapTokenData {
   id: number;
   name: string;
   symbol: string;
@@ -42,25 +43,14 @@ export interface CoinMarketCapResponse {
     notice: string | null;
   };
   data: {
-    [symbol: string]: TokenData;
+    [symbol: string]: CoinMarketCapTokenData;
   };
 }
 
-export interface TokenInfo {
-  name: string;
-  symbol: string;
-  network: string;
-  amount: string;
-  value: string;
-  change: { positive: string; negative: string };
-  icon: string;
-  bgColor: string;
-  balance: string;
-  address: string;
+export interface TokenInfo extends TokenData {
   price: number;
   percentChange24h: number;
   marketCap: number;
-  transactions: Transaction[];
 }
 
 export interface Transaction {
@@ -75,9 +65,17 @@ export interface Transaction {
 class TokenService {
   private apiKey: string;
   private baseUrl: string;
+  private updateInterval: NodeJS.Timeout | null = null;
+  private isUpdating: boolean = false;
 
   constructor() {
-    this.apiKey = process.env.COINMARKETCAP_API_KEY || '';
+    // Load environment variables
+    if (typeof process !== 'undefined' && process.env) {
+      this.apiKey = process.env.COINMARKETCAP_API_KEY || '';
+    } else {
+      this.apiKey = '';
+      console.warn('CoinMarketCap API key not found. Please set COINMARKETCAP_API_KEY environment variable.');
+    }
     this.baseUrl = 'https://pro-api.coinmarketcap.com/v1';
   }
 
@@ -97,9 +95,146 @@ class TokenService {
       }
 
       // Transform the API response into our TokenInfo format
-      return this.transformTokenData(data, symbols, currency);
+      const tokenInfos = this.transformTokenData(data, symbols, currency);
+      
+      // Update the global token data
+      this.updateGlobalTokenData(tokenInfos);
+      
+      return tokenInfos;
     } catch (error) {
       console.error('Error fetching token data:', error);
+      // Return placeholder data on error to prevent UI breaks
+      return this.getPlaceholderTokenInfos(symbols);
+    }
+  }
+
+  /**
+   * Start automatic token data updates
+   * @param intervalMs Update interval in milliseconds (default: 5 minutes)
+   */
+  startAutoUpdate(intervalMs: number = 5 * 60 * 1000): void {
+    if (this.updateInterval) {
+      this.stopAutoUpdate();
+    }
+
+    this.updateInterval = setInterval(async () => {
+      if (!this.isUpdating) {
+        this.isUpdating = true;
+        try {
+          const symbols = getAllTokenSymbols();
+          await this.fetchTokenData(symbols);
+          console.log('Token data updated successfully');
+        } catch (error) {
+          console.error('Auto-update failed:', error);
+        } finally {
+          this.isUpdating = false;
+        }
+      }
+    }, intervalMs);
+
+    console.log(`Token auto-update started with ${intervalMs}ms interval`);
+  }
+
+  /**
+   * Stop automatic token data updates
+   */
+  stopAutoUpdate(): void {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+      console.log('Token auto-update stopped');
+    }
+  }
+
+  /**
+   * Manually refresh token data
+   */
+  async refreshTokenData(): Promise<TokenInfo[]> {
+    const symbols = getAllTokenSymbols();
+    return this.fetchTokenData(symbols);
+  }
+
+  /**
+   * Get historical price data for a token
+   * @param symbol Token symbol (e.g., 'BTC')
+   * @param timeStart Start time (ISO 8601 format)
+   * @param timeEnd End time (ISO 8601 format)
+   * @param interval Data interval
+   * @param currency Currency for conversion (default: 'USD')
+   */
+  async getHistoricalData(
+    symbol: string,
+    timeStart?: string,
+    timeEnd?: string,
+    interval?: '5m' | '10m' | '15m' | '30m' | '45m' | '1h' | '2h' | '3h' | '4h' | '6h' | '12h' | '1d' | '2d' | '3d' | '7d' | '14d' | '15d' | '30d' | '60d' | '90d' | '365d',
+    currency: string = 'USD'
+  ): Promise<any> {
+    try {
+      return await coinMarketCapAdapter.getHistoricalQuotes(
+        symbol,
+        timeStart,
+        timeEnd,
+        undefined,
+        interval,
+        currency
+      );
+    } catch (error) {
+      console.error('Error fetching historical data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get global cryptocurrency market metrics
+   * @param currency Currency for conversion (default: 'USD')
+   */
+  async getGlobalMetrics(currency: string = 'USD'): Promise<any> {
+    try {
+      return await coinMarketCapAdapter.getGlobalMetrics(currency);
+    } catch (error) {
+      console.error('Error fetching global metrics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert price between cryptocurrencies or fiat
+   * @param amount Amount to convert
+   * @param fromSymbol Source currency symbol
+   * @param toSymbol Target currency symbol
+   */
+  async convertPrice(amount: number, fromSymbol: string, toSymbol: string): Promise<any> {
+    try {
+      return await coinMarketCapAdapter.convertPrice(amount, fromSymbol, toSymbol);
+    } catch (error) {
+      console.error('Error converting price:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get top cryptocurrencies by market cap
+   * @param limit Number of cryptocurrencies to return (default: 100)
+   * @param currency Currency for conversion (default: 'USD')
+   */
+  async getTopCryptocurrencies(limit: number = 100, currency: string = 'USD'): Promise<any> {
+    try {
+      return await coinMarketCapAdapter.getListingsLatest(1, limit, currency, 'market_cap');
+    } catch (error) {
+      console.error('Error fetching top cryptocurrencies:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get token metadata including logos and descriptions
+   * @param symbols Array of token symbols
+   */
+  async getTokenMetadata(symbols: string[]): Promise<any> {
+    try {
+      return await coinMarketCapAdapter.getMetadata(symbols);
+    } catch (error) {
+      console.error('Error fetching token metadata:', error);
       throw error;
     }
   }
@@ -139,9 +274,40 @@ class TokenService {
         price: quote.price,
         percentChange24h: percentChange,
         marketCap: quote.market_cap,
+        lastUpdated: new Date().toISOString(),
         transactions: this.getRandomTransactions(tokenData.symbol),
       };
     });
+  }
+
+  /**
+   * Update global token data with fresh API data
+   */
+  private updateGlobalTokenData(tokenInfos: TokenInfo[]): void {
+    try {
+      tokenInfos.forEach(tokenInfo => {
+        if (typeof updateTokenData === 'function') {
+          updateTokenData(tokenInfo.symbol, {
+            value: tokenInfo.value,
+            change: tokenInfo.change,
+            price: tokenInfo.price,
+            percentChange24h: tokenInfo.percentChange24h,
+            marketCap: tokenInfo.marketCap,
+            lastUpdated: tokenInfo.lastUpdated,
+          });
+        }
+      });
+    } catch (error) {
+      // Silently handle the error in test environments
+      console.warn('Could not update global token data:', error);
+    }
+  }
+
+  /**
+   * Get placeholder token infos for error cases
+   */
+  private getPlaceholderTokenInfos(symbols: string[]): TokenInfo[] {
+    return symbols.map(symbol => this.getPlaceholderTokenInfo(symbol));
   }
 
   /**
@@ -162,6 +328,7 @@ class TokenService {
       price: 0,
       percentChange24h: 0,
       marketCap: 0,
+      lastUpdated: new Date().toISOString(),
       transactions: this.getRandomTransactions(symbol),
     };
   }

@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { PlatformComponents } from '../utils/platform-adapter';
+
+// Get platform-specific components
+const { View, ActivityIndicator } = PlatformComponents;
 import { Text } from './ui/text';
 
 interface LoadingContentProps {

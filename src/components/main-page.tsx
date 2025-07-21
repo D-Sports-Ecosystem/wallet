@@ -1,6 +1,6 @@
-import { View, Pressable, ScrollView } from "react-native";
-import Animated from "react-native-reanimated";
-import { FadeIn, FadeOut } from '../utils/animation-utils';
+import { PlatformComponents } from "../utils/platform-adapter";
+const { View, Pressable, ScrollView } = PlatformComponents;
+
 import { Text } from "./ui/text";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -49,9 +49,7 @@ export function MainPage({
   }, 0);
 
   return (
-    <Animated.View
-      entering={isContentReady && FadeIn?.duration ? FadeIn.duration(300).delay(150) : undefined}
-      exiting={isPageTransitioning && FadeOut?.duration ? FadeOut.duration(200) : undefined}
+    <View
       className="flex-1"
     >
       <View className="p-6">
@@ -228,6 +226,6 @@ export function MainPage({
           </Button>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }

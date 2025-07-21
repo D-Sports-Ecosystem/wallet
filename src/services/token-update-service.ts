@@ -53,6 +53,7 @@ export class TokenUpdateService {
   
   private constructor(config: TokenUpdateConfig = {}) {
     // Set default configuration
+    const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
     this.config = {
       refreshInterval: config.refreshInterval ?? 300000, // 5 minutes
       cacheTTL: config.cacheTTL ?? 300000, // 5 minutes
@@ -60,7 +61,7 @@ export class TokenUpdateService {
       currency: config.currency ?? 'USD',
       onUpdate: config.onUpdate ?? (() => {}),
       onError: config.onError ?? ((error) => console.error('Token update error:', error)),
-      autoStart: config.autoStart ?? true,
+      autoStart: config.autoStart ?? (!isTestEnvironment), // Don't auto-start in test environment
     };
     
     // Configure the API adapter cache TTL

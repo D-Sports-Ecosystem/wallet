@@ -1,6 +1,23 @@
 import * as React from 'react';
-import { View, Pressable } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { PlatformComponents } from '../utils/platform-adapter';
+import { isReactNative } from '../utils/platform-detection';
+
+// Get platform-specific components
+const { View, Pressable } = PlatformComponents;
+
+// Conditional import for React Native Animated
+let Animated: any = null;
+if (isReactNative()) {
+  try {
+    Animated = require('react-native-reanimated').default;
+  } catch (error) {
+    // Fallback for when react-native-reanimated is not available
+    Animated = { View: View };
+  }
+} else {
+  // Web fallback - use regular View
+  Animated = { View: View };
+}
 import { FadeIn, FadeOut } from '../utils/animation-utils';
 import { Text } from './ui/text';
 import { Button } from './ui/button';
