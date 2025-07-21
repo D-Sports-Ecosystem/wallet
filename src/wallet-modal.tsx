@@ -2,7 +2,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, RefreshCw } from "lucide-react";
 import Lenis from "@studio-freight/lenis";
 
 import { Button } from "./components/ui/button";
@@ -11,8 +11,7 @@ import { TokenSelectionPage } from "./components/token-selection-page";
 import { SendPage } from "./components/send-page";
 import { ReceivePage } from "./components/receive-page";
 import { LoadingContent } from "./components/loading-content";
-// Text component is not used in this file
-import { availableTokens, tokens } from "../data/token-data";
+import { useTokens } from "./contexts/token-context";
 
 type PageType = "main" | "token-selection" | "send" | "receive";
 
@@ -22,13 +21,14 @@ interface WalletModalProps {
 }
 
 export function WalletModal({ isOpen, onClose }: WalletModalProps) {
+  const { tokens, availableTokens, isLoading, error, refreshTokenData } = useTokens();
   const [activeTab, setActiveTab] = React.useState("tokens");
   const [isVisible, setIsVisible] = React.useState(false);
   const [isContentReady, setIsContentReady] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState<PageType>("main");
   const [previousPage, setPreviousPage] = React.useState<PageType>("main");
   const [isPageTransitioning, setIsPageTransitioning] = React.useState(false);
-  const [selectedToken, setSelectedToken] = React.useState(tokens[1]); // Default to ETH
+  const [selectedToken, setSelectedToken] = React.useState(tokens && tokens.length > 0 ? tokens[0] : null);
   const [selectedReceiveToken, setSelectedReceiveToken] = React.useState<
     (typeof availableTokens)[0] | null
   >(null);
@@ -41,8 +41,16 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
   const [sendButtonPressed, setSendButtonPressed] = React.useState(false);
   const [hoveredToken, setHoveredToken] = React.useState<string | null>(null);
   const [copiedAddress, setCopiedAddress] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const lenisRef = React.useRef<Lenis | null>(null);
+
+  // Update selected token when tokens change
+  useEffect(() => {
+    if (tokens && tokens.length > 0) {
+      setSelectedToken(tokens[0]);
+    }
+  }, [tokens]);
 
   // Initialize Lenis smooth scroll
   useEffect(() => {
@@ -177,6 +185,17 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
     }, 100);
   };
 
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshTokenData();
+    } catch (error) {
+      console.error("Failed to refresh token data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -241,14 +260,27 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="text-white hover:bg-white/20 h-10 w-10 rounded-full transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 hover:rotate-90"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRefreshData}
+                disabled={isRefreshing}
+                className={`text-white hover:bg-white/20 h-10 w-10 rounded-full transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 ${
+                  isRefreshing ? "animate-spin" : ""
+                }`}
+              >
+                <RefreshCw className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="text-white hover:bg-white/20 h-10 w-10 rounded-full transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 hover:rotate-90"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Scrollable Content */}
@@ -260,8 +292,18 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
               msOverflowStyle: "none",
             }}
           >
-            {!isContentReady ? (
+            {!isContentReady || isLoading ? (
               <LoadingContent />
+            ) : error ? (
+              <div className="p-6 text-center">
+                <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+                  <p className="font-medium">Error loading token data</p>
+                  <p className="text-sm mt-1">{error.message}</p>
+                </div>
+                <Button onClick={handleRefreshData} disabled={isRefreshing}>
+                  {isRefreshing ? "Refreshing..." : "Try Again"}
+                </Button>
+              </div>
             ) : (
               <>
                 {currentPage === "main" && (
@@ -279,6 +321,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                     handleReceive={handleReceive}
                     sendButtonPressed={sendButtonPressed}
                     receiveButtonPressed={receiveButtonPressed}
+                    isRefreshing={isRefreshing}
                   />
                 )}
                 {currentPage === "token-selection" && (
@@ -291,7 +334,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                     handleTokenSelect={handleTokenSelect}
                   />
                 )}
-                {currentPage === "send" && (
+                {currentPage === "send" && selectedToken && (
                   <SendPage
                     isPageTransitioning={isPageTransitioning}
                     selectedToken={selectedToken}

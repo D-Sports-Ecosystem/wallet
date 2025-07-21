@@ -79,19 +79,20 @@ export const PlatformTypes: PlatformTypes = isReactNative
         // Try to import React Native types
         const RN = require('react-native');
         return {
-          ViewProps: {} as RN.ViewProps,
-          TextProps: {} as RN.TextProps,
-          PressableProps: {} as RN.PressableProps,
-          TextInputProps: {} as RN.TextInputProps,
-          ImageProps: {} as RN.ImageProps,
+          ViewProps: {} as any, // RN.ViewProps
+          TextProps: {} as any, // RN.TextProps
+          PressableProps: {} as any, // RN.PressableProps
+          TextInputProps: {} as any, // RN.TextInputProps
+          ImageProps: {} as any, // RN.ImageProps
         };
       } catch (error) {
         // Fallback to web types if React Native is not available
         return webTypes;
       }
     })()
-  : webTypes;// AP
-I Request Handling
+  : webTypes;
+
+// API Request Handling
 export interface ApiRequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, string>;

@@ -6,12 +6,16 @@ import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
+import { TokenInfo } from '../services/token-service';
+import { LoadingContent } from './loading-content';
 
 interface ReceivePageProps {
   isPageTransitioning: boolean;
-  selectedReceiveToken: any;
+  selectedReceiveToken: TokenInfo | null;
   copyAddress: () => void;
   copiedAddress: boolean;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 export function ReceivePage({
@@ -19,8 +23,61 @@ export function ReceivePage({
   selectedReceiveToken,
   copyAddress,
   copiedAddress,
+  isLoading = false,
+  error = null
 }: ReceivePageProps) {
-  if (!selectedReceiveToken) return null;
+  if (isLoading) {
+    return (
+      <Animated.View
+        entering={FadeIn.duration(300).delay(150)}
+        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+        className="flex-1"
+      >
+        <LoadingContent message="Loading token information..." />
+      </Animated.View>
+    );
+  }
+
+  if (error) {
+    return (
+      <Animated.View
+        entering={FadeIn.duration(300).delay(150)}
+        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+        className="flex-1"
+      >
+        <View className="p-6 items-center">
+          <View className="w-full bg-red-50 p-4 rounded-lg mb-6">
+            <Text className="text-red-600 font-medium mb-2">Error Loading Token</Text>
+            <Text className="text-muted-foreground">
+              {error.message || "Failed to load token information"}
+            </Text>
+          </View>
+          <Button variant="secondary" onPress={() => window.history.back()}>
+            <Text>Go Back</Text>
+          </Button>
+        </View>
+      </Animated.View>
+    );
+  }
+
+  if (!selectedReceiveToken) {
+    return (
+      <Animated.View
+        entering={FadeIn.duration(300).delay(150)}
+        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+        className="flex-1"
+      >
+        <View className="p-6 items-center">
+          <Text className="text-lg font-medium text-muted-foreground mb-4">
+            No token selected
+          </Text>
+          <Button variant="secondary" onPress={() => window.history.back()}>
+            <Text>Go Back</Text>
+          </Button>
+        </View>
+      </Animated.View>
+    );
+  }
 
   // In a real app, this would be a QR code component
   const QRCodePlaceholder = () => (
@@ -63,6 +120,26 @@ export function ReceivePage({
                 </Badge>
               </View>
             </View>
+            
+            {selectedReceiveToken.price && (
+              <View className="w-full bg-muted/30 p-2 rounded-md">
+                <View className="flex-row justify-between">
+                  <Text className="text-sm text-muted-foreground">Current Price:</Text>
+                  <Text className="text-sm font-medium">${selectedReceiveToken.price.toFixed(2)}</Text>
+                </View>
+                <View className="flex-row justify-between mt-1">
+                  <Text className="text-sm text-muted-foreground">24h Change:</Text>
+                  <Text 
+                    className={`text-sm font-medium ${
+                      selectedReceiveToken.percentChange24h >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {selectedReceiveToken.percentChange24h >= 0 ? '+' : ''}
+                    {selectedReceiveToken.percentChange24h?.toFixed(2) || '0.00'}%
+                  </Text>
+                </View>
+              </View>
+            )}
           </CardContent>
         </Card>
 

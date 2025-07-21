@@ -61,7 +61,7 @@ import {
 
 // Universal wallet factory
 export function createDSportsWallet(
-  options: DSportsWalletOptions,
+  options: DSportsWalletOptions
 ): DSportsWallet {
   const platformAdapter = getDefaultPlatformAdapter();
 
@@ -87,7 +87,7 @@ export function createDSportsWallet(
 
     const socialProvider = new CustomSocialLoginProvider(
       validatedConfig,
-      platformAdapter,
+      platformAdapter
     );
 
     // Create connectors with social login
@@ -138,14 +138,14 @@ export function createDSportsWallet(
 
 // Quick start wallet factory (uses D-Sports managed OAuth)
 export function createDSportsWalletQuickStart(
-  options: Omit<DSportsWalletOptions, "socialLogin">,
+  options: Omit<DSportsWalletOptions, "socialLogin">
 ): DSportsWallet {
   console.log("🚀 Creating D-Sports wallet with quick start OAuth!");
   console.log(
-    "📝 This uses D-Sports managed credentials - perfect for development.",
+    "📝 This uses D-Sports managed credentials - perfect for development."
   );
   console.log(
-    "🔧 For production, use createDSportsWallet() with your own OAuth apps.",
+    "🔧 For production, use createDSportsWallet() with your own OAuth apps."
   );
 
   return createDSportsWallet({
@@ -157,7 +157,7 @@ export function createDSportsWalletQuickStart(
 
 // Universal Rainbow Kit connector factory
 export function createDSportsRainbowKitConnectorUniversal(
-  options: RainbowKitConnectorOptions,
+  options: RainbowKitConnectorOptions
 ) {
   const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin
@@ -172,7 +172,7 @@ export function createDSportsRainbowKitConnectorUniversal(
 
 // Universal Wagmi connector factory
 export function createDSportsWagmiConnectorUniversal(
-  options: WagmiConnectorOptions,
+  options: WagmiConnectorOptions
 ) {
   const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin
@@ -244,6 +244,33 @@ export const polygon = {
 
 // UI Components (optional - only if React is available)
 export * from "./components/ui";
+export { TokenUpdateStatus } from "./components/token-update-status";
+export { TokenUpdateConfig } from "./components/token-update-config";
+
+// Token data and context
+export { TokenProvider, useTokens } from "./contexts/token-context";
+export {
+  tokenService,
+  type TokenInfo,
+  type Transaction,
+} from "./services/token-service";
+export {
+  tokenUpdateService,
+  createTokenUpdateService,
+  type TokenUpdateConfig,
+} from "./services/token-update-service";
+export {
+  tokenSyncService,
+  createTokenSyncService,
+  type TokenSyncConfig,
+} from "./utils/token-sync";
+export {
+  tokenBackgroundService,
+  createTokenBackgroundService,
+  type TokenBackgroundServiceConfig,
+} from "./services/token-background-service";
+export { WalletModal } from "./wallet-modal";
+export { default as WalletPage } from "./wallet-page";
 
 // Version
 export const version = "1.0.0";
