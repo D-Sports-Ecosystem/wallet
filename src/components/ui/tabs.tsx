@@ -1,55 +1,114 @@
-"use client"
+import * as React from 'react';
+import { Pressable, View, ViewProps } from 'react-native';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { cn } from '~/lib/utils';
 
-import { cn } from "@/lib/utils"
-
-const Tabs = TabsPrimitive.Root
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof View>,
+  ViewProps & {
+    value: string;
+    onValueChange: (value: string) => void;
+    className?: string;
+  }
+>(({ value, onValueChange, className, ...props }, ref) => {
+  return (
+    <View ref={ref} className={cn('', className)} {...props} />
+  );
+});
+Tabs.displayName = 'Tabs';
 
 const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+  React.ElementRef<typeof View>,
+  ViewProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
+  <View
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      'bg-muted inline-flex h-10 items-center justify-center rounded-md p-1',
       className
     )}
     {...props}
   />
-))
-TabsList.displayName = TabsPrimitive.List.displayName
+));
+TabsList.displayName = 'TabsList';
+
+const tabsTriggerVariants = cva(
+  'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-background data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
 const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+  React.ElementRef<typeof Pressable>,
+  React.ComponentPropsWithoutRef<typeof Pressable> & {
+    value: string;
+    className?: string;
+    variant?: VariantProps<typeof tabsTriggerVariants>['variant'];
+  }
+>(({ className, variant, value, ...props }, ref) => {
+  const context = React.useContext(TabsContext);
+  if (!context) {
+    throw new Error('TabsTrigger must be used within a Tabs');
+  }
+  const { value: selectedValue, onValueChange } = context;
+  const isSelected = selectedValue === value;
+
+  return (
+    <Pressable
+      ref={ref}
+      className={cn(
+        tabsTriggerVariants({ variant }),
+        isSelected ? 'bg-background shadow-sm' : 'bg-transparent',
+        className
+      )}
+      onPress={() => onValueChange(value)}
+      {...props}
+    />
+  );
+});
+TabsTrigger.displayName = 'TabsTrigger';
 
 const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
-    )}
-    {...props}
-  />
-))
-TabsContent.displayName = TabsPrimitive.Content.displayName
+  React.ElementRef<typeof View>,
+  ViewProps & {
+    value: string;
+    className?: string;
+  }
+>(({ className, value, ...props }, ref) => {
+  const context = React.useContext(TabsContext);
+  if (!context) {
+    throw new Error('TabsContent must be used within a Tabs');
+  }
+  const { value: selectedValue } = context;
+  const isSelected = selectedValue === value;
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+  if (!isSelected) return null;
+
+  return (
+    <View
+      ref={ref}
+      className={cn(
+        'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        className
+      )}
+      {...props}
+    />
+  );
+});
+TabsContent.displayName = 'TabsContent';
+
+const TabsContext = React.createContext<{
+  value: string;
+  onValueChange: (value: string) => void;
+} | null>(null);
+
+export { Tabs, TabsList, TabsTrigger, TabsContent };

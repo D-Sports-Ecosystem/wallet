@@ -1,14 +1,17 @@
-"use client"
-
-import { Copy, QrCode, Camera } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
+import * as React from 'react';
+import { View, Pressable } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Text } from './ui/text';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { Badge } from './ui/badge';
+import { Card, CardContent } from './ui/card';
 
 interface ReceivePageProps {
-  isPageTransitioning: boolean
-  selectedReceiveToken: any
-  copyAddress: () => void
-  copiedAddress: boolean
+  isPageTransitioning: boolean;
+  selectedReceiveToken: any;
+  copyAddress: () => void;
+  copiedAddress: boolean;
 }
 
 export function ReceivePage({
@@ -17,101 +20,78 @@ export function ReceivePage({
   copyAddress,
   copiedAddress,
 }: ReceivePageProps) {
+  if (!selectedReceiveToken) return null;
+
+  // In a real app, this would be a QR code component
+  const QRCodePlaceholder = () => (
+    <View className="w-64 h-64 bg-muted border border-border rounded-lg items-center justify-center mb-6">
+      <Text className="text-muted-foreground">QR Code Placeholder</Text>
+      <Text className="text-xs text-muted-foreground mt-2">
+        (In a real app, this would be a QR code)
+      </Text>
+    </View>
+  );
+
   return (
-    <div
-      className={`p-6 space-y-6 transform transition-all duration-600 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-        !isPageTransitioning ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
-      }`}
+    <Animated.View
+      entering={FadeIn.duration(300).delay(150)}
+      exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+      className="flex-1"
     >
-      {selectedReceiveToken && (
-        <>
-          {/* Selected Token Info with gradient background */}
-          <div className="bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 rounded-xl p-4 border border-orange-200">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-12 h-12 rounded-full ${selectedReceiveToken.bgColor} flex items-center justify-center text-white font-bold text-lg shadow-lg animate-pulse`}
-              >
-                {selectedReceiveToken.icon}
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 text-lg">
-                  {selectedReceiveToken.name} ({selectedReceiveToken.network})
-                </div>
-                <div className="text-sm text-gray-600">
-                  Balance: {selectedReceiveToken.balance} {selectedReceiveToken.symbol}
-                </div>
-              </div>
-            </div>
-          </div>
+      <View className="p-6 items-center">
+        <View className="mb-6 items-center">
+          <Text className="text-2xl font-bold text-foreground mb-2">
+            Receive {selectedReceiveToken.symbol}
+          </Text>
+          <Text className="text-muted-foreground text-center">
+            Scan the QR code or copy the address below to receive {selectedReceiveToken.name}
+          </Text>
+        </View>
 
-          {/* QR Code Section with enhanced animation */}
-          <div className="text-center space-y-4">
-            <div className="mx-auto w-48 h-48 bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-              <div className="w-40 h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <QrCode className="h-20 w-20 text-gray-400 animate-pulse" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-900">Scan to Send {selectedReceiveToken.symbol}</h3>
-              <p className="text-sm text-gray-600">
-                Share this QR code to receive {selectedReceiveToken.name} payments
-              </p>
-            </div>
-          </div>
+        <Card className="w-full mb-6">
+          <CardContent className="p-4 items-center">
+            <View className="flex-row items-center mb-4">
+              <Avatar className={`mr-3 ${selectedReceiveToken.bgColor}`}>
+                <AvatarFallback>
+                  <Text className="text-white text-lg font-bold">{selectedReceiveToken.icon}</Text>
+                </AvatarFallback>
+              </Avatar>
+              <View>
+                <Text className="font-medium">{selectedReceiveToken.name}</Text>
+                <Badge variant="outline" className="bg-muted/50 mt-1">
+                  <Text className="text-xs">{selectedReceiveToken.network}</Text>
+                </Badge>
+              </View>
+            </View>
+          </CardContent>
+        </Card>
 
-          {/* Address Section with copy animation */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Your {selectedReceiveToken.network} Address</Label>
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-orange-300 transition-colors duration-200">
-              <code className="flex-1 text-sm font-mono text-gray-800 break-all">{selectedReceiveToken.address}</code>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={copyAddress}
-                className={`h-8 w-8 text-gray-500 hover:text-gray-700 transition-all duration-200 ${
-                  copiedAddress ? "text-green-600 scale-110" : ""
-                }`}
-              >
-                <Copy className={`h-4 w-4 ${copiedAddress ? "animate-bounce" : ""}`} />
-              </Button>
-            </div>
-            {copiedAddress && (
-              <div className="text-sm text-green-600 animate-fade-in">Address copied to clipboard!</div>
-            )}
-          </div>
+        <QRCodePlaceholder />
 
-          {/* Network Info with enhanced styling */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-4 h-4 rounded-full ${selectedReceiveToken.bgColor} animate-pulse`}></div>
-              <span className="font-medium text-gray-900">{selectedReceiveToken.network} Network</span>
-            </div>
-            <p className="text-sm text-gray-600">
-              Only send {selectedReceiveToken.symbol} tokens on the {selectedReceiveToken.network} network to this
-              address.
-            </p>
-          </div>
-
-          {/* Quick Actions with enhanced animations */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 bg-transparent hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 hover:scale-105"
-              onClick={copyAddress}
-            >
-              <Copy className="h-4 w-4" />
-              Copy Address
+        <View className="w-full mb-6">
+          <Text className="text-sm font-medium mb-2">Your {selectedReceiveToken.symbol} Address</Text>
+          <Pressable
+            onPress={copyAddress}
+            className="p-4 border border-input rounded-md bg-background flex-row items-center justify-between"
+          >
+            <Text className="text-sm flex-1" numberOfLines={1} ellipsizeMode="middle">
+              {selectedReceiveToken.address}
+            </Text>
+            <Button variant="secondary" size="sm" onPress={copyAddress} className="ml-2">
+              <Text>{copiedAddress ? 'Copied!' : 'Copy'}</Text>
             </Button>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 bg-transparent hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 hover:scale-105"
-            >
-              <Camera className="h-4 w-4" />
-              Save QR
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  )
+          </Pressable>
+        </View>
+
+        <View className="w-full">
+          <Text className="text-sm text-muted-foreground text-center mb-2">
+            Only send {selectedReceiveToken.symbol} to this address on the {selectedReceiveToken.network} network
+          </Text>
+          <Text className="text-xs text-destructive text-center">
+            Sending any other assets may result in permanent loss
+          </Text>
+        </View>
+      </View>
+    </Animated.View>
+  );
 }

@@ -1,79 +1,66 @@
-import * as React from "react"
+import * as React from 'react';
+import { View, ViewProps } from 'react-native';
 
-import { cn } from "@/lib/utils"
+import { cn } from '~/lib/utils';
+import { Text, TextProps } from './text';
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+const Card = React.forwardRef<React.ElementRef<typeof View>, ViewProps & { className?: string }>(
+  ({ className, ...props }, ref) => (
+    <View
+      ref={ref}
+      className={cn('rounded-lg border border-border bg-card p-4 web:shadow-sm', className)}
+      {...props}
+    />
+  )
+);
+Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof View>,
+  ViewProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+  <View ref={ref} className={cn('flex gap-1.5 pb-4', className)} {...props} />
+));
+CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof Text>,
+  TextProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div
+  <Text
     ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
+    className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
     {...props}
   />
-))
-CardTitle.displayName = "CardTitle"
+));
+CardTitle.displayName = 'CardTitle';
 
 const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof Text>,
+  TextProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div
+  <Text
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
-))
-CardDescription.displayName = "CardDescription"
+));
+CardDescription.displayName = 'CardDescription';
 
 const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof View>,
+  ViewProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+  <View ref={ref} className={cn('pt-0', className)} {...props} />
+));
+CardContent.displayName = 'CardContent';
 
 const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof View>,
+  ViewProps & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+  <View ref={ref} className={cn('flex flex-row items-center pt-4', className)} {...props} />
+));
+CardFooter.displayName = 'CardFooter';
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };

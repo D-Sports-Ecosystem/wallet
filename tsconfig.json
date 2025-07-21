@@ -19,15 +19,16 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["./components/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/utils/*": ["./utils/*"],
-      "@/types/*": ["./types/*"],
-      "@/connectors/*": ["./connectors/*"],
-      "@/providers/*": ["./providers/*"]
+      "~/*": ["*"],
+      "~/components/*": ["src/components/*"],
+      "~/lib/*": ["src/lib/*"],
+      "~/utils/*": ["src/utils/*"],
+      "~/types/*": ["src/types/*"],
+      "~/connectors/*": ["src/connectors/*"],
+      "~/providers/*": ["src/providers/*"],
+      "~/data/*": ["src/data/*"]
     }
   },
   "include": ["src/**/*"],

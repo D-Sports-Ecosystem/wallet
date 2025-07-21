@@ -1,5 +1,7 @@
 # @d-sports/wallet
 
+> **⚠️ IMPORTANT: IN PROGRESS - This package is currently being updated to fix build issues. Please use with caution.**
+
 A powerful, multi-platform wallet SDK for React, Next.js, and React Native applications with **free, custom social login** and support for Rainbow Kit and Wagmi. 100% D-Sports branded with no vendor dependencies.
 
 ## ✨ Features

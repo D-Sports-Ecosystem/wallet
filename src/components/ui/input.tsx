@@ -1,22 +1,33 @@
-import * as React from "react"
+import * as React from 'react';
+// Import types only to avoid direct dependency on react-native
+import type { TextInputProps } from 'react-native';
 
-import { cn } from "@/lib/utils"
+import { cn } from '../../lib/utils';
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+export interface InputProps extends TextInputProps {
+  className?: string;
+  placeholder?: string;
+  value?: string;
+  onChangeText?: (text: string) => void;
+  placeholderClassName?: string;
+}
+
+const Input = React.forwardRef<any, InputProps>(
+  ({ className, placeholderClassName, placeholder, ...props }, ref) => {
     return (
       <input
-        type={type}
+        ref={ref}
         className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm web:ring-offset-background web:file:border-0 web:file:bg-transparent web:file:text-sm web:file:font-medium placeholder:text-muted-foreground web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 native:text-base',
           className
         )}
-        ref={ref}
+        placeholder={placeholder}
         {...props}
       />
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
 
-export { Input }
+Input.displayName = 'Input';
+
+export { Input };

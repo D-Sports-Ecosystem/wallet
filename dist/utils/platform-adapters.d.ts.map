@@ -1,1 +1,0 @@
-{"version":3,"file":"platform-adapters.d.ts","sourceRoot":"","sources":["../../src/utils/platform-adapters.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,UAAU,CAAC;AAG3C,eAAO,MAAM,kBAAkB,EAAE,eAyChC,CAAC;AAGF,eAAO,MAAM,qBAAqB,EAAE,eAqEnC,CAAC;AAGF,eAAO,MAAM,0BAA0B,EAAE,eA+DxC,CAAC;AAGF,wBAAgB,yBAAyB,IAAI,eAAe,CAc3D"}
