@@ -1,7 +1,3 @@
----
-inclusion: manual
----
-
 # Linear Spec Task Integration
 
 This steering guide provides instructions for automatically creating Linear issues from spec tasks using the MCP Linear integration.
