@@ -204,36 +204,13 @@ async function createCryptoAdapter(platform: Platform, features: PlatformFeature
 /**
  * Network adapter implementations
  */
+import { createNetworkAdapter as createNetworkAdapterImpl } from './network-adapter';
+
 async function createNetworkAdapter(platform: Platform, features: PlatformFeatures) {
-  // Native fetch (browser)
-  if (typeof fetch !== 'undefined') {
-    return {
-      fetch: async (url: string, options?: any) => {
-        return fetch(url, options);
-      }
-    };
-  }
-  
-  // Node-fetch (Node.js)
-  if (features.hasNodeFetch) {
-    try {
-      const { default: nodeFetch } = await import('node-fetch');
-      return {
-        fetch: async (url: string, options?: any) => {
-          return nodeFetch(url, options) as any;
-        }
-      };
-    } catch {
-      // Fall through to fallback implementation
-    }
-  }
-  
-  // Fallback implementation (throws error)
-  return {
-    fetch: async (url: string, options?: any) => {
-      throw new Error('Fetch is not available in this environment');
-    }
-  };
+  return createNetworkAdapterImpl(platform, {
+    useInsecureFallback: false, // Set to true only for testing
+    timeout: 30000 // Default timeout of 30 seconds
+  });
 }
 
 /**

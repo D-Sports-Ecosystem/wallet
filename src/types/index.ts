@@ -243,6 +243,7 @@ export interface PlatformAdapter {
   };
   network: {
     fetch: (url: string, options?: any) => Promise<Response>;
+    isNetworkAvailable: () => Promise<boolean>;
   };
 }
 

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Adapter Browser Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .test-container {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .test-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .test-result {
+      white-space: pre-wrap;
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow: auto;
+      max-height: 300px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Network Adapter Browser Test</h1>
+  
+  <div class="test-container">
+    <div class="test-title">Create Network Adapter</div>
+    <button id="test-create">Run Test</button>
+    <div id="create-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-container">
+    <div class="test-title">Fetch Data</div>
+    <button id="test-fetch">Run Test</button>
+    <div id="fetch-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-container">
+    <div class="test-title">Check Network Availability</div>
+    <button id="test-network">Run Test</button>
+    <div id="network-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-container">
+    <div class="test-title">Test Error Handling</div>
+    <button id="test-error">Run Test</button>
+    <div id="error-result" class="test-result"></div>
+  </div>
+  
+  <script type="module">
+    // Import the network adapter
+    import { createNetworkAdapter } from './src/utils/network-adapter.js';
+    
+    // Helper function to log results
+    function logResult(elementId, message, isError = false) {
+      const element = document.getElementById(elementId);
+      const className = isError ? 'error' : 'success';
+      element.innerHTML += `<div class="${className}">${message}</div>`;
+    }
+    
+    // Test creating network adapter
+    document.getElementById('test-create').addEventListener('click', async () => {
+      const resultElement = document.getElementById('create-result');
+      resultElement.innerHTML = '';
+      
+      try {
+        const adapter = await createNetworkAdapter('web');
+        logResult('create-result', 'Network adapter created successfully');
+        logResult('create-result', `Adapter type: ${typeof adapter}`);
+        logResult('create-result', `Has fetch method: ${typeof adapter.fetch === 'function'}`);
+        logResult('create-result', `Has isNetworkAvailable method: ${typeof adapter.isNetworkAvailable === 'function'}`);
+      } catch (error) {
+        logResult('create-result', `Error: ${error.message}`, true);
+      }
+    });
+    
+    // Test fetch functionality
+    document.getElementById('test-fetch').addEventListener('click', async () => {
+      const resultElement = document.getElementById('fetch-result');
+      resultElement.innerHTML = '';
+      
+      try {
+        const adapter = await createNetworkAdapter('web');
+        logResult('fetch-result', 'Fetching data from JSONPlaceholder API...');
+        
+        const response = await adapter.fetch('https://jsonplaceholder.typicode.com/todos/1');
+        logResult('fetch-result', `Response status: ${response.status}`);
+        
+        const data = await response.json();
+        logResult('fetch-result', 'Data received:');
+        logResult('fetch-result', JSON.stringify(data, null, 2));
+      } catch (error) {
+        logResult('fetch-result', `Error: ${error.message}`, true);
+      }
+    });
+    
+    // Test network availability
+    document.getElementById('test-network').addEventListener('click', async () => {
+      const resultElement = document.getElementById('network-result');
+      resultElement.innerHTML = '';
+      
+      try {
+        const adapter = await createNetworkAdapter('web');
+        logResult('network-result', 'Checking network availability...');
+        
+        const isAvailable = await adapter.isNetworkAvailable();
+        logResult('network-result', `Network available: ${isAvailable}`);
+      } catch (error) {
+        logResult('network-result', `Error: ${error.message}`, true);
+      }
+    });
+    
+    // Test error handling
+    document.getElementById('test-error').addEventListener('click', async () => {
+      const resultElement = document.getElementById('error-result');
+      resultElement.innerHTML = '';
+      
+      try {
+        const adapter = await createNetworkAdapter('web');
+        logResult('error-result', 'Testing error handling with invalid URL...');
+        
+        // This should fail due to CORS or invalid URL
+        const response = await adapter.fetch('https://invalid-url-that-should-fail.xyz');
+        logResult('error-result', `Response status: ${response.status}`);
+      } catch (error) {
+        logResult('error-result', `Error caught successfully: ${error.message}`, false);
+      }
+    });
+  </script>
+</body>
+</html>

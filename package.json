@@ -93,6 +93,7 @@
     "shadcn": "^2.9.2",
     "tailwind-merge": "^3.3.1",
     "tw-animate-css": "^1.3.5",
+    "whatwg-fetch": "^3.6.20",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

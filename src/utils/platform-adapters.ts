@@ -109,6 +109,15 @@ export const webPlatformAdapter: PlatformAdapter = {
     fetch: async (url: string, options?: any) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       return fetch(url, options);
+    },
+    isNetworkAvailable: async () => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
+      try {
+        await fetch('data:text/plain,');
+        return true;
+      } catch {
+        return false;
+      }
     }
   }
 };
@@ -240,6 +249,24 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
         }
         throw new Error('Fetch not available in this environment');
       }
+    },
+    isNetworkAvailable: async () => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
+      try {
+        if (typeof window !== 'undefined') {
+          await fetch('data:text/plain,');
+        } else {
+          const nodeFetch = await import('node-fetch').catch(() => null);
+          if (nodeFetch && nodeFetch.default) {
+            await nodeFetch.default('https://www.google.com', { method: 'HEAD' });
+          } else {
+            return false;
+          }
+        }
+        return true;
+      } catch {
+        return false;
+      }
     }
   }
 };
@@ -369,6 +396,15 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     fetch: async (url: string, options?: any) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       return fetch(url, options);
+    },
+    isNetworkAvailable: async () => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
+      try {
+        await fetch('https://www.google.com', { method: 'HEAD' });
+        return true;
+      } catch {
+        return false;
+      }
     }
   }
 };
