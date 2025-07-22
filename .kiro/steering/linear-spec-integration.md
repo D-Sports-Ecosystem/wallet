@@ -57,8 +57,8 @@ Use the Linear MCP tools with these parameters:
 mcp_linear_create_issue({
   title: "[SPEC] {Feature Name}: {Task Title}",
   description: "// Use template above",
-  teamId: "26a37a4b-f1bb-494e-823a-ec11330515b7",
-  projectId: "1c915b30-deed-4317-b1c5-e646e69345b6",
+  teamId: "ask for teamId to use after polling user",
+  projectId: "ask for projectId to use after polling user",
   // Optional: Add labels like ["SPEC", "DEVELOPMENT"]
 })
 ```

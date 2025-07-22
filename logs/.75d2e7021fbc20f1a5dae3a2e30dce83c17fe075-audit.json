@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "j:\\projects\\wallet\\logs\\.75d2e7021fbc20f1a5dae3a2e30dce83c17fe075-audit.json",
+    "files": [
+        {
+            "date": 1753163402146,
+            "name": "j:\\projects\\wallet\\logs\\mcp-puppeteer-2025-07-22.log",
+            "hash": "5b61968ea128006401c949c407af3e43d815c163089d1b79a387d8622b3cbce2"
+        }
+    ],
+    "hashType": "sha256"
+}

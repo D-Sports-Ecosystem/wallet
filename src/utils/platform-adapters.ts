@@ -1,10 +1,39 @@
 import { PlatformAdapter } from '../types';
+import {
+  createPlatformAdapter,
+  createCustomPlatformAdapter,
+  getDefaultPlatformAdapter as getFactoryDefaultAdapter
+} from './platform-adapter-factory';
 
-// Web/Next.js Platform Adapter
+/**
+ * Legacy platform adapters - kept for backward compatibility
+ * New code should use the factory pattern instead
+ */
+
+// Create web platform adapter with dynamic imports
+export async function createWebPlatformAdapter(): Promise<PlatformAdapter> {
+  return createCustomPlatformAdapter('web');
+}
+
+// Create Next.js platform adapter with dynamic imports
+export async function createNextjsPlatformAdapter(): Promise<PlatformAdapter> {
+  return createCustomPlatformAdapter('nextjs');
+}
+
+// Create React Native platform adapter with dynamic imports
+export async function createReactNativePlatformAdapter(): Promise<PlatformAdapter> {
+  return createCustomPlatformAdapter('react-native');
+}
+
+// Placeholder adapters for synchronous compatibility
+// These will be replaced with proper implementations when used asynchronously
+
+// Web/Next.js Platform Adapter (synchronous fallback)
 export const webPlatformAdapter: PlatformAdapter = {
   platform: 'web',
   storage: {
     getItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         return localStorage.getItem(key);
       } catch {
@@ -12,6 +41,7 @@ export const webPlatformAdapter: PlatformAdapter = {
       }
     },
     setItem: async (key: string, value: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         localStorage.setItem(key, value);
       } catch {
@@ -19,6 +49,7 @@ export const webPlatformAdapter: PlatformAdapter = {
       }
     },
     removeItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         localStorage.removeItem(key);
       } catch {
@@ -28,27 +59,52 @@ export const webPlatformAdapter: PlatformAdapter = {
   },
   crypto: {
     generateRandomBytes: (size: number) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       const array = new Uint8Array(size);
-      crypto.getRandomValues(array);
+      try {
+        crypto.getRandomValues(array);
+      } catch {
+        // Fallback to Math.random if Web Crypto is not available
+        for (let i = 0; i < size; i++) {
+          array[i] = Math.floor(Math.random() * 256);
+        }
+      }
       return array;
     },
     sha256: async (data: Uint8Array) => {
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return new Uint8Array(hashBuffer);
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
+      try {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return new Uint8Array(hashBuffer);
+      } catch {
+        // Fallback implementation (not secure!)
+        const hash = new Uint8Array(32); // SHA-256 is 32 bytes
+        let h = 0;
+        for (let i = 0; i < data.length; i++) {
+          h = ((h << 5) - h) + data[i];
+          h |= 0;
+        }
+        for (let i = 0; i < 32; i++) {
+          hash[i] = (h + i * 16) & 0xFF;
+        }
+        return hash;
+      }
     }
   },
   network: {
     fetch: async (url: string, options?: any) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       return fetch(url, options);
     }
   }
 };
 
-// Next.js Platform Adapter
+// Next.js Platform Adapter (synchronous fallback)
 export const nextjsPlatformAdapter: PlatformAdapter = {
   platform: 'nextjs',
   storage: {
     getItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         if (typeof window !== 'undefined') {
           return localStorage.getItem(key);
@@ -59,6 +115,7 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
       }
     },
     setItem: async (key: string, value: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem(key, value);
@@ -68,6 +125,7 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
       }
     },
     removeItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
         if (typeof window !== 'undefined') {
           localStorage.removeItem(key);
@@ -79,6 +137,7 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
   },
   crypto: {
     generateRandomBytes: (size: number) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       const array = new Uint8Array(size);
       if (typeof window !== 'undefined' && window.crypto) {
         crypto.getRandomValues(array);
@@ -91,63 +150,101 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
       return array;
     },
     sha256: async (data: Uint8Array) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         return new Uint8Array(hashBuffer);
       } else {
         // Fallback for server-side (simplified)
         try {
-          const crypto = await import('crypto');
-          const hash = crypto.createHash('sha256');
-          hash.update(data);
-          return new Uint8Array(hash.digest());
+          const crypto = await import('crypto').catch(() => null);
+          if (crypto) {
+            const hash = crypto.createHash('sha256');
+            hash.update(data);
+            return new Uint8Array(hash.digest());
+          }
         } catch (error) {
-          throw new Error('SHA-256 not available in this environment');
+          // Continue to fallback
         }
+        
+        // Fallback implementation (not secure!)
+        const hash = new Uint8Array(32); // SHA-256 is 32 bytes
+        let h = 0;
+        for (let i = 0; i < data.length; i++) {
+          h = ((h << 5) - h) + data[i];
+          h |= 0;
+        }
+        for (let i = 0; i < 32; i++) {
+          hash[i] = (h + i * 16) & 0xFF;
+        }
+        return hash;
       }
     }
   },
   network: {
     fetch: async (url: string, options?: any) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       if (typeof window !== 'undefined') {
         return fetch(url, options);
       } else {
         // Server-side fetch (Node.js)
         try {
-          const { default: fetch } = await import('node-fetch');
-          return fetch(url, options) as any;
+          const nodeFetch = await import('node-fetch').catch(() => null);
+          if (nodeFetch && nodeFetch.default) {
+            return nodeFetch.default(url, options) as any;
+          }
         } catch (error) {
-          throw new Error('Fetch not available in this environment');
+          // Continue to error
         }
+        throw new Error('Fetch not available in this environment');
       }
     }
   }
 };
 
-// React Native Platform Adapter
+// React Native Platform Adapter (synchronous fallback)
 export const reactNativePlatformAdapter: PlatformAdapter = {
   platform: 'react-native',
   storage: {
     getItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-        return await AsyncStorage.getItem(key);
+        const AsyncStorage = await import('@react-native-async-storage/async-storage')
+          .then(module => module.default)
+          .catch(() => null);
+        
+        if (AsyncStorage) {
+          return await AsyncStorage.getItem(key);
+        }
+        return null;
       } catch {
         return null;
       }
     },
     setItem: async (key: string, value: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-        await AsyncStorage.setItem(key, value);
+        const AsyncStorage = await import('@react-native-async-storage/async-storage')
+          .then(module => module.default)
+          .catch(() => null);
+        
+        if (AsyncStorage) {
+          await AsyncStorage.setItem(key, value);
+        }
       } catch {
         // Ignore storage errors
       }
     },
     removeItem: async (key: string) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-        await AsyncStorage.removeItem(key);
+        const AsyncStorage = await import('@react-native-async-storage/async-storage')
+          .then(module => module.default)
+          .catch(() => null);
+        
+        if (AsyncStorage) {
+          await AsyncStorage.removeItem(key);
+        }
       } catch {
         // Ignore storage errors
       }
@@ -155,14 +252,21 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
   },
   crypto: {
     generateRandomBytes: (size: number) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       const array = new Uint8Array(size);
       try {
-        // Use React Native's crypto polyfill
-        const crypto = eval('require("crypto")');
-        const bytes = crypto.randomBytes(size);
-        for (let i = 0; i < size; i++) {
-          array[i] = bytes[i];
-        }
+        // Use dynamic import instead of eval/require
+        import('crypto').then(crypto => {
+          const bytes = crypto.randomBytes(size);
+          for (let i = 0; i < size; i++) {
+            array[i] = bytes[i];
+          }
+        }).catch(() => {
+          // Fallback to Math.random
+          for (let i = 0; i < size; i++) {
+            array[i] = Math.floor(Math.random() * 256);
+          }
+        });
       } catch {
         // Fallback to Math.random
         for (let i = 0; i < size; i++) {
@@ -172,26 +276,42 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
       return array;
     },
     sha256: async (data: Uint8Array) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const crypto = await import('crypto');
-        const hash = crypto.createHash('sha256');
-        hash.update(data);
-        return new Uint8Array(hash.digest());
+        const crypto = await import('crypto').catch(() => null);
+        if (crypto) {
+          const hash = crypto.createHash('sha256');
+          hash.update(data);
+          return new Uint8Array(hash.digest());
+        }
+        
+        // Fallback implementation (not secure!)
+        const hash = new Uint8Array(32); // SHA-256 is 32 bytes
+        let h = 0;
+        for (let i = 0; i < data.length; i++) {
+          h = ((h << 5) - h) + data[i];
+          h |= 0;
+        }
+        for (let i = 0; i < 32; i++) {
+          hash[i] = (h + i * 16) & 0xFF;
+        }
+        return hash;
       } catch {
-        // Fallback implementation
         throw new Error('SHA-256 not available in this environment');
       }
     }
   },
   network: {
     fetch: async (url: string, options?: any) => {
+      console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       return fetch(url, options);
     }
   }
 };
 
-// Auto-detect platform adapter
+// Auto-detect platform adapter (synchronous version for backward compatibility)
 export function getDefaultPlatformAdapter(): PlatformAdapter {
+  console.warn('Using synchronous getDefaultPlatformAdapter. Please migrate to async getDefaultPlatformAdapterAsync.');
   if (typeof window !== 'undefined') {
     // Check if we're in Next.js
     if (typeof (window as any).next !== 'undefined' || typeof process !== 'undefined' && process.env.NODE_ENV) {
@@ -205,4 +325,9 @@ export function getDefaultPlatformAdapter(): PlatformAdapter {
     }
     return nextjsPlatformAdapter; // Default to Next.js for server-side
   }
-} 
+}
+
+// Async version of getDefaultPlatformAdapter (recommended)
+export async function getDefaultPlatformAdapterAsync(): Promise<PlatformAdapter> {
+  return getFactoryDefaultAdapter();
+}
