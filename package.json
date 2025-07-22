@@ -66,6 +66,22 @@
       }
     }
   },
+  "typesVersions": {
+    "*": {
+      "browser": [
+        "dist/browser/src/browser/index.d.ts"
+      ],
+      "server": [
+        "dist/server/src/server/index.d.ts"
+      ],
+      "nextjs": [
+        "dist/nextjs/src/nextjs/index.d.ts"
+      ],
+      "react-native": [
+        "dist/react-native/src/react-native/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist",
     "*.d.ts",
