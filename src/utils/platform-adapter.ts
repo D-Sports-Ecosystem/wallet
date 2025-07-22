@@ -2,10 +2,7 @@
 // This helps avoid direct react-native imports in web builds
 // Also provides platform-specific API request handling
 
-import { config } from "dotenv";
-
-// Load environment variables
-config();
+// Environment variables will be loaded by the build process or runtime environment
 
 export interface PlatformComponents {
   View: any;

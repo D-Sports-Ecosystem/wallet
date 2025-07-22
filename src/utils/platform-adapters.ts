@@ -96,10 +96,14 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
         return new Uint8Array(hashBuffer);
       } else {
         // Fallback for server-side (simplified)
-        const crypto = require('crypto');
-        const hash = crypto.createHash('sha256');
-        hash.update(data);
-        return new Uint8Array(hash.digest());
+        try {
+          const crypto = await import('crypto');
+          const hash = crypto.createHash('sha256');
+          hash.update(data);
+          return new Uint8Array(hash.digest());
+        } catch (error) {
+          throw new Error('SHA-256 not available in this environment');
+        }
       }
     }
   },
@@ -109,8 +113,12 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
         return fetch(url, options);
       } else {
         // Server-side fetch (Node.js)
-        const { default: fetch } = await import('node-fetch');
-        return fetch(url, options) as any;
+        try {
+          const { default: fetch } = await import('node-fetch');
+          return fetch(url, options) as any;
+        } catch (error) {
+          throw new Error('Fetch not available in this environment');
+        }
       }
     }
   }
@@ -122,7 +130,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
   storage: {
     getItem: async (key: string) => {
       try {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
         return await AsyncStorage.getItem(key);
       } catch {
         return null;
@@ -130,7 +138,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     },
     setItem: async (key: string, value: string) => {
       try {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
         await AsyncStorage.setItem(key, value);
       } catch {
         // Ignore storage errors
@@ -138,7 +146,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     },
     removeItem: async (key: string) => {
       try {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
         await AsyncStorage.removeItem(key);
       } catch {
         // Ignore storage errors
@@ -150,7 +158,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
       const array = new Uint8Array(size);
       try {
         // Use React Native's crypto polyfill
-        const crypto = require('crypto');
+        const crypto = eval('require("crypto")');
         const bytes = crypto.randomBytes(size);
         for (let i = 0; i < size; i++) {
           array[i] = bytes[i];
@@ -165,7 +173,7 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     },
     sha256: async (data: Uint8Array) => {
       try {
-        const crypto = require('crypto');
+        const crypto = await import('crypto');
         const hash = crypto.createHash('sha256');
         hash.update(data);
         return new Uint8Array(hash.digest());

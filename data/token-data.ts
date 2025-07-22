@@ -192,4 +192,4 @@ export function getAllTokenSymbols(): string[] {
 }
 
 // Original tokens for main page (keeping existing functionality)
-export const tokens = availableTokens.slice(0, 4)
+export const tokens = availableTokens.slice(0, 4);

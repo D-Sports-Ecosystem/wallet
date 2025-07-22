@@ -269,6 +269,18 @@ export {
   createTokenBackgroundService,
   type TokenBackgroundServiceConfig,
 } from "./services/token-background-service";
+
+// Token fetcher utilities
+export {
+  updateTokenData,
+  getTokenData,
+  getTokenBySymbol,
+  getAllTokenSymbols,
+  getTokensByNetwork,
+  clearTokenData,
+  getLastUpdated,
+  isTokenDataStale,
+} from "./utils/token-fetcher";
 export { WalletModal } from "./wallet-modal";
 export { default as WalletPage } from "./wallet-page";
 

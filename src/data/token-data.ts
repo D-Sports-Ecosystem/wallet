@@ -1,4 +1,22 @@
-export const availableTokens = [
+import { getTokenData, isTokenDataStale } from '../utils/token-fetcher';
+
+// Function to get live token data or fallback to static data
+function getLiveTokenData() {
+  try {
+    const liveData = getTokenData();
+    if (liveData.length > 0 && !isTokenDataStale(10)) {
+      return liveData;
+    }
+  } catch (error) {
+    console.warn('Failed to get live token data, using static fallback:', error);
+  }
+  
+  // Fallback to static data
+  return staticTokenData;
+}
+
+// Static fallback token data
+const staticTokenData = [
   {
     name: "Bitcoin",
     symbol: "BTC",
@@ -113,7 +131,10 @@ export const availableTokens = [
     address: "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4",
     transactions: [{ type: "receive", amount: "+2 BNB", value: "+$600.00", time: "1 day ago", from: "0xdddd...eeee" }],
   },
-]
+];
+
+// Export live token data with fallback to static data
+export const availableTokens = getLiveTokenData();
 
 // Original tokens for main page (keeping existing functionality)
-export const tokens = availableTokens.slice(0, 4)
+export const tokens = getLiveTokenData().slice(0, 4);

@@ -68,5 +68,20 @@ export default {
     }),
     terser()
   ],
-  external: ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem', 'react-native', 'react-native-reanimated']
+  external: (id) => {
+    // Always external these peer dependencies
+    const peerDeps = ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem', 'react-native', 'react-native-reanimated'];
+    if (peerDeps.includes(id)) return true;
+    
+    // External Node.js built-in modules and platform-specific packages
+    const nodeModules = ['fs', 'path', 'crypto', 'os', 'node-fetch'];
+    const nodeBuiltins = ['node:fs', 'node:path', 'node:crypto', 'node:http', 'node:https', 'node:stream', 'node:buffer', 'node:util', 'node:url', 'node:net', 'node:zlib'];
+    const platformModules = ['@react-native-async-storage/async-storage'];
+    if (nodeModules.includes(id) || nodeBuiltins.includes(id) || platformModules.includes(id)) return true;
+    
+    // External server-only modules
+    if (id.includes('server-token-writer')) return true;
+    
+    return false;
+  }
 }; 

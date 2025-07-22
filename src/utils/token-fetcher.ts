@@ -1,9 +1,88 @@
 import { tokenService, TokenInfo } from '../services/token-service';
-import * as fs from 'fs';
-import * as path from 'path';
+
+// Platform detection
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
+function isServer(): boolean {
+  return typeof process !== 'undefined' && process.versions && !!process.versions.node;
+}
+
+// Memory-based token storage for browser environments
+class TokenStorage {
+  private static instance: TokenStorage;
+  private tokenData: TokenInfo[] = [];
+  private lastUpdated: Date | null = null;
+  
+  private constructor() {}
+  
+  public static getInstance(): TokenStorage {
+    if (!TokenStorage.instance) {
+      TokenStorage.instance = new TokenStorage();
+    }
+    return TokenStorage.instance;
+  }
+  
+  public setTokenData(tokens: TokenInfo[]): void {
+    this.tokenData = tokens;
+    this.lastUpdated = new Date();
+    
+    // Persist to localStorage in browser environments
+    if (isBrowser() && window.localStorage) {
+      try {
+        const data = {
+          tokens,
+          lastUpdated: this.lastUpdated.toISOString()
+        };
+        localStorage.setItem('dsports_token_data', JSON.stringify(data));
+      } catch (error) {
+        console.warn('Failed to persist token data to localStorage:', error);
+      }
+    }
+  }
+  
+  public getTokenData(): TokenInfo[] {
+    // Try to load from localStorage if memory is empty
+    if (this.tokenData.length === 0 && isBrowser() && window.localStorage) {
+      try {
+        const stored = localStorage.getItem('dsports_token_data');
+        if (stored) {
+          const data = JSON.parse(stored);
+          this.tokenData = data.tokens || [];
+          this.lastUpdated = data.lastUpdated ? new Date(data.lastUpdated) : null;
+        }
+      } catch (error) {
+        console.warn('Failed to load token data from localStorage:', error);
+      }
+    }
+    
+    return this.tokenData;
+  }
+  
+  public getLastUpdated(): Date | null {
+    return this.lastUpdated;
+  }
+  
+  public clearTokenData(): void {
+    this.tokenData = [];
+    this.lastUpdated = null;
+    
+    if (isBrowser() && window.localStorage) {
+      try {
+        localStorage.removeItem('dsports_token_data');
+      } catch (error) {
+        console.warn('Failed to clear token data from localStorage:', error);
+      }
+    }
+  }
+}
+
+// Export singleton instance
+const tokenStorage = TokenStorage.getInstance();
 
 /**
- * Fetch token data from CoinMarketCap API and update the token-data.ts file
+ * Fetch token data from CoinMarketCap API and update token storage
  */
 export async function updateTokenData(): Promise<void> {
   try {
@@ -16,18 +95,26 @@ export async function updateTokenData(): Promise<void> {
     // Create multiple network versions for some tokens (like ETH on different networks)
     const availableTokens = createMultiNetworkTokens(tokens);
     
-    // Generate the content for the token-data.ts file
-    const fileContent = generateTokenDataFileContent(availableTokens);
+    // Store in memory-based storage
+    tokenStorage.setTokenData(availableTokens);
     
-    // Write the content to the token-data.ts file
-    const filePath = path.resolve(process.cwd(), 'data', 'token-data.ts');
-    fs.writeFileSync(filePath, fileContent);
+    // In server environments, also write to file system
+    if (isServer()) {
+      try {
+        const { writeTokenDataToFile } = await import('./server-token-writer');
+        await writeTokenDataToFile(availableTokens);
+      } catch (error) {
+        console.warn('Failed to write token data to file system:', error);
+      }
+    }
     
-    console.log(`Token data updated successfully at ${filePath}`);
+    console.log('Token data updated successfully');
   } catch (error) {
     console.error('Failed to update token data:', error);
   }
 }
+
+
 
 /**
  * Create multiple network versions for some tokens (like ETH on different networks)
@@ -100,23 +187,66 @@ function createMultiNetworkTokens(tokens: TokenInfo[]): TokenInfo[] {
   return result;
 }
 
-/**
- * Generate the content for the token-data.ts file
- */
-function generateTokenDataFileContent(tokens: TokenInfo[]): string {
-  // Convert tokens to a formatted string representation
-  const tokensString = JSON.stringify(tokens, null, 2)
-    .replace(/"([^"]+)":/g, '$1:') // Remove quotes from property names
-    .replace(/"/g, "'"); // Replace double quotes with single quotes
-  
-  return `export const availableTokens = ${tokensString}
 
-// Original tokens for main page (keeping existing functionality)
-export const tokens = availableTokens.slice(0, 4)
-`;
+
+/**
+ * Get current token data from storage
+ */
+export function getTokenData(): TokenInfo[] {
+  return tokenStorage.getTokenData();
 }
 
-// Execute the function if this file is run directly
-if (require.main === module) {
+/**
+ * Get token data by symbol
+ */
+export function getTokenBySymbol(symbol: string): TokenInfo | undefined {
+  const tokens = tokenStorage.getTokenData();
+  return tokens.find(token => token.symbol === symbol);
+}
+
+/**
+ * Get all available token symbols
+ */
+export function getAllTokenSymbols(): string[] {
+  const tokens = tokenStorage.getTokenData();
+  return [...new Set(tokens.map(token => token.symbol))];
+}
+
+/**
+ * Get tokens for a specific network
+ */
+export function getTokensByNetwork(network: string): TokenInfo[] {
+  const tokens = tokenStorage.getTokenData();
+  return tokens.filter(token => token.network === network);
+}
+
+/**
+ * Clear token data from storage
+ */
+export function clearTokenData(): void {
+  tokenStorage.clearTokenData();
+}
+
+/**
+ * Get last updated timestamp
+ */
+export function getLastUpdated(): Date | null {
+  return tokenStorage.getLastUpdated();
+}
+
+/**
+ * Check if token data is stale (older than specified minutes)
+ */
+export function isTokenDataStale(maxAgeMinutes: number = 5): boolean {
+  const lastUpdated = tokenStorage.getLastUpdated();
+  if (!lastUpdated) return true;
+  
+  const now = new Date();
+  const ageMinutes = (now.getTime() - lastUpdated.getTime()) / (1000 * 60);
+  return ageMinutes > maxAgeMinutes;
+}
+
+// Execute the function if this file is run directly (Node.js only)
+if (isServer() && typeof require !== 'undefined' && require.main === module) {
   updateTokenData().catch(console.error);
 }
