@@ -240,12 +240,21 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     getItem: async (key: string) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = await import('@react-native-async-storage/async-storage')
-          .then(module => module.default)
-          .catch(() => null);
+        // Use dynamic import with a variable to prevent direct static analysis
+        // This will be properly excluded from browser bundles
+        const storageModuleName = '@react-native-' + 'async-storage/async-storage';
         
-        if (AsyncStorage) {
-          return await AsyncStorage.getItem(key);
+        // Safely try to import AsyncStorage
+        try {
+          const AsyncStorage = await import(/* webpackIgnore: true */ storageModuleName)
+            .then(module => module.default)
+            .catch(() => null);
+          
+          if (AsyncStorage) {
+            return await AsyncStorage.getItem(key);
+          }
+        } catch {
+          // Silently fail if module is not available
         }
         return null;
       } catch {
@@ -255,12 +264,20 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     setItem: async (key: string, value: string) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = await import('@react-native-async-storage/async-storage')
-          .then(module => module.default)
-          .catch(() => null);
+        // Use dynamic import with a variable to prevent direct static analysis
+        const storageModuleName = '@react-native-' + 'async-storage/async-storage';
         
-        if (AsyncStorage) {
-          await AsyncStorage.setItem(key, value);
+        // Safely try to import AsyncStorage
+        try {
+          const AsyncStorage = await import(/* webpackIgnore: true */ storageModuleName)
+            .then(module => module.default)
+            .catch(() => null);
+          
+          if (AsyncStorage) {
+            await AsyncStorage.setItem(key, value);
+          }
+        } catch {
+          // Silently fail if module is not available
         }
       } catch {
         // Ignore storage errors
@@ -269,12 +286,20 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
     removeItem: async (key: string) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
       try {
-        const AsyncStorage = await import('@react-native-async-storage/async-storage')
-          .then(module => module.default)
-          .catch(() => null);
+        // Use dynamic import with a variable to prevent direct static analysis
+        const storageModuleName = '@react-native-' + 'async-storage/async-storage';
         
-        if (AsyncStorage) {
-          await AsyncStorage.removeItem(key);
+        // Safely try to import AsyncStorage
+        try {
+          const AsyncStorage = await import(/* webpackIgnore: true */ storageModuleName)
+            .then(module => module.default)
+            .catch(() => null);
+          
+          if (AsyncStorage) {
+            await AsyncStorage.removeItem(key);
+          }
+        } catch {
+          // Silently fail if module is not available
         }
       } catch {
         // Ignore storage errors
@@ -358,7 +383,11 @@ export function getDefaultPlatformAdapter(): PlatformAdapter {
     return webPlatformAdapter;
   } else {
     // Check if we're in React Native
-    if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    // Use a safer check that doesn't rely on deprecated navigator.product
+    if (typeof global !== 'undefined' && 
+        ((global as any).__REACT_NATIVE_MAJOR_VERSION || 
+         (global as any).ReactNative || 
+         (typeof navigator !== 'undefined' && navigator.product === 'ReactNative'))) {
       return reactNativePlatformAdapter;
     }
     return nextjsPlatformAdapter; // Default to Next.js for server-side

@@ -55,29 +55,37 @@ export async function writeTokenDataToFile(availableTokens: TokenInfo[]): Promis
     try {
       // Only import fs in a Node.js environment
       if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        fs = await import(/* webpackIgnore: true */ 'fs').catch(error => {
-          console.error('Failed to import fs module:', error);
+        // Use a variable to prevent direct static analysis
+        const fsModuleName = 'f' + 's';
+        fs = await import(/* webpackIgnore: true */ fsModuleName).catch((importError: unknown) => {
+          const errorMessage = importError instanceof Error ? importError.message : String(importError);
+          console.error('Failed to import fs module:', errorMessage);
           throw new Error('fs module not available');
         });
       } else {
         throw new Error('fs module not available in browser environment');
       }
-    } catch (error) {
-      throw new Error('Failed to import fs module: ' + (error.message || String(error)));
+    } catch (catchError: unknown) {
+      const errorMessage = catchError instanceof Error ? catchError.message : String(catchError);
+      throw new Error('Failed to import fs module: ' + errorMessage);
     }
     
     try {
       // Only import path in a Node.js environment
       if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        path = await import(/* webpackIgnore: true */ 'path').catch(error => {
-          console.error('Failed to import path module:', error);
+        // Use a variable to prevent direct static analysis
+        const pathModuleName = 'p' + 'ath';
+        path = await import(/* webpackIgnore: true */ pathModuleName).catch((importError: unknown) => {
+          const errorMessage = importError instanceof Error ? importError.message : String(importError);
+          console.error('Failed to import path module:', errorMessage);
           throw new Error('path module not available');
         });
       } else {
         throw new Error('path module not available in browser environment');
       }
-    } catch (error) {
-      throw new Error('Failed to import path module: ' + (error.message || String(error)));
+    } catch (catchError: unknown) {
+      const errorMessage = catchError instanceof Error ? catchError.message : String(catchError);
+      throw new Error('Failed to import path module: ' + errorMessage);
     }
     
     // Generate the content for the token-data.ts file
@@ -93,22 +101,25 @@ export async function writeTokenDataToFile(availableTokens: TokenInfo[]): Promis
       if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
       }
-    } catch (error) {
-      console.error('Failed to create directory:', error);
-      throw new Error('Failed to create directory: ' + error.message);
+    } catch (dirError: unknown) {
+      const errorMessage = dirError instanceof Error ? dirError.message : String(dirError);
+      console.error('Failed to create directory:', errorMessage);
+      throw new Error('Failed to create directory: ' + errorMessage);
     }
     
     // Write file
     try {
       fs.writeFileSync(filePath, fileContent);
-    } catch (error) {
-      console.error('Failed to write file:', error);
-      throw new Error('Failed to write file: ' + error.message);
+    } catch (writeError: unknown) {
+      const errorMessage = writeError instanceof Error ? writeError.message : String(writeError);
+      console.error('Failed to write file:', errorMessage);
+      throw new Error('Failed to write file: ' + errorMessage);
     }
     
     console.log(`Token data file updated at ${filePath}`);
-  } catch (error) {
-    console.error('Failed to write token data to file:', error);
-    throw error;
+  } catch (finalError: unknown) {
+    const errorMessage = finalError instanceof Error ? finalError.message : String(finalError);
+    console.error('Failed to write token data to file:', errorMessage);
+    throw finalError instanceof Error ? finalError : new Error(String(finalError));
   }
 }
