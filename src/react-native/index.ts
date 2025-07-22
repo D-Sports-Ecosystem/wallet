@@ -305,8 +305,10 @@ export async function removeSecureData(key: string): Promise<boolean> {
 // React Native URL polyfill setup with dynamic import and type assertions
 export async function setupURLPolyfill() {
   try {
-    await import("react-native-url-polyfill/auto" as any).catch(() => 
-      (require as any)("react-native-url-polyfill/auto")
+    // Use dynamic import with proper error handling
+    const polyfillModule = 'react-native-url-polyfill/auto';
+    await import(/* webpackIgnore: true */ polyfillModule as any).catch(() => 
+      (require as any)(polyfillModule)
     );
   } catch (error) {
     // Polyfill not available, URL might not work properly
@@ -320,7 +322,8 @@ export async function setupURLPolyfill() {
 // Synchronous fallback for immediate setup
 export function setupURLPolyfillSync() {
   try {
-    (require as any)("react-native-url-polyfill/auto");
+    const polyfillModule = 'react-native-url-polyfill/auto';
+    (require as any)(polyfillModule);
   } catch (error) {
     console.warn(
       "react-native-url-polyfill not available synchronously:",

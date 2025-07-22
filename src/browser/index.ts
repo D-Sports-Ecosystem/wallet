@@ -1,43 +1,36 @@
-// Universal entry point - detects environment and loads appropriate code
-// For browser-only usage, import from '@d-sports/wallet/browser'
-// For server-only usage, import from '@d-sports/wallet/server'
+// Browser-specific entry point - excludes server-side utilities
+import "../index.css";
 
-// Import CSS styles (will be handled by bundler)
-import "./index.css";
-
-// Core wallet functionality
-export { DSportsWallet } from "./core/wallet";
-export { CustomSocialLoginProvider } from "./providers/custom-social-login";
+// Core wallet functionality (client-side only)
+export { DSportsWallet } from "../core/wallet";
+export { CustomSocialLoginProvider } from "../providers/custom-social-login";
 export {
   DSportsOAuthService,
   createQuickStartSocialLogin,
   validateSocialLoginConfig,
-} from "./providers/dsports-oauth-service";
+} from "../providers/dsports-oauth-service";
 
-// Connectors
+// Connectors (client-side only)
 export {
   DSportsRainbowKitConnector,
   createDSportsRainbowKitConnector,
-} from "./connectors/rainbow-kit";
+} from "../connectors/rainbow-kit";
 export {
   DSportsWagmiConnector,
   createDSportsWagmiConnector,
   dsportsWagmiConnector,
-} from "./connectors/wagmi";
+} from "../connectors/wagmi";
 
-// Platform adapters (with environment detection)
+// Platform adapters (browser-specific)
 export {
   webPlatformAdapter,
-  nextjsPlatformAdapter,
-  reactNativePlatformAdapter,
   getDefaultPlatformAdapter,
-  getDefaultPlatformAdapterAsync,
-} from "./utils/platform-adapters";
+} from "../utils/platform-adapters";
 
 // Event emitter utility
-export { EventEmitter } from "./utils/event-emitter";
+export { EventEmitter } from "../utils/event-emitter";
 
-// Animation utilities
+// Animation utilities (browser-compatible)
 export {
   loadUnifiedAnimations,
   getUnifiedAnimations,
@@ -53,9 +46,9 @@ export {
   // Legacy compatibility
   loadSafeAnimations,
   getSafeAnimations,
-} from "./utils/animation-utils";
+} from "../utils/animation-utils";
 
-// Animation hooks
+// Animation hooks (browser-compatible)
 export {
   useAnimations,
   useAnimation,
@@ -63,9 +56,9 @@ export {
   useSlideAnimation,
   useBounceAnimation,
   useShimmerAnimation,
-} from "./hooks/useAnimations";
+} from "../hooks/useAnimations";
 
-// Animation components
+// Animation components (browser-compatible)
 export {
   AnimatedWrapper,
   FadeInWrapper,
@@ -75,41 +68,39 @@ export {
   BounceInWrapper,
   ShimmerWrapper,
   withAnimation,
-} from "./components/AnimatedWrapper";
+} from "../components/AnimatedWrapper";
 
 // All types
-export * from "./types";
+export * from "../types";
 
-// Factory functions for easy setup
-import { DSportsWallet } from "./core/wallet";
-import { CustomSocialLoginProvider } from "./providers/custom-social-login";
+// Factory functions for browser environment
+import { DSportsWallet } from "../core/wallet";
+import { CustomSocialLoginProvider } from "../providers/custom-social-login";
 import {
   createQuickStartSocialLogin,
   validateSocialLoginConfig,
-} from "./providers/dsports-oauth-service";
+} from "../providers/dsports-oauth-service";
 import {
   DSportsRainbowKitConnector,
   createDSportsRainbowKitConnector,
-} from "./connectors/rainbow-kit";
+} from "../connectors/rainbow-kit";
 import {
   DSportsWagmiConnector,
   createDSportsWagmiConnector,
   dsportsWagmiConnector,
-} from "./connectors/wagmi";
-import { getDefaultPlatformAdapter } from "./utils/platform-adapters";
+} from "../connectors/wagmi";
+import { webPlatformAdapter } from "../utils/platform-adapters";
 import {
   WalletConfig,
   DSportsWalletOptions,
   RainbowKitConnectorOptions,
   WagmiConnectorOptions,
-} from "./types";
+} from "../types";
 
-// Universal wallet factory
+// Browser-specific wallet factory
 export function createDSportsWallet(
   options: DSportsWalletOptions
 ): DSportsWallet {
-  const platformAdapter = getDefaultPlatformAdapter();
-
   const config: WalletConfig = {
     appName: options.metadata?.name || "D-Sports App",
     appUrl: options.metadata?.url,
@@ -121,7 +112,7 @@ export function createDSportsWallet(
     theme: options.theme,
   };
 
-  const wallet = new DSportsWallet(config, platformAdapter);
+  const wallet = new DSportsWallet(config, webPlatformAdapter);
 
   // Add social login provider if configured
   if (options.socialLogin) {
@@ -132,7 +123,7 @@ export function createDSportsWallet(
 
     const socialProvider = new CustomSocialLoginProvider(
       validatedConfig,
-      platformAdapter
+      webPlatformAdapter
     );
 
     // Create connectors with social login
@@ -200,13 +191,12 @@ export function createDSportsWalletQuickStart(
   });
 }
 
-// Universal Rainbow Kit connector factory
-export function createDSportsRainbowKitConnectorUniversal(
+// Browser-specific Rainbow Kit connector factory
+export function createDSportsRainbowKitConnectorForBrowser(
   options: RainbowKitConnectorOptions
 ) {
-  const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin
-    ? new CustomSocialLoginProvider(options.socialLogin, platformAdapter)
+    ? new CustomSocialLoginProvider(options.socialLogin, webPlatformAdapter)
     : undefined;
 
   return createDSportsRainbowKitConnector({
@@ -215,13 +205,12 @@ export function createDSportsRainbowKitConnectorUniversal(
   });
 }
 
-// Universal Wagmi connector factory
-export function createDSportsWagmiConnectorUniversal(
+// Browser-specific Wagmi connector factory
+export function createDSportsWagmiConnectorForBrowser(
   options: WagmiConnectorOptions
 ) {
-  const platformAdapter = getDefaultPlatformAdapter();
   const socialProvider = options.socialLogin
-    ? new CustomSocialLoginProvider(options.socialLogin, platformAdapter)
+    ? new CustomSocialLoginProvider(options.socialLogin, webPlatformAdapter)
     : undefined;
 
   return createDSportsWagmiConnector({
@@ -230,11 +219,10 @@ export function createDSportsWagmiConnectorUniversal(
   });
 }
 
-// Universal Wagmi v2 connector
-export function dsportsWagmiConnectorUniversal(options: WagmiConnectorOptions) {
-  const platformAdapter = getDefaultPlatformAdapter();
+// Browser-specific Wagmi v2 connector
+export function dsportsWagmiConnectorForBrowser(options: WagmiConnectorOptions) {
   const socialProvider = options.socialLogin
-    ? new CustomSocialLoginProvider(options.socialLogin, platformAdapter)
+    ? new CustomSocialLoginProvider(options.socialLogin, webPlatformAdapter)
     : undefined;
 
   return dsportsWagmiConnector({
@@ -243,7 +231,7 @@ export function dsportsWagmiConnectorUniversal(options: WagmiConnectorOptions) {
   });
 }
 
-// Common chains
+// Common chains for browser
 export const mainnet = {
   id: 1,
   name: "Ethereum",
@@ -287,81 +275,35 @@ export const polygon = {
   },
 };
 
-// UI Components (browser/client-side only)
-// These are conditionally exported to prevent server-side rendering issues
-let uiComponents: any = {};
-let tokenComponents: any = {};
+// UI Components (browser-compatible)
+export * from "../components/ui";
+export { TokenUpdateStatus } from "../components/token-update-status";
+export { TokenUpdateConfig as TokenUpdateConfigComponent } from "../components/token-update-config";
 
-if (typeof window !== 'undefined') {
-  // Only load UI components in browser environments
-  try {
-    uiComponents = require("./components/ui");
-    tokenComponents = {
-      TokenUpdateStatus: require("./components/token-update-status").TokenUpdateStatus,
-      TokenUpdateConfigComponent: require("./components/token-update-config").TokenUpdateConfig,
-    };
-  } catch (error) {
-    console.warn("UI components not available:", error);
-  }
-}
-
-// Export UI components conditionally
-export const {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} = uiComponents;
-
-export const { TokenUpdateStatus, TokenUpdateConfigComponent } = tokenComponents;
-
-// Token data and context
-export { TokenProvider, useTokens } from "./contexts/token-context";
+// Token data and context (client-side only)
+export { TokenProvider, useTokens } from "../contexts/token-context";
 export {
   tokenService,
   type TokenInfo,
   type Transaction,
-} from "./services/token-service";
+} from "../services/token-service";
 export {
   tokenUpdateService,
   createTokenUpdateService,
   type TokenUpdateConfig,
-} from "./services/token-update-service";
+} from "../services/token-update-service";
 export {
   tokenSyncService,
   createTokenSyncService,
   type TokenSyncConfig,
-} from "./utils/token-sync";
+} from "../utils/token-sync";
 export {
   tokenBackgroundService,
   createTokenBackgroundService,
   type TokenBackgroundServiceConfig,
-} from "./services/token-background-service";
+} from "../services/token-background-service";
 
-// Token fetcher utilities
+// Token fetcher utilities (client-side only)
 export {
   updateTokenData,
   getTokenData,
@@ -371,22 +313,10 @@ export {
   clearTokenData,
   getLastUpdated,
   isTokenDataStale,
-} from "./utils/token-fetcher";
-// Wallet UI components (browser/client-side only)
-let walletUIComponents: any = {};
+} from "../utils/token-fetcher";
 
-if (typeof window !== 'undefined') {
-  try {
-    walletUIComponents = {
-      WalletModal: require("./wallet-modal").WalletModal,
-      WalletPage: require("./wallet-page").default,
-    };
-  } catch (error) {
-    console.warn("Wallet UI components not available:", error);
-  }
-}
-
-export const { WalletModal, WalletPage } = walletUIComponents;
+export { WalletModal } from "../wallet-modal";
+export { default as WalletPage } from "../wallet-page";
 
 // Version
 export const version = "1.0.0";

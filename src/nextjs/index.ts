@@ -3,7 +3,7 @@ import { DSportsWallet } from '../core/wallet';
 import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 import { DSportsRainbowKitConnector, createDSportsRainbowKitConnector } from '../connectors/rainbow-kit';
 import { DSportsWagmiConnector, createDSportsWagmiConnector, dsportsWagmiConnector } from '../connectors/wagmi';
-import { nextjsPlatformAdapter } from '../utils/platform-adapters';
+import { nextjsPlatformAdapter, getDefaultPlatformAdapterAsync } from '../utils/platform-adapters';
 import { 
   WalletConfig, 
   DSportsWalletOptions, 
@@ -258,5 +258,59 @@ export const sepolia: Chain = {
   testnet: true
 };
 
-// UI Components
-export * from '../components/ui';
+// UI Components (conditionally exported for Next.js)
+// These are conditionally loaded to prevent server-side rendering issues
+let uiComponents: any = {};
+let tokenComponents: any = {};
+let walletUIComponents: any = {};
+
+if (typeof window !== 'undefined') {
+  // Only load UI components on the client side
+  try {
+    uiComponents = require('../components/ui');
+    tokenComponents = {
+      TokenUpdateStatus: require('../components/token-update-status').TokenUpdateStatus,
+      TokenUpdateConfigComponent: require('../components/token-update-config').TokenUpdateConfig,
+    };
+    walletUIComponents = {
+      WalletModal: require('../wallet-modal').WalletModal,
+      WalletPage: require('../wallet-page').default,
+    };
+  } catch (error) {
+    console.warn("UI components not available:", error);
+  }
+}
+
+// Export UI components conditionally
+export const {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} = uiComponents;
+
+export const { TokenUpdateStatus, TokenUpdateConfigComponent } = tokenComponents;
+export const { WalletModal, WalletPage } = walletUIComponents;

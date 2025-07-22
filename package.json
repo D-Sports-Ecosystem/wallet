@@ -10,19 +10,60 @@
   "react-native": "dist/react-native/index.js",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/src/index.d.ts"
+      "browser": {
+        "import": "./dist/browser/index.esm.js",
+        "require": "./dist/browser/index.js",
+        "types": "./dist/browser/src/browser/index.d.ts"
+      },
+      "node": {
+        "import": "./dist/index.esm.js",
+        "require": "./dist/index.js",
+        "types": "./dist/src/index.d.ts"
+      },
+      "default": {
+        "import": "./dist/index.esm.js",
+        "require": "./dist/index.js",
+        "types": "./dist/src/index.d.ts"
+      }
+    },
+    "./browser": {
+      "import": "./dist/browser/index.esm.js",
+      "require": "./dist/browser/index.js",
+      "types": "./dist/browser/src/browser/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server/index.esm.js",
+      "require": "./dist/server/index.js",
+      "types": "./dist/server/src/server/index.d.ts"
     },
     "./nextjs": {
-      "import": "./dist/nextjs/index.esm.js",
-      "require": "./dist/nextjs/index.js",
-      "types": "./dist/nextjs/src/nextjs/index.d.ts"
+      "browser": {
+        "import": "./dist/nextjs/index.esm.js",
+        "require": "./dist/nextjs/index.js",
+        "types": "./dist/nextjs/src/nextjs/index.d.ts"
+      },
+      "node": {
+        "import": "./dist/nextjs/index.esm.js",
+        "require": "./dist/nextjs/index.js",
+        "types": "./dist/nextjs/src/nextjs/index.d.ts"
+      },
+      "default": {
+        "import": "./dist/nextjs/index.esm.js",
+        "require": "./dist/nextjs/index.js",
+        "types": "./dist/nextjs/src/nextjs/index.d.ts"
+      }
     },
     "./react-native": {
-      "import": "./dist/react-native/index.esm.js",
-      "require": "./dist/react-native/index.js",
-      "types": "./dist/react-native/src/react-native/index.d.ts"
+      "react-native": {
+        "import": "./dist/react-native/index.esm.js",
+        "require": "./dist/react-native/index.js",
+        "types": "./dist/react-native/src/react-native/index.d.ts"
+      },
+      "default": {
+        "import": "./dist/react-native/index.esm.js",
+        "require": "./dist/react-native/index.js",
+        "types": "./dist/react-native/src/react-native/index.d.ts"
+      }
     }
   },
   "files": [
@@ -35,8 +76,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:core && npm run build:nextjs && npm run build:react-native",
+    "build": "npm run clean && npm run build:core && npm run build:browser && npm run build:server && npm run build:nextjs && npm run build:react-native",
     "build:core": "rollup -c rollup.config.js",
+    "build:browser": "rollup -c rollup.config.browser.js",
+    "build:server": "rollup -c rollup.config.server.js",
     "build:nextjs": "rollup -c rollup.config.nextjs.js",
     "build:react-native": "rollup -c rollup.config.react-native.js",
     "clean": "npx rimraf dist",
@@ -50,7 +93,7 @@
     "release": "np",
     "update-tokens": "node scripts/update-token-data.js",
     "analyze-bundle": "npm run build && node scripts/analyze-bundle.js",
-    "analyze": "npm run build && start dist/stats-browser.html && start dist/stats-nextjs.html && start dist/stats-react-native.html"
+    "analyze": "npm run build && start dist/stats-browser.html && start dist/stats-browser-specific.html && start dist/stats-server.html && start dist/stats-nextjs.html && start dist/stats-react-native.html"
   },
   "keywords": [
     "wallet",
