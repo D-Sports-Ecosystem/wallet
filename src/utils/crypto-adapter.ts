@@ -1,167 +1,162 @@
+/**
+ * Cross-platform crypto adapter
+ * Provides a unified interface for cryptographic operations across different platforms
+ */
+
 import { Platform } from '../types';
 
 /**
- * Interface for crypto operations across different platforms
+ * Interface for cryptographic operations
  */
 export interface CryptoAdapter {
   /**
-   * Generate cryptographically secure random bytes
+   * Generate random bytes
    * @param size Number of bytes to generate
-   * @returns Uint8Array containing random bytes
+   * @returns Uint8Array of random bytes
    */
-  generateRandomBytes: (size: number) => Uint8Array;
+  getRandomValues(size: number): Uint8Array;
   
   /**
-   * Calculate SHA-256 hash of data
-   * @param data Data to hash
-   * @returns Promise resolving to Uint8Array containing hash
+   * Generate a random UUID
+   * @returns A random UUID string
    */
-  sha256: (data: Uint8Array) => Promise<Uint8Array>;
+  randomUUID(): string;
 }
 
 /**
- * Feature detection for crypto capabilities
+ * Browser-based crypto adapter using Web Crypto API
  */
-export function detectCryptoFeatures(): {
-  hasWebCrypto: boolean;
-  hasNodeCrypto: boolean;
-} {
-  const features = {
-    hasWebCrypto: false,
-    hasNodeCrypto: false
-  };
-  
-  // Check for Web Crypto API
-  if (typeof window !== 'undefined') {
-    try {
-      features.hasWebCrypto = window.crypto !== undefined && 
-                             window.crypto.subtle !== undefined;
-    } catch {
-      features.hasWebCrypto = false;
-    }
-  }
-  
-  // We'll check for Node.js crypto at runtime when needed
-  // This avoids bundling issues with the crypto module
-  
-  return features;
-}
-
-/**
- * Web Crypto API implementation
- */
-export function createWebCryptoAdapter(): CryptoAdapter {
-  return {
-    generateRandomBytes: (size: number) => {
-      const array = new Uint8Array(size);
+export class BrowserCryptoAdapter implements CryptoAdapter {
+  getRandomValues(size: number): Uint8Array {
+    const array = new Uint8Array(size);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       crypto.getRandomValues(array);
-      return array;
-    },
-    sha256: async (data: Uint8Array) => {
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return new Uint8Array(hashBuffer);
+    } else if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(array);
+    } else {
+      throw new Error('Web Crypto API is not available');
     }
-  };
+    return array;
+  }
+  
+  randomUUID(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    } else if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+      return window.crypto.randomUUID();
+    } else {
+      // Fallback implementation for browsers without randomUUID
+      const bytes = this.getRandomValues(16);
+      // Set version (4) and variant (RFC4122)
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      
+      // Convert to hex string with proper UUID format
+      return [
+        bytes.slice(0, 4).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+        bytes.slice(4, 6).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+        bytes.slice(6, 8).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+        bytes.slice(8, 10).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+        bytes.slice(10, 16).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+      ].join('-');
+    }
+  }
 }
 
 /**
- * Node.js crypto implementation (loaded dynamically)
+ * Node.js crypto adapter
+ * This will be dynamically imported only in Node.js environments
  */
-export async function createNodeCryptoAdapter(): Promise<CryptoAdapter | null> {
+export class NodeCryptoAdapter implements CryptoAdapter {
+  private nodeCrypto: any;
+  
+  constructor(nodeCrypto: any) {
+    this.nodeCrypto = nodeCrypto;
+  }
+  
+  getRandomValues(size: number): Uint8Array {
+    const buffer = this.nodeCrypto.randomBytes(size);
+    return new Uint8Array(buffer);
+  }
+  
+  randomUUID(): string {
+    return this.nodeCrypto.randomUUID();
+  }
+}
+
+/**
+ * Memory-based fallback crypto adapter
+ * WARNING: This is NOT cryptographically secure and should only be used as a last resort
+ */
+export class FallbackCryptoAdapter implements CryptoAdapter {
+  getRandomValues(size: number): Uint8Array {
+    console.warn('Using insecure random number generator');
+    const array = new Uint8Array(size);
+    for (let i = 0; i < size; i++) {
+      array[i] = Math.floor(Math.random() * 256);
+    }
+    return array;
+  }
+  
+  randomUUID(): string {
+    console.warn('Using insecure UUID generator');
+    const bytes = this.getRandomValues(16);
+    // Set version (4) and variant (RFC4122)
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    
+    // Convert to hex string with proper UUID format
+    return [
+      bytes.slice(0, 4).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+      bytes.slice(4, 6).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+      bytes.slice(6, 8).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+      bytes.slice(8, 10).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+      bytes.slice(10, 16).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), ''),
+    ].join('-');
+  }
+}
+
+/**
+ * Create a crypto adapter based on the platform
+ */
+export async function createCryptoAdapter(platform: Platform): Promise<CryptoAdapter> {
+  // Try browser crypto first
   try {
-    // Dynamic import to avoid bundling issues
-    const nodeCrypto = await import('crypto').catch(() => null);
-    
-    if (!nodeCrypto) {
-      return null;
-    }
-    
-    return {
-      generateRandomBytes: (size: number) => {
-        const buffer = nodeCrypto.randomBytes(size);
-        return new Uint8Array(buffer);
-      },
-      sha256: async (data: Uint8Array) => {
-        const hash = nodeCrypto.createHash('sha256');
-        hash.update(Buffer.from(data));
-        return new Uint8Array(hash.digest());
-      }
-    };
-  } catch {
-    return null;
+    return new BrowserCryptoAdapter();
+  } catch (error) {
+    console.warn('Browser crypto not available:', error);
   }
+  
+  // Try Node.js crypto if not in browser
+  if (platform === 'nextjs' && typeof window === 'undefined' && typeof process !== 'undefined') {
+    try {
+      // Only try to import crypto in a server-side Node.js environment
+      // This import will be excluded from browser bundles by Rollup
+      if (process.versions && process.versions.node) {
+        const nodeCrypto = await import(/* webpackIgnore: true */ 'crypto').catch(() => null);
+        if (nodeCrypto) {
+          return new NodeCryptoAdapter(nodeCrypto);
+        }
+      }
+    } catch (error) {
+      console.warn('Node.js crypto not available:', error);
+    }
+  }
+  
+  // Fallback to insecure implementation
+  console.warn('Using fallback (insecure) crypto implementation');
+  return new FallbackCryptoAdapter();
 }
 
-/**
- * Fallback implementation using basic algorithms
- * Note: This is NOT cryptographically secure and should only be used as a last resort
- */
-export function createFallbackCryptoAdapter(): CryptoAdapter {
-  console.warn('Using insecure crypto fallback - NOT RECOMMENDED FOR PRODUCTION');
-  
-  return {
-    generateRandomBytes: (size: number) => {
-      const array = new Uint8Array(size);
-      for (let i = 0; i < size; i++) {
-        array[i] = Math.floor(Math.random() * 256);
-      }
-      return array;
-    },
-    sha256: async (data: Uint8Array) => {
-      // Simple non-cryptographic hash function
-      // In a real implementation, you would use a JS SHA-256 implementation
-      const hash = new Uint8Array(32); // SHA-256 is 32 bytes
-      let h = 0;
-      for (let i = 0; i < data.length; i++) {
-        h = ((h << 5) - h) + data[i];
-        h |= 0;
-      }
-      // Fill the hash with some derived values (NOT a real SHA-256)
-      for (let i = 0; i < 32; i++) {
-        hash[i] = (h + i * 16) & 0xFF;
-      }
-      return hash;
-    }
-  };
-}
+// Singleton instance
+let cryptoAdapter: CryptoAdapter | null = null;
 
 /**
- * Create the appropriate crypto adapter based on platform and available features
+ * Get the crypto adapter instance
  */
-export async function createCryptoAdapter(
-  platform: Platform,
-  options: {
-    useInsecureCrypto?: boolean;
-  } = {}
-): Promise<CryptoAdapter> {
-  // If insecure crypto is explicitly requested, use the fallback
-  if (options.useInsecureCrypto) {
-    return createFallbackCryptoAdapter();
+export async function getCryptoAdapter(platform: Platform): Promise<CryptoAdapter> {
+  if (!cryptoAdapter) {
+    cryptoAdapter = await createCryptoAdapter(platform);
   }
-  
-  const features = detectCryptoFeatures();
-  
-  // For web and Next.js, prefer Web Crypto API
-  if ((platform === 'web' || platform === 'nextjs') && features.hasWebCrypto) {
-    return createWebCryptoAdapter();
-  }
-  
-  // For Node.js or Next.js server-side, try Node.js crypto
-  if (platform === 'nextjs' || typeof window === 'undefined') {
-    const nodeCryptoAdapter = await createNodeCryptoAdapter();
-    if (nodeCryptoAdapter) {
-      return nodeCryptoAdapter;
-    }
-  }
-  
-  // For React Native, we could add a React Native specific implementation here
-  // For now, we'll use Web Crypto if available, or fallback
-  
-  // If Web Crypto is available as a fallback for any platform, use it
-  if (features.hasWebCrypto) {
-    return createWebCryptoAdapter();
-  }
-  
-  // Last resort: use the insecure fallback
-  return createFallbackCryptoAdapter();
+  return cryptoAdapter;
 }

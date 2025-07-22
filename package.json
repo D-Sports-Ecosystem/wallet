@@ -48,7 +48,9 @@
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build",
     "release": "np",
-    "update-tokens": "node scripts/update-token-data.js"
+    "update-tokens": "node scripts/update-token-data.js",
+    "analyze-bundle": "npm run build && node scripts/analyze-bundle.js",
+    "analyze": "npm run build && start dist/stats-browser.html && start dist/stats-nextjs.html && start dist/stats-react-native.html"
   },
   "keywords": [
     "wallet",
@@ -126,8 +128,10 @@
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
     "rollup": "^4.24.4",
+    "rollup-plugin-ignore-import": "^1.3.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-visualizer": "^6.0.3",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.37.0"

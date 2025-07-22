@@ -9,6 +9,7 @@ import postcss from 'rollup-plugin-postcss';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,9 +48,38 @@ export default {
     }),
     resolve({
       browser: true,
-      preferBuiltins: false
+      preferBuiltins: false,
+      // Prefer browser field over module field for browser builds
+      mainFields: ['browser', 'module', 'main'],
+      // Explicitly exclude Node.js built-ins
+      resolveOnly: (module) => {
+        const nodeBuiltins = [
+          'fs', 'path', 'crypto', 'os', 'stream', 'http', 'https', 'zlib', 
+          'util', 'url', 'net', 'tls', 'buffer', 'querystring', 'assert', 
+          'events', 'string_decoder', 'punycode', 'process', 'child_process'
+        ];
+        return !nodeBuiltins.some(builtin => 
+          module === builtin || 
+          module.startsWith(`${builtin}/`) || 
+          module.startsWith(`node:${builtin}`)
+        );
+      }
     }),
-    commonjs(),
+    commonjs({
+      // Exclude Node.js built-ins from CommonJS resolution
+      ignore: (id) => {
+        const nodeBuiltins = [
+          'fs', 'path', 'crypto', 'os', 'stream', 'http', 'https', 'zlib', 
+          'util', 'url', 'net', 'tls', 'buffer', 'querystring', 'assert', 
+          'events', 'string_decoder', 'punycode', 'process', 'child_process'
+        ];
+        return nodeBuiltins.some(builtin => 
+          id === builtin || 
+          id.startsWith(`${builtin}/`) || 
+          id.startsWith(`node:${builtin}`)
+        );
+      }
+    }),
     json(),
     postcss({
       extract: false,
@@ -59,7 +89,16 @@ export default {
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.PLATFORM': JSON.stringify('nextjs'),
-      preventAssignment: true
+      preventAssignment: true,
+      // Replace direct Node.js module imports with empty objects
+      'require("fs")': '{}',
+      'require("path")': '{}',
+      'require("crypto")': '{}',
+      'require("node-fetch")': 'fetch',
+      'require(\'fs\')': '{}',
+      'require(\'path\')': '{}',
+      'require(\'crypto\')': '{}',
+      'require(\'node-fetch\')': 'fetch'
     }),
     typescript({
       tsconfig: './tsconfig.json',
@@ -67,7 +106,42 @@ export default {
       declarationDir: 'dist/nextjs',
       exclude: ['**/*.test.*', '**/*.spec.*']
     }),
-    terser()
+    terser(),
+    visualizer({
+      filename: 'dist/stats-nextjs.html',
+      title: 'D-Sports Wallet Next.js Bundle Analysis',
+      gzipSize: true,
+      brotliSize: true
+    })
   ],
-  external: ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem', 'next', 'react-native', 'react-native-reanimated']
+  external: (id) => {
+    // Always external these peer dependencies
+    const peerDeps = ['react', 'react-dom', 'framer-motion', 'lucide-react', 'ethers', 'viem', 'next', 'react-native', 'react-native-reanimated'];
+    if (peerDeps.includes(id) || id.startsWith('react/') || id.startsWith('react-dom/') || id.startsWith('next/')) return true;
+    
+    // External Node.js built-in modules and platform-specific packages
+    const nodeModules = [
+      'fs', 'path', 'crypto', 'os', 'node-fetch', 'stream', 'http', 'https', 'zlib', 
+      'util', 'url', 'net', 'tls', 'buffer', 'querystring', 'assert', 
+      'events', 'string_decoder', 'punycode', 'process', 'child_process'
+    ];
+    const nodeBuiltins = nodeModules.map(mod => `node:${mod}`);
+    const platformModules = [
+      '@react-native-async-storage/async-storage',
+      'react-native-keychain',
+      'react-native-url-polyfill'
+    ];
+    
+    // Check if the module is a Node.js built-in or platform-specific module
+    if (nodeModules.some(mod => id === mod || id.startsWith(`${mod}/`)) || 
+        nodeBuiltins.some(mod => id === mod || id.startsWith(`${mod}/`)) || 
+        platformModules.some(mod => id === mod || id.startsWith(`${mod}/`))) {
+      return true;
+    }
+    
+    // External server-only modules
+    if (id.includes('server-token-writer')) return true;
+    
+    return false;
+  }
 }; 

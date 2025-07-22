@@ -31,12 +31,20 @@ function isNodeEnvironment(): boolean {
 }
 
 /**
+ * Check if we're in a browser environment
+ */
+function isBrowserEnvironment(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
+/**
  * Write token data to file system (Node.js only)
  */
 export async function writeTokenDataToFile(availableTokens: TokenInfo[]): Promise<void> {
   // This function should only be called in Node.js environments
-  if (!isNodeEnvironment()) {
-    throw new Error('writeTokenDataToFile can only be called in Node.js environments');
+  if (!isNodeEnvironment() || isBrowserEnvironment()) {
+    console.warn('writeTokenDataToFile can only be called in Node.js environments');
+    return Promise.resolve(); // Return early in browser environments
   }
 
   try {
@@ -45,21 +53,31 @@ export async function writeTokenDataToFile(availableTokens: TokenInfo[]): Promis
     let path;
     
     try {
-      fs = await import('fs').catch(error => {
-        console.error('Failed to import fs module:', error);
-        throw new Error('fs module not available');
-      });
+      // Only import fs in a Node.js environment
+      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+        fs = await import(/* webpackIgnore: true */ 'fs').catch(error => {
+          console.error('Failed to import fs module:', error);
+          throw new Error('fs module not available');
+        });
+      } else {
+        throw new Error('fs module not available in browser environment');
+      }
     } catch (error) {
-      throw new Error('Failed to import fs module: ' + error.message);
+      throw new Error('Failed to import fs module: ' + (error.message || String(error)));
     }
     
     try {
-      path = await import('path').catch(error => {
-        console.error('Failed to import path module:', error);
-        throw new Error('path module not available');
-      });
+      // Only import path in a Node.js environment
+      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+        path = await import(/* webpackIgnore: true */ 'path').catch(error => {
+          console.error('Failed to import path module:', error);
+          throw new Error('path module not available');
+        });
+      } else {
+        throw new Error('path module not available in browser environment');
+      }
     } catch (error) {
-      throw new Error('Failed to import path module: ' + error.message);
+      throw new Error('Failed to import path module: ' + (error.message || String(error)));
     }
     
     // Generate the content for the token-data.ts file

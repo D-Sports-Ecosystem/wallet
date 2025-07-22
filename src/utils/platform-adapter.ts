@@ -4,6 +4,7 @@
 
 // Import types
 import { Platform } from '../types';
+import { getCryptoAdapter, BrowserCryptoAdapter } from './crypto-adapter';
 
 // Environment variables will be loaded by the build process or runtime environment
 
@@ -63,6 +64,11 @@ export function detectPlatform(): "web" | "nextjs" | "react-native" {
   } else {
     return "nextjs"; // Default to Next.js for server-side
   }
+}
+
+// Detect if we're in a browser environment
+export function isBrowser(): boolean {
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
 // Check if we're in a React Native environment

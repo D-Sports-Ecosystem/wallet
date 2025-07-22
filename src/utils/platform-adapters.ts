@@ -4,6 +4,7 @@ import {
   createCustomPlatformAdapter,
   getDefaultPlatformAdapter as getFactoryDefaultAdapter
 } from './platform-adapter-factory';
+import { BrowserCryptoAdapter, FallbackCryptoAdapter } from './crypto-adapter';
 
 /**
  * Legacy platform adapters - kept for backward compatibility
@@ -60,24 +61,17 @@ export const webPlatformAdapter: PlatformAdapter = {
   crypto: {
     generateRandomBytes: (size: number) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
-      // Use the browser-compatible implementation
-      const array = new Uint8Array(size);
       
-      // Try to use Web Crypto API if available
-      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-        try {
-          window.crypto.getRandomValues(array);
-          return array;
-        } catch {
-          // Fall through to fallback
-        }
+      try {
+        // Use our browser crypto adapter
+        const cryptoAdapter = new BrowserCryptoAdapter();
+        return cryptoAdapter.getRandomValues(size);
+      } catch (error) {
+        console.warn('Browser crypto not available:', error);
+        // Fallback to insecure implementation
+        const fallbackAdapter = new FallbackCryptoAdapter();
+        return fallbackAdapter.getRandomValues(size);
       }
-      
-      // Fallback to Math.random if Web Crypto is not available
-      for (let i = 0; i < size; i++) {
-        array[i] = Math.floor(Math.random() * 256);
-      }
-      return array;
     },
     sha256: async (data: Uint8Array) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
@@ -161,36 +155,17 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
   crypto: {
     generateRandomBytes: (size: number) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
-      const array = new Uint8Array(size);
       
-      // Client-side: Use Web Crypto API if available
-      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-        try {
-          window.crypto.getRandomValues(array);
-          return array;
-        } catch {
-          // Fall through to fallback
-        }
+      try {
+        // Use our browser crypto adapter
+        const cryptoAdapter = new BrowserCryptoAdapter();
+        return cryptoAdapter.getRandomValues(size);
+      } catch (error) {
+        console.warn('Browser crypto not available:', error);
+        // Fallback to insecure implementation
+        const fallbackAdapter = new FallbackCryptoAdapter();
+        return fallbackAdapter.getRandomValues(size);
       }
-      
-      // Server-side: Try to use Node.js crypto (dynamic import to avoid bundling issues)
-      if (typeof window === 'undefined') {
-        try {
-          // We can't await here since this is a synchronous function
-          // This is a limitation of the legacy adapter - users should migrate to async factory
-          const nodeCrypto = require('crypto');
-          const buffer = nodeCrypto.randomBytes(size);
-          return new Uint8Array(buffer);
-        } catch {
-          // Fall through to fallback if Node.js crypto is not available
-        }
-      }
-      
-      // Fallback implementation
-      for (let i = 0; i < size; i++) {
-        array[i] = Math.floor(Math.random() * 256);
-      }
-      return array;
     },
     sha256: async (data: Uint8Array) => {
       console.warn('Using synchronous adapter. Please migrate to async factory pattern.');
@@ -205,21 +180,8 @@ export const nextjsPlatformAdapter: PlatformAdapter = {
         }
       }
       
-      // Server-side: Try to use Node.js crypto
-      if (typeof window === 'undefined') {
-        try {
-          const crypto = await import('crypto').catch(() => null);
-          if (crypto) {
-            const hash = crypto.createHash('sha256');
-            hash.update(Buffer.from(data));
-            return new Uint8Array(hash.digest());
-          }
-        } catch {
-          // Fall through to fallback
-        }
-      }
-      
       // Fallback implementation (not secure!)
+      console.warn('Using insecure SHA-256 implementation');
       const hash = new Uint8Array(32); // SHA-256 is 32 bytes
       let h = 0;
       for (let i = 0; i < data.length; i++) {
@@ -330,25 +292,12 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
           global.crypto.getRandomValues(array);
           return array;
         } catch {
-          // Fall through to next option
+          // Fall through to fallback
         }
       }
       
-      // Try to use Node.js crypto module (will be excluded from browser bundles)
-      try {
-        // We can't await here since this is a synchronous function
-        // This is a limitation of the legacy adapter - users should migrate to async factory
-        const nodeCrypto = require('crypto');
-        const buffer = nodeCrypto.randomBytes(size);
-        for (let i = 0; i < size; i++) {
-          array[i] = buffer[i];
-        }
-        return array;
-      } catch {
-        // Fall through to fallback
-      }
-      
-      // Fallback to Math.random (not secure!)
+      // Fallback to insecure random (should never happen in production)
+      console.warn("Using insecure random number generator");
       for (let i = 0; i < size; i++) {
         array[i] = Math.floor(Math.random() * 256);
       }
@@ -363,23 +312,12 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
           const hashBuffer = await global.crypto.subtle.digest('SHA-256', data);
           return new Uint8Array(hashBuffer);
         } catch {
-          // Fall through to next option
+          // Fall through to fallback
         }
-      }
-      
-      // Try to use Node.js crypto module
-      try {
-        const crypto = await import('crypto').catch(() => null);
-        if (crypto) {
-          const hash = crypto.createHash('sha256');
-          hash.update(Buffer.from(data));
-          return new Uint8Array(hash.digest());
-        }
-      } catch {
-        // Fall through to fallback
       }
       
       // Fallback implementation (not secure!)
+      console.warn('Using insecure SHA-256 implementation');
       const hash = new Uint8Array(32); // SHA-256 is 32 bytes
       let h = 0;
       for (let i = 0; i < data.length; i++) {

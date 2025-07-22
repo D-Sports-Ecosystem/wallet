@@ -73,23 +73,30 @@ export async function detectFeatures(): Promise<PlatformFeatures> {
   }
   
   // Node.js features
-  try {
-    await import('crypto').then(() => {
-      features.hasNodeCrypto = true;
-    }).catch(() => {
+  if (typeof window === 'undefined') {
+    try {
+      // Only try to import crypto in a Node.js environment
+      await import('crypto').then(() => {
+        features.hasNodeCrypto = true;
+      }).catch(() => {
+        features.hasNodeCrypto = false;
+      });
+    } catch {
       features.hasNodeCrypto = false;
-    });
-  } catch {
-    features.hasNodeCrypto = false;
-  }
-  
-  try {
-    await import('fs').then(() => {
-      features.hasNodeFs = true;
-    }).catch(() => {
+    }
+    
+    try {
+      // Only try to import fs in a Node.js environment
+      await import('fs').then(() => {
+        features.hasNodeFs = true;
+      }).catch(() => {
+        features.hasNodeFs = false;
+      });
+    } catch {
       features.hasNodeFs = false;
-    });
-  } catch {
+    }
+  } else {
+    features.hasNodeCrypto = false;
     features.hasNodeFs = false;
   }
   
