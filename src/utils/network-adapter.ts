@@ -69,7 +69,7 @@ export async function createNetworkAdapter(
   try {
     const nodeFetch = await import('node-fetch').catch(() => null);
     if (nodeFetch && nodeFetch.default) {
-      return createNodeFetchAdapter(nodeFetch.default, timeout);
+      return createNodeFetchAdapter(nodeFetch.default as any, timeout);
     }
   } catch {
     // Continue to fallback
@@ -80,6 +80,7 @@ export async function createNetworkAdapter(
     try {
       // Attempt to dynamically import whatwg-fetch polyfill
       // Note: This requires the polyfill to be installed
+      // @ts-ignore - Ignore missing type declaration for whatwg-fetch
       await import('whatwg-fetch').catch(() => null);
       
       // After importing the polyfill, check if fetch is now available
@@ -169,7 +170,9 @@ function createNodeFetchAdapter(nodeFetch: typeof fetch, timeout: number): Netwo
         
         try {
           controller = new AbortController();
-          timeoutId = setTimeout(() => controller.abort(), timeout);
+          timeoutId = setTimeout(() => {
+            if (controller) controller.abort();
+          }, timeout);
         } catch {
           // AbortController not supported, continue without timeout
         }
@@ -208,10 +211,15 @@ function createNodeFetchAdapter(nodeFetch: typeof fetch, timeout: number): Netwo
     isNetworkAvailable: async () => {
       try {
         // Try to fetch a reliable endpoint to check network connectivity
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         const response = await nodeFetch('https://www.google.com', { 
           method: 'HEAD',
-          timeout: 5000
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         return response.status === 200;
       } catch {
         return false;
@@ -233,7 +241,9 @@ function createCustomFetchAdapter(customFetch: typeof fetch, timeout: number): N
         
         try {
           controller = new AbortController();
-          timeoutId = setTimeout(() => controller.abort(), timeout);
+          timeoutId = setTimeout(() => {
+            if (controller) controller.abort();
+          }, timeout);
         } catch {
           // AbortController not supported, continue without timeout
         }
@@ -267,10 +277,15 @@ function createCustomFetchAdapter(customFetch: typeof fetch, timeout: number): N
     isNetworkAvailable: async () => {
       try {
         // Try to fetch a small resource to check network connectivity
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         await customFetch('https://www.google.com', { 
           method: 'HEAD',
-          timeout: 5000
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         return true;
       } catch {
         return false;

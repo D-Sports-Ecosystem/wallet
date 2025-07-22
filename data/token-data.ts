@@ -188,7 +188,7 @@ export function getTokenBySymbol(symbol: string): TokenData | undefined {
 }
 
 export function getAllTokenSymbols(): string[] {
-  return [...new Set(availableTokens.map(token => token.symbol))];
+  return Array.from(new Set(availableTokens.map(token => token.symbol)));
 }
 
 // Original tokens for main page (keeping existing functionality)

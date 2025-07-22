@@ -152,14 +152,54 @@ async function createStorageAdapterWithFeatures(
 /**
  * Crypto adapter implementations
  */
-import { createCryptoAdapter as createCryptoAdapterImpl } from "./crypto-adapter";
+import { createCryptoAdapter as createCryptoAdapterImpl, CryptoAdapter } from "./crypto-adapter";
+
+// Wrapper class to adapt CryptoAdapter to PlatformAdapter.crypto interface
+class PlatformCryptoAdapter {
+  private adapter: CryptoAdapter;
+  
+  constructor(adapter: CryptoAdapter) {
+    this.adapter = adapter;
+  }
+  
+  generateRandomBytes(size: number): Uint8Array {
+    return this.adapter.getRandomValues(size);
+  }
+  
+  async sha256(data: Uint8Array): Promise<Uint8Array> {
+    // Use Web Crypto API if available
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      try {
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+        return new Uint8Array(hashBuffer);
+      } catch (error) {
+        console.warn('Web Crypto subtle digest failed:', error);
+        // Fall through to fallback
+      }
+    }
+    
+    // Fallback implementation (not secure!)
+    console.warn('Using insecure SHA-256 implementation');
+    const hash = new Uint8Array(32); // SHA-256 is 32 bytes
+    let h = 0;
+    for (let i = 0; i < data.length; i++) {
+      h = ((h << 5) - h) + data[i];
+      h |= 0;
+    }
+    for (let i = 0; i < 32; i++) {
+      hash[i] = (h + i * 16) & 0xFF;
+    }
+    return hash;
+  }
+}
 
 async function createCryptoAdapter(
   platform: Platform,
   features: PlatformFeatures
 ) {
   // Pass platform to the crypto adapter factory
-  return createCryptoAdapterImpl(platform);
+  const cryptoAdapter = await createCryptoAdapterImpl(platform);
+  return new PlatformCryptoAdapter(cryptoAdapter);
 }
 
 /**

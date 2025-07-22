@@ -2,11 +2,6 @@ import { tokenService, TokenInfo } from '../services/token-service';
 import { getDefaultPlatformAdapterAsync } from './platform-adapters';
 import { PlatformAdapter } from '../types';
 
-// Platform detection with improved browser detection
-function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
-}
-
 function isServer(): boolean {
   return typeof process !== 'undefined' && 
          process.versions !== undefined && 
@@ -242,7 +237,7 @@ export function getTokenBySymbol(symbol: string): TokenInfo | undefined {
  */
 export function getAllTokenSymbols(): string[] {
   const tokens = tokenStorage.getTokenData();
-  return [...new Set(tokens.map(token => token.symbol))];
+  return Array.from(new Set(tokens.map(token => token.symbol)));
 }
 
 /**

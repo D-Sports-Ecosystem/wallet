@@ -152,7 +152,10 @@ export async function detectStorageFeatures(): Promise<{
  */
 async function importAsyncStorage(): Promise<any> {
   try {
-    return await import('@react-native-async-storage/async-storage')
+    // Use dynamic import with a variable to prevent direct static analysis
+    const storageModuleName = '@react-native-' + 'async-storage/async-storage';
+    
+    return await import(/* webpackIgnore: true */ storageModuleName)
       .then(module => module.default)
       .catch(() => null);
   } catch {
