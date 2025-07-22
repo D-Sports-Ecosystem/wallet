@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { isReactNative } from '../../utils/platform-detection';
+import { getPlatformComponents } from '../../utils/component-factory';
 
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -12,8 +13,8 @@ interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
     if (isReactNative()) {
-      const { View } = require('react-native');
       return (
         <View
           ref={ref}
@@ -36,8 +37,8 @@ Avatar.displayName = 'Avatar';
 
 const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
   ({ className, ...props }, ref) => {
+    const { Image } = getPlatformComponents();
     if (isReactNative()) {
-      const { Image } = require('react-native');
       return (
         <Image
           ref={ref}
@@ -60,8 +61,8 @@ AvatarImage.displayName = 'AvatarImage';
 
 const AvatarFallback = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
     if (isReactNative()) {
-      const { View } = require('react-native');
       return (
         <View
           ref={ref}

@@ -75,45 +75,86 @@ export function isBrowser(): boolean {
 const isReactNative = detectPlatform() === "react-native";
 
 // Export the appropriate components and types based on platform
+// Use dynamic import pattern for React Native components
+async function loadReactNativeComponents(): Promise<PlatformComponents> {
+  try {
+    const RN = await import("react-native").catch(() => require("react-native"));
+    return {
+      View: RN.View,
+      Text: RN.Text,
+      Pressable: RN.Pressable,
+      TextInput: RN.TextInput,
+      ScrollView: RN.ScrollView,
+      FlatList: RN.FlatList,
+      Image: RN.Image,
+      ActivityIndicator: RN.ActivityIndicator,
+    };
+  } catch (error) {
+    console.warn("React Native components not available, using web fallback:", error);
+    return webComponents;
+  }
+}
+
+// Synchronous fallback for immediate access
+function getReactNativeComponentsSync(): PlatformComponents {
+  try {
+    const RN = require("react-native");
+    return {
+      View: RN.View,
+      Text: RN.Text,
+      Pressable: RN.Pressable,
+      TextInput: RN.TextInput,
+      ScrollView: RN.ScrollView,
+      FlatList: RN.FlatList,
+      Image: RN.Image,
+      ActivityIndicator: RN.ActivityIndicator,
+    };
+  } catch (error) {
+    console.warn("React Native components not available synchronously, using web fallback");
+    return webComponents;
+  }
+}
+
 export const PlatformComponents: PlatformComponents = isReactNative
-  ? (() => {
-      try {
-        // Try to import React Native components
-        const RN = require("react-native");
-        return {
-          View: RN.View,
-          Text: RN.Text,
-          Pressable: RN.Pressable,
-          TextInput: RN.TextInput,
-          ScrollView: RN.ScrollView,
-          FlatList: RN.FlatList,
-          Image: RN.Image,
-          ActivityIndicator: RN.ActivityIndicator,
-        };
-      } catch (error) {
-        // Fallback to web components if React Native is not available
-        return webComponents;
-      }
-    })()
+  ? getReactNativeComponentsSync()
   : webComponents;
 
+// Use dynamic import pattern for React Native types
+async function loadReactNativeTypes(): Promise<PlatformTypes> {
+  try {
+    const RN = await import("react-native").catch(() => require("react-native"));
+    return {
+      ViewProps: {} as any, // RN.ViewProps
+      TextProps: {} as any, // RN.TextProps
+      PressableProps: {} as any, // RN.PressableProps
+      TextInputProps: {} as any, // RN.TextInputProps
+      ImageProps: {} as any, // RN.ImageProps
+    };
+  } catch (error) {
+    console.warn("React Native types not available, using web fallback:", error);
+    return webTypes;
+  }
+}
+
+// Synchronous fallback for immediate access
+function getReactNativeTypesSync(): PlatformTypes {
+  try {
+    const RN = require("react-native");
+    return {
+      ViewProps: {} as any, // RN.ViewProps
+      TextProps: {} as any, // RN.TextProps
+      PressableProps: {} as any, // RN.PressableProps
+      TextInputProps: {} as any, // RN.TextInputProps
+      ImageProps: {} as any, // RN.ImageProps
+    };
+  } catch (error) {
+    console.warn("React Native types not available synchronously, using web fallback");
+    return webTypes;
+  }
+}
+
 export const PlatformTypes: PlatformTypes = isReactNative
-  ? (() => {
-      try {
-        // Try to import React Native types
-        const RN = require("react-native");
-        return {
-          ViewProps: {} as any, // RN.ViewProps
-          TextProps: {} as any, // RN.TextProps
-          PressableProps: {} as any, // RN.PressableProps
-          TextInputProps: {} as any, // RN.TextInputProps
-          ImageProps: {} as any, // RN.ImageProps
-        };
-      } catch (error) {
-        // Fallback to web types if React Native is not available
-        return webTypes;
-      }
-    })()
+  ? getReactNativeTypesSync()
   : webTypes;
 
 // API Request Handling

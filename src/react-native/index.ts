@@ -252,48 +252,79 @@ export function handleDeepLink(url: string, wallet: DSportsWallet) {
   return null;
 }
 
-// React Native Keychain utilities
+// React Native Keychain utilities with dynamic imports and proper error handling
+async function loadKeychain(): Promise<any> {
+  try {
+    // Try dynamic import first with type assertion
+    return await import("react-native-keychain" as any).catch(() => {
+      // Fallback to require if dynamic import fails
+      return (require as any)("react-native-keychain");
+    });
+  } catch (error) {
+    console.warn("React Native Keychain not available:", error);
+    throw new Error("Keychain functionality not available");
+  }
+}
+
 export async function storeSecureData(
   key: string,
   value: string,
 ): Promise<boolean> {
   try {
-    const Keychain = require("react-native-keychain");
+    const Keychain = await loadKeychain();
     await Keychain.setInternetCredentials(key, key, value);
     return true;
-  } catch {
+  } catch (error) {
+    console.warn("Failed to store secure data:", error);
     return false;
   }
 }
 
 export async function getSecureData(key: string): Promise<string | null> {
   try {
-    const Keychain = require("react-native-keychain");
+    const Keychain = await loadKeychain();
     const credentials = await Keychain.getInternetCredentials(key);
     return credentials ? credentials.password : null;
-  } catch {
+  } catch (error) {
+    console.warn("Failed to get secure data:", error);
     return null;
   }
 }
 
 export async function removeSecureData(key: string): Promise<boolean> {
   try {
-    const Keychain = require("react-native-keychain");
+    const Keychain = await loadKeychain();
     await Keychain.resetInternetCredentials(key);
     return true;
-  } catch {
+  } catch (error) {
+    console.warn("Failed to remove secure data:", error);
     return false;
   }
 }
 
-// React Native URL polyfill setup
-export function setupURLPolyfill() {
+// React Native URL polyfill setup with dynamic import and type assertions
+export async function setupURLPolyfill() {
   try {
-    require("react-native-url-polyfill/auto");
-  } catch {
+    await import("react-native-url-polyfill/auto" as any).catch(() => 
+      (require as any)("react-native-url-polyfill/auto")
+    );
+  } catch (error) {
     // Polyfill not available, URL might not work properly
     console.warn(
-      "react-native-url-polyfill not available. URL parsing may not work correctly.",
+      "react-native-url-polyfill not available. URL parsing may not work correctly:",
+      error
+    );
+  }
+}
+
+// Synchronous fallback for immediate setup
+export function setupURLPolyfillSync() {
+  try {
+    (require as any)("react-native-url-polyfill/auto");
+  } catch (error) {
+    console.warn(
+      "react-native-url-polyfill not available synchronously:",
+      error
     );
   }
 }

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 import { isReactNative } from '../../utils/platform-detection';
+import { getPlatformComponents } from '../../utils/component-factory';
 
 const TabsContext = React.createContext<{
   value: string;
@@ -16,13 +17,14 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ value, onValueChange, className, children, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     return (
       <TabsContext.Provider value={{ value, onValueChange }}>
         {isReactNative() ? (
-          (() => {
-            const { View } = require('react-native');
-            return <View ref={ref} className={cn('', className)} {...props}>{children}</View>;
-          })()
+          <View ref={ref} className={cn('', className)} {...props}>
+            {children}
+          </View>
         ) : (
           <div ref={ref} className={cn('', className)} {...props}>
             {children}
@@ -36,8 +38,9 @@ Tabs.displayName = 'Tabs';
 
 const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { className?: string }>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     if (isReactNative()) {
-      const { View } = require('react-native');
       return (
         <View
           ref={ref}
@@ -92,9 +95,9 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
     }
     const { value: selectedValue, onValueChange } = context;
     const isSelected = selectedValue === value;
+    const { Pressable } = getPlatformComponents();
 
     if (isReactNative()) {
-      const { Pressable } = require('react-native');
       return (
         <Pressable
           ref={ref}
@@ -139,11 +142,11 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
     }
     const { value: selectedValue } = context;
     const isSelected = selectedValue === value;
+    const { View } = getPlatformComponents();
 
     if (!isSelected) return null;
 
     if (isReactNative()) {
-      const { View } = require('react-native');
       return (
         <View
           ref={ref}

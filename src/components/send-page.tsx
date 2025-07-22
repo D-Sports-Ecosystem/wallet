@@ -5,19 +5,43 @@ import { isReactNative } from '../utils/platform-detection';
 // Get platform-specific components
 const { View, ScrollView, Pressable } = PlatformComponents;
 
-// Conditional import for React Native Animated
+// Dynamic import for React Native Animated with proper error handling
 let Animated: any = null;
-if (isReactNative()) {
-  try {
-    Animated = require('react-native-reanimated').default;
-  } catch (error) {
-    // Fallback for when react-native-reanimated is not available
-    Animated = { View: View };
+
+async function loadAnimated() {
+  if (isReactNative()) {
+    try {
+      const reanimated = await import('react-native-reanimated').catch(() => 
+        require('react-native-reanimated')
+      );
+      return reanimated.default || reanimated;
+    } catch (error) {
+      console.warn('React Native Reanimated not available, using fallback:', error);
+      return { View: View };
+    }
+  } else {
+    // Web fallback - use regular View
+    return { View: View };
   }
-} else {
-  // Web fallback - use regular View
-  Animated = { View: View };
 }
+
+// Synchronous fallback for immediate access
+function getAnimatedSync() {
+  if (isReactNative()) {
+    try {
+      return require('react-native-reanimated').default;
+    } catch (error) {
+      // Fallback for when react-native-reanimated is not available
+      return { View: View };
+    }
+  } else {
+    // Web fallback - use regular View
+    return { View: View };
+  }
+}
+
+// Initialize with synchronous fallback
+Animated = getAnimatedSync();
 import { FadeIn, FadeOut } from '../utils/animation-utils';
 import { Text } from './ui/text';
 import { Input } from './ui/input';

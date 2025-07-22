@@ -19,7 +19,26 @@ const createFallbackAnimation = (): AnimationBuilder => ({
   delay: () => createFallbackAnimation(),
 });
 
-// Safe import of React Native animations with proper fallbacks
+// Safe import of React Native animations with proper fallbacks using dynamic imports
+export async function loadSafeAnimations(): Promise<SafeAnimations> {
+  try {
+    const reanimated = await import("react-native-reanimated").catch(() => 
+      require("react-native-reanimated")
+    );
+    return {
+      FadeIn: reanimated.FadeIn || createFallbackAnimation(),
+      FadeOut: reanimated.FadeOut || createFallbackAnimation(),
+    };
+  } catch (e) {
+    console.warn("React Native Reanimated not available, using fallback animations:", e);
+    return {
+      FadeIn: createFallbackAnimation(),
+      FadeOut: createFallbackAnimation(),
+    };
+  }
+}
+
+// Synchronous fallback for immediate access
 export function getSafeAnimations(): SafeAnimations {
   try {
     const reanimated = require("react-native-reanimated");

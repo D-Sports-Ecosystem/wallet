@@ -1,25 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { isReactNative } from '../../utils/platform-detection';
-
-// Platform-specific imports
-let View: any, ViewProps: any, Text: any, TextProps: any;
-
-if (isReactNative()) {
-  const RN = require('react-native');
-  View = RN.View;
-  ViewProps = {};
-  const TextComponent = require('./text');
-  Text = TextComponent.Text;
-  TextProps = TextComponent.TextProps || {};
-} else {
-  // Web/Next.js fallback - use div elements
-  View = 'div';
-  ViewProps = {};
-  const TextComponent = require('./text');
-  Text = TextComponent.Text || 'span';
-  TextProps = {};
-}
+import { getPlatformComponents } from '../../utils/component-factory';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -27,6 +9,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     if (isReactNative()) {
       return (
         <View
@@ -50,6 +34,8 @@ Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     if (isReactNative()) {
       return <View ref={ref} className={cn('flex gap-1.5 pb-4', className)} {...props} />;
     }
@@ -63,6 +49,8 @@ CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement> & { className?: string }>(
   ({ className, ...props }, ref) => {
+    const { Text } = getPlatformComponents();
+    
     if (isReactNative()) {
       return (
         <Text
@@ -86,6 +74,8 @@ CardTitle.displayName = 'CardTitle';
 
 const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement> & { className?: string }>(
   ({ className, ...props }, ref) => {
+    const { Text } = getPlatformComponents();
+    
     if (isReactNative()) {
       return (
         <Text
@@ -109,6 +99,8 @@ CardDescription.displayName = 'CardDescription';
 
 const CardContent = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     if (isReactNative()) {
       return <View ref={ref} className={cn('pt-0', className)} {...props} />;
     }
@@ -120,6 +112,8 @@ CardContent.displayName = 'CardContent';
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
+    const { View } = getPlatformComponents();
+    
     if (isReactNative()) {
       return <View ref={ref} className={cn('flex flex-row items-center pt-4', className)} {...props} />;
     }
