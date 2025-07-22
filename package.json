@@ -5,33 +5,29 @@
   "description": "[IN PROGRESS] A comprehensive wallet package with Rainbow Kit and Wagmi connectors, supporting both Next.js and React Native with social login functionality",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "style": "dist/index.css",
   "react-native": "dist/react-native/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/src/index.d.ts"
     },
     "./nextjs": {
       "import": "./dist/nextjs/index.esm.js",
       "require": "./dist/nextjs/index.js",
-      "types": "./dist/nextjs/index.d.ts"
+      "types": "./dist/nextjs/src/nextjs/index.d.ts"
     },
     "./react-native": {
       "import": "./dist/react-native/index.esm.js",
       "require": "./dist/react-native/index.js",
-      "types": "./dist/react-native/index.d.ts"
-    },
-    "./ui": {
-      "import": "./dist/ui/index.esm.js",
-      "require": "./dist/ui/index.js",
-      "types": "./dist/ui/index.d.ts"
+      "types": "./dist/react-native/src/react-native/index.d.ts"
     }
   },
   "files": [
     "dist",
+    "*.d.ts",
     "README.md",
     "LICENSE"
   ],
