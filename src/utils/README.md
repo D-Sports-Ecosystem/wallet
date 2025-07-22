@@ -81,4 +81,23 @@ The platform adapter factory provides fallback implementations for missing featu
 
 - Storage: Falls back to memory storage if localStorage or AsyncStorage is not available
 - Crypto: Falls back to a basic implementation if Web Crypto API or Node.js crypto is not available
+
+## Browser-Compatible Crypto Adapter
+
+The SDK now includes a browser-compatible crypto adapter that works across all platforms:
+
+```typescript
+import { createCryptoAdapter } from './crypto-adapter';
+
+// Create a crypto adapter for the current platform
+const crypto = await createCryptoAdapter('web'); // or 'nextjs', 'react-native'
+
+// Generate random bytes
+const randomBytes = crypto.generateRandomBytes(32);
+
+// Calculate SHA-256 hash
+const hash = await crypto.sha256(data);
+```
+
+See [crypto-adapter.md](./crypto-adapter.md) for detailed documentation.
 - Network: Falls back to an error-throwing implementation if fetch is not available

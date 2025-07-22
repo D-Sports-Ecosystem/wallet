@@ -193,68 +193,12 @@ async function createStorageAdapter(platform: Platform, features: PlatformFeatur
 /**
  * Crypto adapter implementations
  */
+import { createCryptoAdapter as createCryptoAdapterImpl } from './crypto-adapter';
+
 async function createCryptoAdapter(platform: Platform, features: PlatformFeatures) {
-  // Web Crypto API (browser)
-  if ((platform === 'web' || platform === 'nextjs') && features.hasWebCrypto) {
-    return {
-      generateRandomBytes: (size: number) => {
-        const array = new Uint8Array(size);
-        crypto.getRandomValues(array);
-        return array;
-      },
-      sha256: async (data: Uint8Array) => {
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        return new Uint8Array(hashBuffer);
-      }
-    };
-  }
-  
-  // Node.js crypto
-  if (features.hasNodeCrypto) {
-    try {
-      const nodeCrypto = await import('crypto');
-      return {
-        generateRandomBytes: (size: number) => {
-          const buffer = nodeCrypto.randomBytes(size);
-          return new Uint8Array(buffer);
-        },
-        sha256: async (data: Uint8Array) => {
-          const hash = nodeCrypto.createHash('sha256');
-          hash.update(Buffer.from(data));
-          return new Uint8Array(hash.digest());
-        }
-      };
-    } catch {
-      // Fall through to fallback implementation
-    }
-  }
-  
-  // Fallback implementation (not secure, but works everywhere)
-  console.warn('Using insecure crypto fallback');
-  return {
-    generateRandomBytes: (size: number) => {
-      const array = new Uint8Array(size);
-      for (let i = 0; i < size; i++) {
-        array[i] = Math.floor(Math.random() * 256);
-      }
-      return array;
-    },
-    sha256: async (data: Uint8Array) => {
-      // This is a very basic hash function, not secure!
-      // In a real implementation, you would use a proper JS SHA-256 implementation
-      const hash = new Uint8Array(32); // SHA-256 is 32 bytes
-      let h = 0;
-      for (let i = 0; i < data.length; i++) {
-        h = ((h << 5) - h) + data[i];
-        h |= 0;
-      }
-      // Fill the hash with some derived values (NOT a real SHA-256)
-      for (let i = 0; i < 32; i++) {
-        hash[i] = (h + i * 16) & 0xFF;
-      }
-      return hash;
-    }
-  };
+  return createCryptoAdapterImpl(platform, {
+    useInsecureCrypto: !(features.hasWebCrypto || features.hasNodeCrypto)
+  });
 }
 
 /**
