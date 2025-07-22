@@ -32,6 +32,46 @@ export {
 // Event emitter utility
 export { EventEmitter } from "./utils/event-emitter";
 
+// Animation utilities
+export {
+  loadUnifiedAnimations,
+  getUnifiedAnimations,
+  detectAnimationCapabilities,
+  cssAnimationClasses,
+  animations,
+  FadeIn,
+  FadeOut,
+  SlideInRight,
+  SlideInLeft,
+  BounceIn,
+  Shimmer,
+  // Legacy compatibility
+  loadSafeAnimations,
+  getSafeAnimations,
+} from "./utils/animation-utils";
+
+// Animation hooks
+export {
+  useAnimations,
+  useAnimation,
+  useFadeAnimation,
+  useSlideAnimation,
+  useBounceAnimation,
+  useShimmerAnimation,
+} from "./hooks/useAnimations";
+
+// Animation components
+export {
+  AnimatedWrapper,
+  FadeInWrapper,
+  FadeOutWrapper,
+  SlideInRightWrapper,
+  SlideInLeftWrapper,
+  BounceInWrapper,
+  ShimmerWrapper,
+  withAnimation,
+} from "./components/AnimatedWrapper";
+
 // All types
 export * from "./types";
 

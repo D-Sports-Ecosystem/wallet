@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { PlatformComponents } from '../utils/platform-adapter';
-import { isReactNative } from '../utils/platform-detection';
-import { FadeIn, FadeOut } from '../utils/animation-utils';
+import { AnimatedWrapper } from './AnimatedWrapper';
+import { useAnimations } from '../hooks/useAnimations';
 import { Text } from './ui/text';
 import { Input } from './ui/input';
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -10,44 +10,6 @@ import { TokenInfo } from '../services/token-service';
 
 // Get platform-specific components
 const { View, FlatList, Pressable } = PlatformComponents;
-
-// Dynamic import for React Native Animated with proper error handling
-let Animated: any = null;
-
-async function loadAnimated() {
-  if (isReactNative()) {
-    try {
-      const reanimated = await import('react-native-reanimated').catch(() => 
-        require('react-native-reanimated')
-      );
-      return reanimated.default || reanimated;
-    } catch (error) {
-      console.warn('React Native Reanimated not available, using fallback:', error);
-      return { View: View };
-    }
-  } else {
-    // Web fallback - use regular View
-    return { View: View };
-  }
-}
-
-// Synchronous fallback for immediate access
-function getAnimatedSync() {
-  if (isReactNative()) {
-    try {
-      return require('react-native-reanimated').default;
-    } catch (error) {
-      // Fallback for when react-native-reanimated is not available
-      return { View: View };
-    }
-  } else {
-    // Web fallback - use regular View
-    return { View: View };
-  }
-}
-
-// Initialize with synchronous fallback
-Animated = getAnimatedSync();
 
 interface TokenSelectionPageProps {
   isPageTransitioning: boolean;
@@ -70,6 +32,8 @@ export function TokenSelectionPage({
   isLoading = false,
   error = null
 }: TokenSelectionPageProps) {
+  const { animations } = useAnimations();
+  
   const filteredTokens = React.useMemo(() => {
     if (!searchQuery) return availableTokens;
     const query = searchQuery.toLowerCase();
@@ -82,9 +46,9 @@ export function TokenSelectionPage({
   }, [availableTokens, searchQuery]);
 
   return (
-    <Animated.View
-      entering={isContentReady ? FadeIn.duration(300).delay(150) : undefined}
-      exiting={isPageTransitioning ? FadeOut.duration(200)!: undefined}
+    <AnimatedWrapper
+      animation={isContentReady ? animations.FadeIn.duration(300).delay(150) : animations.FadeIn}
+      trigger={isContentReady}
       className="flex-1"
     >
       <View className="p-6">
@@ -154,6 +118,6 @@ export function TokenSelectionPage({
           />
         )}
       </View>
-    </Animated.View>
+    </AnimatedWrapper>
   );
 }

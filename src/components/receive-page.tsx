@@ -1,48 +1,10 @@
 import * as React from 'react';
 import { PlatformComponents } from '../utils/platform-adapter';
-import { isReactNative } from '../utils/platform-detection';
+import { AnimatedWrapper } from './AnimatedWrapper';
+import { useAnimations } from '../hooks/useAnimations';
 
 // Get platform-specific components
 const { View, Pressable } = PlatformComponents;
-
-// Dynamic import for React Native Animated with proper error handling
-let Animated: any = null;
-
-async function loadAnimated() {
-  if (isReactNative()) {
-    try {
-      const reanimated = await import('react-native-reanimated').catch(() => 
-        require('react-native-reanimated')
-      );
-      return reanimated.default || reanimated;
-    } catch (error) {
-      console.warn('React Native Reanimated not available, using fallback:', error);
-      return { View: View };
-    }
-  } else {
-    // Web fallback - use regular View
-    return { View: View };
-  }
-}
-
-// Synchronous fallback for immediate access
-function getAnimatedSync() {
-  if (isReactNative()) {
-    try {
-      return require('react-native-reanimated').default;
-    } catch (error) {
-      // Fallback for when react-native-reanimated is not available
-      return { View: View };
-    }
-  } else {
-    // Web fallback - use regular View
-    return { View: View };
-  }
-}
-
-// Initialize with synchronous fallback
-Animated = getAnimatedSync();
-import { FadeIn, FadeOut } from '../utils/animation-utils';
 import { Text } from './ui/text';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -68,23 +30,22 @@ export function ReceivePage({
   isLoading = false,
   error = null
 }: ReceivePageProps) {
+  const { animations } = useAnimations();
   if (isLoading) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(300).delay(150)}
-        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+      <AnimatedWrapper
+        animation={animations.FadeIn.duration(300).delay(150)}
         className="flex-1"
       >
         <LoadingContent message="Loading token information..." />
-      </Animated.View>
+      </AnimatedWrapper>
     );
   }
 
   if (error) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(300).delay(150)}
-        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+      <AnimatedWrapper
+        animation={animations.FadeIn.duration(300).delay(150)}
         className="flex-1"
       >
         <View className="p-6 items-center">
@@ -98,15 +59,14 @@ export function ReceivePage({
             <Text>Go Back</Text>
           </Button>
         </View>
-      </Animated.View>
+      </AnimatedWrapper>
     );
   }
 
   if (!selectedReceiveToken) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(300).delay(150)}
-        exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+      <AnimatedWrapper
+        animation={animations.FadeIn.duration(300).delay(150)}
         className="flex-1"
       >
         <View className="p-6 items-center">
@@ -117,7 +77,7 @@ export function ReceivePage({
             <Text>Go Back</Text>
           </Button>
         </View>
-      </Animated.View>
+      </AnimatedWrapper>
     );
   }
 
@@ -132,9 +92,8 @@ export function ReceivePage({
   );
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(300).delay(150)}
-      exiting={isPageTransitioning ? FadeOut.duration(200) : undefined}
+    <AnimatedWrapper
+      animation={animations.FadeIn.duration(300).delay(150)}
       className="flex-1"
     >
       <View className="p-6 items-center">
@@ -211,6 +170,6 @@ export function ReceivePage({
           </Text>
         </View>
       </View>
-    </Animated.View>
+    </AnimatedWrapper>
   );
 }
