@@ -1,5 +1,6 @@
 import { tokenUpdateService, TokenUpdateConfig } from '../services/token-update-service';
 import { TokenInfo } from '../services/token-service';
+import { getDefaultPlatformAdapter } from './platform-adapter-factory';
 
 /**
  * Configuration for token synchronization
@@ -133,9 +134,9 @@ export class TokenSyncService {
   /**
    * Initialize the service by loading cached data and starting updates
    */
-  private initialize(): void {
+  private async initialize(): Promise<void> {
     // Try to load cached data from storage
-    const cachedData = this.loadFromStorage();
+    const cachedData = await this.loadFromStorage();
     
     if (cachedData) {
       // Use cached data if it's not too old
@@ -155,20 +156,16 @@ export class TokenSyncService {
   /**
    * Save token data to storage
    */
-  private saveToStorage(tokens: TokenInfo[]): void {
+  private async saveToStorage(tokens: TokenInfo[]): Promise<void> {
     try {
       const data = {
         tokens,
         timestamp: Date.now(),
       };
       
-      // Use localStorage in browser environments
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(this.config.storageKey, JSON.stringify(data));
-      }
-      
-      // Use AsyncStorage in React Native environments
-      // This is handled by the platform adapter in a real implementation
+      // Use the platform adapter for storage operations
+      const adapter = await getDefaultPlatformAdapter();
+      await adapter.storage.setItem(this.config.storageKey, JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save token data to storage:', error);
     }
@@ -177,18 +174,15 @@ export class TokenSyncService {
   /**
    * Load token data from storage
    */
-  private loadFromStorage(): { tokens: TokenInfo[], timestamp: number } | null {
+  private async loadFromStorage(): Promise<{ tokens: TokenInfo[], timestamp: number } | null> {
     try {
-      // Use localStorage in browser environments
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const data = window.localStorage.getItem(this.config.storageKey);
-        if (data) {
-          return JSON.parse(data);
-        }
-      }
+      // Use the platform adapter for storage operations
+      const adapter = await getDefaultPlatformAdapter();
+      const data = await adapter.storage.getItem(this.config.storageKey);
       
-      // Use AsyncStorage in React Native environments
-      // This is handled by the platform adapter in a real implementation
+      if (data) {
+        return JSON.parse(data);
+      }
       
       return null;
     } catch (error) {
@@ -221,17 +215,13 @@ export class TokenSyncService {
   /**
    * Clear the token cache from both memory and storage
    */
-  public clearCache(): void {
+  public async clearCache(): Promise<void> {
     tokenUpdateService.clearCache();
     
     try {
-      // Clear from localStorage in browser environments
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.removeItem(this.config.storageKey);
-      }
-      
-      // Clear from AsyncStorage in React Native environments
-      // This is handled by the platform adapter in a real implementation
+      // Use the platform adapter for storage operations
+      const adapter = await getDefaultPlatformAdapter();
+      await adapter.storage.removeItem(this.config.storageKey);
     } catch (error) {
       console.error('Failed to clear token cache from storage:', error);
     }

@@ -2,6 +2,9 @@
 // This helps avoid direct react-native imports in web builds
 // Also provides platform-specific API request handling
 
+// Import types
+import { Platform } from '../types';
+
 // Environment variables will be loaded by the build process or runtime environment
 
 export interface PlatformComponents {
@@ -537,10 +540,13 @@ export interface StorageAdapter {
 
 export class PlatformStorageAdapter implements StorageAdapter {
   private static instance: PlatformStorageAdapter;
-  private platform: string;
+  private platform: Platform;
+  private adapter: StorageAdapter | null = null;
+  private initPromise: Promise<void> | null = null;
 
   private constructor() {
-    this.platform = detectPlatform();
+    this.platform = detectPlatform() as Platform;
+    this.initPromise = this.initAdapter();
   }
 
   public static getInstance(): PlatformStorageAdapter {
@@ -550,46 +556,56 @@ export class PlatformStorageAdapter implements StorageAdapter {
     return PlatformStorageAdapter.instance;
   }
 
+  private async initAdapter(): Promise<void> {
+    try {
+      // Dynamically import the storage adapter to avoid bundling issues
+      const { createStorageAdapter } = await import('./storage-adapter');
+      this.adapter = await createStorageAdapter(this.platform);
+    } catch (error) {
+      console.error('Failed to initialize storage adapter:', error);
+      // Create a memory-based fallback
+      const { MemoryStorageAdapter } = await import('./storage-adapter');
+      this.adapter = new MemoryStorageAdapter();
+    }
+  }
+
+  private async ensureAdapter(): Promise<StorageAdapter> {
+    if (this.initPromise) {
+      await this.initPromise;
+    }
+    
+    if (!this.adapter) {
+      throw new Error('Storage adapter not initialized');
+    }
+    
+    return this.adapter;
+  }
+
   async getItem(key: string): Promise<string | null> {
     try {
-      if (this.platform === "react-native") {
-        const AsyncStorage =
-          require("@react-native-async-storage/async-storage").default;
-        return await AsyncStorage.getItem(key);
-      } else if (typeof window !== "undefined") {
-        return localStorage.getItem(key);
-      }
-      return null;
-    } catch {
+      const adapter = await this.ensureAdapter();
+      return await adapter.getItem(key);
+    } catch (error) {
+      console.warn('Storage getItem failed:', error);
       return null;
     }
   }
 
   async setItem(key: string, value: string): Promise<void> {
     try {
-      if (this.platform === "react-native") {
-        const AsyncStorage =
-          require("@react-native-async-storage/async-storage").default;
-        await AsyncStorage.setItem(key, value);
-      } else if (typeof window !== "undefined") {
-        localStorage.setItem(key, value);
-      }
-    } catch {
-      // Ignore storage errors
+      const adapter = await this.ensureAdapter();
+      await adapter.setItem(key, value);
+    } catch (error) {
+      console.warn('Storage setItem failed:', error);
     }
   }
 
   async removeItem(key: string): Promise<void> {
     try {
-      if (this.platform === "react-native") {
-        const AsyncStorage =
-          require("@react-native-async-storage/async-storage").default;
-        await AsyncStorage.removeItem(key);
-      } else if (typeof window !== "undefined") {
-        localStorage.removeItem(key);
-      }
-    } catch {
-      // Ignore storage errors
+      const adapter = await this.ensureAdapter();
+      await adapter.removeItem(key);
+    } catch (error) {
+      console.warn('Storage removeItem failed:', error);
     }
   }
 }

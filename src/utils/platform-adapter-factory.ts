@@ -109,85 +109,11 @@ export async function detectFeatures(): Promise<PlatformFeatures> {
 /**
  * Storage adapter implementations
  */
+import { createStorageAdapter } from './storage-adapter';
+
 async function createStorageAdapter(platform: Platform, features: PlatformFeatures) {
-  // React Native AsyncStorage
-  if (platform === 'react-native' && features.hasAsyncStorage) {
-    try {
-      const AsyncStorage = await import('@react-native-async-storage/async-storage')
-        .then(module => module.default)
-        .catch(() => null);
-      
-      if (AsyncStorage) {
-        return {
-          getItem: async (key: string) => {
-            try {
-              return await AsyncStorage.getItem(key);
-            } catch {
-              return null;
-            }
-          },
-          setItem: async (key: string, value: string) => {
-            try {
-              await AsyncStorage.setItem(key, value);
-            } catch {
-              // Ignore storage errors
-            }
-          },
-          removeItem: async (key: string) => {
-            try {
-              await AsyncStorage.removeItem(key);
-            } catch {
-              // Ignore storage errors
-            }
-          }
-        };
-      }
-    } catch {
-      // Fall through to next option if AsyncStorage fails
-    }
-  }
-  
-  // Browser localStorage
-  if ((platform === 'web' || platform === 'nextjs') && features.hasLocalStorage) {
-    return {
-      getItem: async (key: string) => {
-        try {
-          return localStorage.getItem(key);
-        } catch {
-          return null;
-        }
-      },
-      setItem: async (key: string, value: string) => {
-        try {
-          localStorage.setItem(key, value);
-        } catch {
-          // Ignore storage errors
-        }
-      },
-      removeItem: async (key: string) => {
-        try {
-          localStorage.removeItem(key);
-        } catch {
-          // Ignore storage errors
-        }
-      }
-    };
-  }
-  
-  // Memory fallback (works everywhere)
-  console.warn('Using memory storage fallback');
-  const memoryStorage = new Map<string, string>();
-  return {
-    getItem: async (key: string) => {
-      return memoryStorage.get(key) || null;
-    },
-    setItem: async (key: string, value: string) => {
-      memoryStorage.set(key, value);
-    },
-    removeItem: async (key: string) => {
-      memoryStorage.delete(key);
-    }
-  };
+  // Use the new storage adapter factory
+  return createStorageAdapter(platform);
 }
 
 /**
