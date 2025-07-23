@@ -1,11 +1,62 @@
-// Universal entry point - detects environment and loads appropriate code
+/**
+ * @file src/index.ts
+ * @description Universal entry point for @d-sports/wallet library
+ * @overview Detects runtime environment and loads appropriate platform-specific code
+ * @environment-detection [Browser, Server, React Native]
+ * @exports All public APIs for cross-platform usage
+ * @author D-Sports Engineering Team
+ * @version 1.1.1
+ * @since 2024-07-20
+ */
+
+/**
+ * @section Universal Entry Point
+ * @description This file serves as the universal entry point for the wallet library,
+ * automatically detecting the runtime environment and loading appropriate
+ * platform-specific implementations.
+ * @platforms [Browser, Next.js, React Native]
+ * @import-detection Handles CSS styles and platform-specific imports
+ */
+
+/**
+ * @import "./index.css"
+ * @description Import CSS styles handled by bundler
+ * @note CSS will be processed by the platform-specific bundler
+ * @platforms [Webpack, Rollup, Metro]
+ */
 // For browser-only usage, import from '@d-sports/wallet/browser'
 // For server-only usage, import from '@d-sports/wallet/server'
 
 // Import CSS styles (will be handled by bundler)
 import "./index.css";
 
-// Core wallet functionality
+/**
+ * @exports DSportWallet
+ * @description Core wallet functionality exported from ./core/wallet
+ * @class DSportsWallet
+ * @overview Main wallet class providing deterministic key generation
+ * @extends EventEmitter for event handling
+ * @implements WalletProviderInterface for provider compatibility
+ * @methods [connect, disconnect, generateKey, addConnector, removeConnector]
+ */
+
+/**
+ * @exports CustomSocialLoginProvider
+ * @description OAuth integration exported from ./providers/custom-social_login
+ * @class CustomSocialLoginProvider
+ * @overview Custom social login provider for OAuth integration
+ * @supports [Google, Facebook, Twitter, Discord, GitHub, Apple]
+ * @methods [authenticate, authorize, callback, tokenExchange]
+ */
+
+/**
+ * @exports DSportsOAuthService
+ * @description Managed OAuth service exported from ./providers/dsports_oauth_service
+ * @class DSportsOAuthService
+ * @overview D-Sports managed OAuth service for instant development
+ * @features [Quick setup, Managed credentials, Development OAuth]
+ * @methods [createQuickStartSocialLogin, validateSocialLoginConfig]
+ */
 export { DSportsWallet } from "./core/wallet";
 export { CustomSocialLoginProvider } from "./providers/custom-social-login";
 export {

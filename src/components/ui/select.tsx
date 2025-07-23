@@ -1,3 +1,12 @@
+/**
+ * @file select.tsx
+ * @description An accessible dropdown select component based on Radix UI
+ * @module components/ui
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2024-07-23
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,12 +15,51 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "../../lib/utils"
 
+/**
+ * Root Select component that manages the select state
+ * 
+ * @component
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#root}
+ */
 const Select = SelectPrimitive.Root
 
+/**
+ * Group component for organizing select items
+ * 
+ * @component
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#group}
+ */
 const SelectGroup = SelectPrimitive.Group
 
+/**
+ * Component that displays the selected value
+ * 
+ * @component
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#value}
+ */
 const SelectValue = SelectPrimitive.Value
 
+/**
+ * Trigger button that opens the select dropdown
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.ReactNode} props.children - Content to display in the trigger
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.Trigger>>} ref - Reference to the trigger element
+ * @returns {JSX.Element} - Rendered SelectTrigger component
+ * 
+ * @example
+ * ```tsx
+ * <Select>
+ *   <SelectTrigger className="w-[200px]">
+ *     <SelectValue placeholder="Select a fruit" />
+ *   </SelectTrigger>
+ * </Select>
+ * ```
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#trigger}
+ */
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
@@ -32,6 +80,17 @@ const SelectTrigger = React.forwardRef<
 ))
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
+/**
+ * Button for scrolling up in the select dropdown
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.ScrollUpButton>>} ref - Reference to the button element
+ * @returns {JSX.Element} - Rendered SelectScrollUpButton component
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#scrollupbutton}
+ */
 const SelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
@@ -49,6 +108,17 @@ const SelectScrollUpButton = React.forwardRef<
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
 
+/**
+ * Button for scrolling down in the select dropdown
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.ScrollDownButton>>} ref - Reference to the button element
+ * @returns {JSX.Element} - Rendered SelectScrollDownButton component
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#scrolldownbutton}
+ */
 const SelectScrollDownButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
@@ -67,6 +137,33 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+/**
+ * Content component that contains the select dropdown items
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.ReactNode} props.children - Content to display in the dropdown
+ * @param {"item" | "popper"} [props.position="popper"] - Position strategy for the dropdown
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.Content>>} ref - Reference to the content element
+ * @returns {JSX.Element} - Rendered SelectContent component
+ * 
+ * @example
+ * ```tsx
+ * <Select>
+ *   <SelectTrigger>
+ *     <SelectValue placeholder="Select a fruit" />
+ *   </SelectTrigger>
+ *   <SelectContent>
+ *     <SelectItem value="apple">Apple</SelectItem>
+ *     <SelectItem value="banana">Banana</SelectItem>
+ *     <SelectItem value="orange">Orange</SelectItem>
+ *   </SelectContent>
+ * </Select>
+ * ```
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#content}
+ */
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
@@ -99,6 +196,28 @@ const SelectContent = React.forwardRef<
 ))
 SelectContent.displayName = SelectPrimitive.Content.displayName
 
+/**
+ * Label component for select groups
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.Label>>} ref - Reference to the label element
+ * @returns {JSX.Element} - Rendered SelectLabel component
+ * 
+ * @example
+ * ```tsx
+ * <SelectContent>
+ *   <SelectGroup>
+ *     <SelectLabel>Fruits</SelectLabel>
+ *     <SelectItem value="apple">Apple</SelectItem>
+ *     <SelectItem value="banana">Banana</SelectItem>
+ *   </SelectGroup>
+ * </SelectContent>
+ * ```
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#label}
+ */
 const SelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
@@ -111,6 +230,29 @@ const SelectLabel = React.forwardRef<
 ))
 SelectLabel.displayName = SelectPrimitive.Label.displayName
 
+/**
+ * Selectable item component for the dropdown
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {string} props.value - Value of the item when selected
+ * @param {boolean} [props.disabled] - Whether the item is disabled
+ * @param {React.ReactNode} props.children - Content to display in the item
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.Item>>} ref - Reference to the item element
+ * @returns {JSX.Element} - Rendered SelectItem component
+ * 
+ * @example
+ * ```tsx
+ * <SelectContent>
+ *   <SelectItem value="apple">Apple</SelectItem>
+ *   <SelectItem value="banana">Banana</SelectItem>
+ *   <SelectItem value="orange" disabled>Orange (Out of Stock)</SelectItem>
+ * </SelectContent>
+ * ```
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#item}
+ */
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
@@ -134,6 +276,34 @@ const SelectItem = React.forwardRef<
 ))
 SelectItem.displayName = SelectPrimitive.Item.displayName
 
+/**
+ * Separator component for visually dividing select items
+ * 
+ * @component
+ * @param {React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>} props - Component props
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {React.Ref<React.ElementRef<typeof SelectPrimitive.Separator>>} ref - Reference to the separator element
+ * @returns {JSX.Element} - Rendered SelectSeparator component
+ * 
+ * @example
+ * ```tsx
+ * <SelectContent>
+ *   <SelectGroup>
+ *     <SelectLabel>Fruits</SelectLabel>
+ *     <SelectItem value="apple">Apple</SelectItem>
+ *     <SelectItem value="banana">Banana</SelectItem>
+ *   </SelectGroup>
+ *   <SelectSeparator />
+ *   <SelectGroup>
+ *     <SelectLabel>Vegetables</SelectLabel>
+ *     <SelectItem value="carrot">Carrot</SelectItem>
+ *     <SelectItem value="potato">Potato</SelectItem>
+ *   </SelectGroup>
+ * </SelectContent>
+ * ```
+ * 
+ * @see {@link https://www.radix-ui.com/primitives/docs/components/select#separator}
+ */
 const SelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
@@ -146,6 +316,33 @@ const SelectSeparator = React.forwardRef<
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
+/**
+ * Complete example of the Select component usage
+ * 
+ * @example
+ * ```tsx
+ * <Select onValueChange={(value) => console.log(value)}>
+ *   <SelectTrigger className="w-[200px]">
+ *     <SelectValue placeholder="Select a fruit" />
+ *   </SelectTrigger>
+ *   <SelectContent>
+ *     <SelectGroup>
+ *       <SelectLabel>Fruits</SelectLabel>
+ *       <SelectItem value="apple">Apple</SelectItem>
+ *       <SelectItem value="banana">Banana</SelectItem>
+ *       <SelectItem value="blueberry">Blueberry</SelectItem>
+ *     </SelectGroup>
+ *     <SelectSeparator />
+ *     <SelectGroup>
+ *       <SelectLabel>Vegetables</SelectLabel>
+ *       <SelectItem value="carrot">Carrot</SelectItem>
+ *       <SelectItem value="potato">Potato</SelectItem>
+ *       <SelectItem value="broccoli" disabled>Broccoli</SelectItem>
+ *     </SelectGroup>
+ *   </SelectContent>
+ * </Select>
+ * ```
+ */
 export {
   Select,
   SelectGroup,

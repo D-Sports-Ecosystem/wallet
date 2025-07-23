@@ -51,7 +51,7 @@
         "mcp-remote",
         "https://mcp.linear.app/sse"
       ],
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "list_teams",
         "list_projects",

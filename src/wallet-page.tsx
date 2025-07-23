@@ -9,6 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { TokenProvider, useTokens } from "./contexts/token-context";
 import { WalletModal } from "./wallet-modal";
 
+/**
+ * @description Wallet page content component
+ * @returns {JSX.Element} Wallet page content
+ */
 function WalletPageContent() {
   const { tokens, isLoading, error, refreshTokenData, lastUpdated } = useTokens();
   const [activeTab, setActiveTab] = useState("tokens");
@@ -26,6 +30,10 @@ function WalletPageContent() {
     }
   };
 
+  /**
+   * @description Formats the last updated time
+   * @returns {string} Last updated time
+   */
   const formatLastUpdated = () => {
     if (!lastUpdated) return "Never updated";
     
