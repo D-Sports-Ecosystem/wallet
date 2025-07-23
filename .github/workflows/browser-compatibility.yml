@@ -16,10 +16,10 @@ jobs:
         node-version: [18.x]
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -52,13 +52,13 @@ jobs:
         run: npm run monitor-bundle-size:report
       
       - name: Upload bundle size report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bundle-size-report
           path: dist/bundle-size-report.html
       
       - name: Upload bundle stats
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bundle-stats
           path: dist/stats-*.html
