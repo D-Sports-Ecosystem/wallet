@@ -1,17 +1,34 @@
 #!/usr/bin/env node
 
 /**
- * Enhanced Browser Bundle Validation Script
+ * @file validate-browser-bundle.js
+ * @description Enhanced Browser Bundle Validation Script that ensures browser compatibility
+ * @module scripts/validate-browser-bundle
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
  * 
  * This script validates that the browser bundle does not contain any Node.js modules
- * and performs additional checks for browser compatibility.
+ * and performs additional checks for browser compatibility. It can also attempt to
+ * fix simple issues automatically when run with the --fix flag.
  * 
- * Usage:
- *   node scripts/validate-browser-bundle.js [--fix] [--verbose]
+ * @example
+ * ```bash
+ * # Basic validation
+ * node scripts/validate-browser-bundle.js
  * 
- * Options:
- *   --fix       Attempt to fix simple issues automatically
- *   --verbose   Show detailed output including all matches
+ * # Attempt to fix simple issues automatically
+ * node scripts/validate-browser-bundle.js --fix
+ * 
+ * # Show detailed output including all matches
+ * node scripts/validate-browser-bundle.js --verbose
+ * 
+ * # Combine options
+ * node scripts/validate-browser-bundle.js --fix --verbose
+ * ```
+ * 
+ * @typedef {Object} CommandLineOptions
+ * @property {boolean} fix - Attempt to fix simple issues automatically
+ * @property {boolean} verbose - Show detailed output including all matches
  */
 
 import fs from 'fs';
@@ -48,7 +65,20 @@ const filesToValidate = [
   path.join(__dirname, '..', 'dist', 'browser', 'index.esm.js')
 ];
 
-// Patterns to check for
+/**
+ * Creates regex patterns to check for forbidden module imports
+ * 
+ * @function createPatterns
+ * @param {string[]} modules - Array of module names to check for
+ * @returns {RegExp[]} Array of regular expressions to match different import patterns
+ * 
+ * @example
+ * ```javascript
+ * const nodeModules = ['fs', 'path', 'crypto'];
+ * const patterns = createPatterns(nodeModules);
+ * // Returns array of RegExp objects to match require, import, and dynamic import statements
+ * ```
+ */
 const createPatterns = (modules) => {
   return [
     // Direct require statements
@@ -88,7 +118,31 @@ const browserCompatibilityChecks = [
   }
 ];
 
-// Validate each file
+/**
+ * Validates browser bundle files for Node.js module references and browser compatibility
+ * 
+ * This function is the main entry point for the validation process. It checks each
+ * browser bundle file for Node.js module references, React Native module references,
+ * and other browser compatibility issues. It can also attempt to fix simple issues
+ * automatically when run with the --fix flag.
+ * 
+ * @async
+ * @function validateFiles
+ * @returns {Promise<number>} A promise that resolves to 0 if validation passes, 1 if it fails
+ * @throws {Error} If any file cannot be read or validated
+ * 
+ * @example
+ * ```javascript
+ * validateFiles()
+ *   .then(exitCode => {
+ *     process.exit(exitCode);
+ *   })
+ *   .catch(error => {
+ *     console.error('Validation failed with error:', error);
+ *     process.exit(1);
+ *   });
+ * ```
+ */
 async function validateFiles() {
   console.log('Validating browser bundle files for Node.js module references...\n');
   

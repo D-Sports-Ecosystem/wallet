@@ -1,17 +1,34 @@
 #!/usr/bin/env node
 
 /**
- * Bundle Size Monitoring Script
- *
+ * @file monitor-bundle-size.js
+ * @description Bundle Size Monitoring Script that tracks bundle sizes across platforms
+ * @module scripts/monitor-bundle-size
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * 
  * This script monitors the size of bundle files across different platforms
  * and compares them with previous builds to track changes over time.
- *
- * Usage:
- *   node scripts/monitor-bundle-size.js [--threshold=SIZE_KB] [--report]
- *
- * Options:
- *   --threshold=N  Set size threshold warning in KB (default: 500)
- *   --report       Generate HTML report with size history
+ * It can also generate an HTML report with historical size data and charts.
+ * 
+ * @example
+ * ```bash
+ * # Basic usage
+ * node scripts/monitor-bundle-size.js
+ * 
+ * # Set custom size threshold warning (in KB)
+ * node scripts/monitor-bundle-size.js --threshold=300
+ * 
+ * # Generate HTML report with size history
+ * node scripts/monitor-bundle-size.js --report
+ * 
+ * # Combine options
+ * node scripts/monitor-bundle-size.js --threshold=300 --report
+ * ```
+ * 
+ * @typedef {Object} CommandLineOptions
+ * @property {number} threshold - Size threshold warning in KB (default: 500)
+ * @property {boolean} report - Whether to generate an HTML report
  */
 
 import fs from "fs";
@@ -68,7 +85,24 @@ const REPORT_FILE = path.join(
   "bundle-size-report.html"
 );
 
-// Load previous bundle sizes if available
+/**
+ * Loads the previous bundle size history from the history file
+ * 
+ * @function loadBundleSizeHistory
+ * @returns {Object} The bundle size history object
+ * @property {Array} history - Array of historical bundle size entries
+ * @property {Object} current - Current bundle size entry
+ * @property {string} current.date - ISO timestamp of the current entry
+ * @property {Object} current.sizes - Object containing bundle sizes by platform and file
+ * @throws {Error} If the history file exists but cannot be parsed
+ * 
+ * @example
+ * ```javascript
+ * const historyData = loadBundleSizeHistory();
+ * console.log(`Current date: ${historyData.current.date}`);
+ * console.log(`History entries: ${historyData.history.length}`);
+ * ```
+ */
 function loadBundleSizeHistory() {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
@@ -93,7 +127,28 @@ function loadBundleSizeHistory() {
   };
 }
 
-// Save current bundle sizes
+/**
+ * Saves the current bundle size history to the history file
+ * 
+ * @function saveBundleSizeHistory
+ * @param {Object} history - The bundle size history object to save
+ * @param {Array} history.history - Array of historical bundle size entries
+ * @param {Object} history.current - Current bundle size entry
+ * @returns {void}
+ * @throws {Error} If the directory cannot be created or the file cannot be written
+ * 
+ * @example
+ * ```javascript
+ * const history = {
+ *   history: [],
+ *   current: {
+ *     date: new Date().toISOString(),
+ *     sizes: { browser: { 'index.js': 245.5 } }
+ *   }
+ * };
+ * saveBundleSizeHistory(history);
+ * ```
+ */
 function saveBundleSizeHistory(history) {
   try {
     // Ensure directory exists
@@ -108,7 +163,26 @@ function saveBundleSizeHistory(history) {
   }
 }
 
-// Generate HTML report
+/**
+ * Generates an HTML report with bundle size history charts
+ * 
+ * This function creates a comprehensive HTML report with charts showing
+ * the bundle size trends over time for each platform and file.
+ * 
+ * @function generateHtmlReport
+ * @param {Object} history - The bundle size history object
+ * @param {Array} history.history - Array of historical bundle size entries
+ * @param {Object} history.current - Current bundle size entry
+ * @returns {void}
+ * @throws {Error} If the report file cannot be written
+ * 
+ * @example
+ * ```javascript
+ * const historyData = loadBundleSizeHistory();
+ * generateHtmlReport(historyData);
+ * // Creates an HTML report at dist/bundle-size-report.html
+ * ```
+ */
 function generateHtmlReport(history) {
   if (!history.history || history.history.length === 0) {
     console.log("No historical data available for report generation");
@@ -415,7 +489,30 @@ function generateHtmlReport(history) {
   console.log(`Bundle size report generated at: ${REPORT_FILE}`);
 }
 
-// Monitor bundle sizes
+/**
+ * Monitors bundle sizes across all platforms and compares with previous builds
+ * 
+ * This function is the main entry point for the bundle size monitoring process.
+ * It checks each platform's bundle files for size changes, compares with previous
+ * builds, and updates the size history. It can also generate an HTML report.
+ * 
+ * @async
+ * @function monitorBundleSizes
+ * @returns {Promise<boolean>} A promise that resolves to true if no warnings, false otherwise
+ * @throws {Error} If any file cannot be read or analyzed
+ * 
+ * @example
+ * ```javascript
+ * monitorBundleSizes()
+ *   .then(success => {
+ *     process.exit(success ? 0 : 1);
+ *   })
+ *   .catch(error => {
+ *     console.error('Monitoring failed:', error);
+ *     process.exit(1);
+ *   });
+ * ```
+ */
 async function monitorBundleSizes() {
   console.log("Monitoring bundle sizes across platforms...\n");
 

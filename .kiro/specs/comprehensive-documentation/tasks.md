@@ -9,7 +9,6 @@
 
 - [x] 2. Document UI components in @/components/ui
 
-
   - [x] 2.1 Document base UI components
 
     - Document Button component with props, examples, and usage patterns
@@ -48,15 +47,17 @@
     - Document data validation and transformation functions
     - _Requirements: 1.1, 1.2, 3.1, 3.2_
 
-- [ ] 4. Document scripts in scripts/
+- [x] 4. Document scripts in scripts/
 
-  - [ ] 4.1 Document build and analysis scripts
+
+  - [x] 4.1 Document build and analysis scripts
 
     - Document analyze-bundle.js with function descriptions and usage
     - Document monitor-bundle-size.js with comprehensive JSDoc comments
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 4.2 Document data update scripts
+  - [x] 4.2 Document data update scripts
+
     - Document update-token-data.js with function descriptions and usage
     - Document validation scripts with comprehensive JSDoc comments
     - _Requirements: 1.1, 1.2, 1.3, 3.4_

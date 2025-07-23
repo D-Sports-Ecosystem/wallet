@@ -1,17 +1,36 @@
 #!/usr/bin/env node
 
 /**
- * Enhanced Bundle Analysis Script
+ * @file analyze-bundle.js
+ * @description Enhanced Bundle Analysis Script that verifies platform compatibility
+ * and monitors bundle sizes across different platform builds.
+ * @module scripts/analyze-bundle
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
  * 
  * This script analyzes the bundle output to verify that Node.js modules
  * are properly excluded from browser builds and monitors bundle sizes.
+ * It checks for forbidden module references in each platform-specific build
+ * and tracks bundle size changes over time.
  * 
- * Usage:
- *   node scripts/analyze-bundle.js [--verbose] [--threshold=SIZE_KB]
+ * @example
+ * ```bash
+ * # Basic usage
+ * node scripts/analyze-bundle.js
  * 
- * Options:
- *   --verbose     Show detailed analysis including all matches
- *   --threshold=N Set size threshold warning in KB (default: 500)
+ * # Show detailed analysis with all matches
+ * node scripts/analyze-bundle.js --verbose
+ * 
+ * # Set custom size threshold warning (in KB)
+ * node scripts/analyze-bundle.js --threshold=300
+ * 
+ * # Combine options
+ * node scripts/analyze-bundle.js --verbose --threshold=300
+ * ```
+ * 
+ * @typedef {Object} CommandLineOptions
+ * @property {boolean} verbose - Show detailed analysis including all matches
+ * @property {number} threshold - Size threshold warning in KB (default: 500)
  */
 
 import fs from 'fs';
@@ -69,7 +88,20 @@ const filesToAnalyze = {
   ]
 };
 
-// Patterns to check for
+/**
+ * Creates regex patterns to check for forbidden module imports
+ * 
+ * @function createPatterns
+ * @param {string[]} modules - Array of module names to check for
+ * @returns {RegExp[]} Array of regular expressions to match different import patterns
+ * 
+ * @example
+ * ```javascript
+ * const nodeModules = ['fs', 'path', 'crypto'];
+ * const patterns = createPatterns(nodeModules);
+ * // Returns array of RegExp objects to match require, import, and dynamic import statements
+ * ```
+ */
 const createPatterns = (modules) => {
   return [
     // Direct require statements
@@ -84,7 +116,22 @@ const createPatterns = (modules) => {
 // Store historical bundle sizes
 const HISTORY_FILE = path.join(__dirname, '..', '.kiro', 'settings', 'bundle-size-history.json');
 
-// Load previous bundle sizes if available
+/**
+ * Loads the previous bundle size history from the history file
+ * 
+ * @function loadBundleSizeHistory
+ * @returns {Object} The bundle size history object containing lastUpdated timestamp and sizes by platform
+ * @property {string|null} lastUpdated - ISO timestamp of when the history was last updated
+ * @property {Object} sizes - Object containing bundle sizes by platform and file
+ * @throws {Error} If the history file exists but cannot be parsed
+ * 
+ * @example
+ * ```javascript
+ * const history = loadBundleSizeHistory();
+ * console.log(`Last updated: ${history.lastUpdated}`);
+ * console.log(`Previous browser bundle size: ${history.sizes.browser['index.js']} KB`);
+ * ```
+ */
 function loadBundleSizeHistory() {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
@@ -97,7 +144,21 @@ function loadBundleSizeHistory() {
   return { lastUpdated: null, sizes: {} };
 }
 
-// Save current bundle sizes
+/**
+ * Saves the current bundle size history to the history file
+ * 
+ * @function saveBundleSizeHistory
+ * @param {Object} history - The bundle size history object to save
+ * @param {Object} history.sizes - Object containing bundle sizes by platform and file
+ * @returns {void}
+ * @throws {Error} If the directory cannot be created or the file cannot be written
+ * 
+ * @example
+ * ```javascript
+ * const history = { sizes: { browser: { 'index.js': 245.5 } } };
+ * saveBundleSizeHistory(history);
+ * ```
+ */
 function saveBundleSizeHistory(history) {
   try {
     // Ensure directory exists
@@ -113,7 +174,30 @@ function saveBundleSizeHistory(history) {
   }
 }
 
-// Analyze each file
+/**
+ * Analyzes all bundle files for compatibility and size
+ * 
+ * This function is the main entry point for the bundle analysis process.
+ * It checks each platform's bundle files for forbidden module references
+ * and tracks bundle sizes, comparing them with previous builds.
+ * 
+ * @async
+ * @function analyzeFiles
+ * @returns {Promise<boolean>} A promise that resolves to true if all checks pass, false otherwise
+ * @throws {Error} If any file cannot be read or analyzed
+ * 
+ * @example
+ * ```javascript
+ * analyzeFiles()
+ *   .then(success => {
+ *     process.exit(success ? 0 : 1);
+ *   })
+ *   .catch(error => {
+ *     console.error('Analysis failed:', error);
+ *     process.exit(1);
+ *   });
+ * ```
+ */
 async function analyzeFiles() {
   console.log('Analyzing bundle files for compatibility and size...\n');
   
