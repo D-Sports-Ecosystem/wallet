@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D-Sports Wallet Browser Platform Adapters Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .test-section h2 {
+      margin-top: 0;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .success {
+      color: #2e7d32;
+      background-color: #e8f5e9;
+    }
+    .error {
+      color: #c62828;
+      background-color: #ffebee;
+    }
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>D-Sports Wallet Browser Platform Adapters Test</h1>
+  <p>This page tests the browser compatibility of the D-Sports Wallet platform adapters.</p>
+  
+  <div class="test-section">
+    <h2>Platform Detection</h2>
+    <button id="test-platform-detection">Run Test</button>
+    <div id="platform-detection-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Feature Detection</h2>
+    <button id="test-feature-detection">Run Test</button>
+    <div id="feature-detection-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Storage Adapter</h2>
+    <button id="test-storage-adapter">Run Test</button>
+    <div id="storage-adapter-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Crypto Adapter</h2>
+    <button id="test-crypto-adapter">Run Test</button>
+    <div id="crypto-adapter-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Network Adapter</h2>
+    <button id="test-network-adapter">Run Test</button>
+    <div id="network-adapter-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Node.js Module Import Test</h2>
+    <p>This test verifies that the browser bundle doesn't try to import Node.js modules.</p>
+    <button id="test-node-modules">Run Test</button>
+    <div id="node-modules-result" class="result"></div>
+  </div>
+  
+  <script type="module">
+    // Import the browser bundle
+    import * as wallet from './dist/browser/index.esm.js';
+    
+    // Platform Detection Test
+    document.getElementById('test-platform-detection').addEventListener('click', async () => {
+      const resultElement = document.getElementById('platform-detection-result');
+      try {
+        const platformAdapter = await wallet.createPlatformAdapter();
+        resultElement.textContent = `Platform detected: ${platformAdapter.platform}`;
+        resultElement.classList.add('success');
+        resultElement.classList.remove('error');
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+    
+    // Feature Detection Test
+    document.getElementById('test-feature-detection').addEventListener('click', async () => {
+      const resultElement = document.getElementById('feature-detection-result');
+      try {
+        const features = await wallet.detectFeatures();
+        resultElement.textContent = JSON.stringify(features, null, 2);
+        resultElement.classList.add('success');
+        resultElement.classList.remove('error');
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+    
+    // Storage Adapter Test
+    document.getElementById('test-storage-adapter').addEventListener('click', async () => {
+      const resultElement = document.getElementById('storage-adapter-result');
+      try {
+        const platformAdapter = await wallet.createPlatformAdapter();
+        
+        // Test storage operations
+        await platformAdapter.storage.setItem('test-key', 'test-value');
+        const value = await platformAdapter.storage.getItem('test-key');
+        await platformAdapter.storage.removeItem('test-key');
+        
+        resultElement.textContent = `Storage test successful!\nStored and retrieved: ${value}`;
+        resultElement.classList.add('success');
+        resultElement.classList.remove('error');
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+    
+    // Crypto Adapter Test
+    document.getElementById('test-crypto-adapter').addEventListener('click', async () => {
+      const resultElement = document.getElementById('crypto-adapter-result');
+      try {
+        const platformAdapter = await wallet.createPlatformAdapter();
+        
+        // Test random bytes generation
+        const randomBytes = platformAdapter.crypto.generateRandomBytes(16);
+        const hexBytes = Array.from(randomBytes)
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        
+        // Test SHA-256
+        const data = new TextEncoder().encode('test data');
+        const hash = await platformAdapter.crypto.sha256(data);
+        const hexHash = Array.from(hash)
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        
+        resultElement.textContent = `Crypto test successful!\nRandom bytes: ${hexBytes}\nSHA-256 hash: ${hexHash}`;
+        resultElement.classList.add('success');
+        resultElement.classList.remove('error');
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+    
+    // Network Adapter Test
+    document.getElementById('test-network-adapter').addEventListener('click', async () => {
+      const resultElement = document.getElementById('network-adapter-result');
+      try {
+        const platformAdapter = await wallet.createPlatformAdapter();
+        
+        // Test network availability
+        const isNetworkAvailable = await platformAdapter.network.isNetworkAvailable();
+        
+        // Test fetch
+        const response = await platformAdapter.network.fetch('https://jsonplaceholder.typicode.com/todos/1');
+        const data = await response.json();
+        
+        resultElement.textContent = `Network test successful!\nNetwork available: ${isNetworkAvailable}\nFetch response: ${JSON.stringify(data, null, 2)}`;
+        resultElement.classList.add('success');
+        resultElement.classList.remove('error');
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+    
+    // Node.js Module Import Test
+    document.getElementById('test-node-modules').addEventListener('click', async () => {
+      const resultElement = document.getElementById('node-modules-result');
+      try {
+        // Try to import Node.js modules (should fail or return empty objects)
+        const nodeModules = ['fs', 'path', 'crypto', 'node-fetch'];
+        const results = {};
+        
+        for (const mod of nodeModules) {
+          try {
+            // This should either fail or return an empty object
+            const importedModule = await import(mod).catch(() => ({ __status: 'import failed' }));
+            results[mod] = importedModule.__status || 
+              (Object.keys(importedModule).length === 0 ? 'empty object' : 'non-empty object');
+          } catch (error) {
+            results[mod] = `Error: ${error.message}`;
+          }
+        }
+        
+        resultElement.textContent = `Node.js module import test results:\n${JSON.stringify(results, null, 2)}`;
+        
+        // Check if all modules either failed to import or returned empty objects
+        const allSafe = Object.values(results).every(
+          result => result === 'import failed' || result === 'empty object'
+        );
+        
+        if (allSafe) {
+          resultElement.classList.add('success');
+          resultElement.classList.remove('error');
+        } else {
+          resultElement.classList.add('error');
+          resultElement.classList.remove('success');
+        }
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.classList.add('error');
+        resultElement.classList.remove('success');
+      }
+    });
+  </script>
+</body>
+</html>

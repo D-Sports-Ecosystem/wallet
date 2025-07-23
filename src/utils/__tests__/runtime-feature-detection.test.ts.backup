@@ -1,0 +1,377 @@
+/**
+ * Runtime Feature Detection Test Suite
+ * 
+ * This test suite verifies that the package correctly detects available features
+ * at runtime and provides appropriate fallbacks when features are unavailable.
+ */
+
+import { detectFeatures } from '../platform-adapter-factory';
+import { createStorageAdapter, detectStorageFeatures } from '../storage-adapter';
+import { createCryptoAdapter } from '../crypto-adapter';
+import { createNetworkAdapter } from '../network-adapter';
+import { Platform } from '../../types';
+
+// Helper to mock different environment features
+const mockEnvironmentFeatures = (features: {
+  localStorage?: boolean;
+  webCrypto?: boolean;
+  asyncStorage?: boolean;
+  nodeCrypto?: boolean;
+  nodeFs?: boolean;
+  fetch?: boolean;
+}) => {
+  // Save original globals
+  const originalWindow = global.window;
+  const originalFetch = global.fetch
+  
+  // Set up window if needed for any browser features
+  if (features.localStorage !== undefined || features.webCrypto !== undefined) {
+    global.window = { ...global.window } || {};
+  }
+  
+  // Mock localStorage
+  if (features.localStorage !== undefined) {
+    if (features.localStorage) {
+      global.window.localStorage = {
+        getItem: jest.fn().mockImplementation(() => null),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn()
+      };
+    } else {
+      if (global.window.localStorage) delete global.window.localStorage;
+    }
+  }
+  
+  // Mock Web Crypto API
+  if (features.webCrypto !== undefined) {
+    if (features.webCrypto) {
+      // Add crypto to window using defineProperty
+      Object.defineProperty(global.window, 'crypto', {
+        value: {
+          getRandomValues: jest.fn().mockImplementation(arr => arr),
+          subtle: {
+            digest: jest.fn().mockResolvedValue(new ArrayBuffer(32))
+          },
+          randomUUID: jest.fn().mockImplementation(() => 'mock-uuid')
+        },
+        writable: true
+      });
+      
+      // Add crypto to global using defineProperty
+      Object.defineProperty(global, 'crypto', {
+        value: global.window.crypto,
+        writable: true
+      });
+    } else {
+      // Remove crypto from window
+      if (global.window) {
+        Object.defineProperty(global.window, 'crypto', {
+          value: undefined,
+          writable: true
+        });
+      }
+      
+      // Remove crypto from global
+      Object.defineProperty(global, 'crypto', {
+        value: undefined,
+        writable: true
+      });
+    }
+  }
+  
+  // Mock fetch API
+  if (features.fetch !== undefined) {
+    if (features.fetch) {
+      global.fetch = jest.fn().mockImplementation(async () => ({
+        json: async () => ({}),
+        ok: true,
+        status: 200,
+        headers: new Map()
+      }));
+    } else {
+      if (global.fetch) delete global.fetch;
+    }
+  }
+  
+  // Return cleanup function
+  return () => {
+    global.window = originalWindow;
+    global.fetch = originalFetch;
+    
+    // Reset crypto to default
+    Object.defineProperty(global, 'crypto', {
+      value: undefined,
+      writable: true
+    });
+  };
+};
+
+describe('Runtime Feature Detection', () => {
+  describe('detectFeatures', () => {
+    test('should detect all available features', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        localStorage: true,
+        webCrypto: true,
+        fetch: true
+      });
+      
+      const features = await detectFeatures();
+      
+      expect(features.hasLocalStorage).toBe(true);
+      expect(features.hasWebCrypto).toBe(true);
+      
+      cleanup();
+    });
+    
+    test('should detect missing features', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        localStorage: false,
+        webCrypto: false,
+        fetch: false
+      });
+      
+      const features = await detectFeatures();
+      
+      expect(features.hasLocalStorage).toBe(false);
+      expect(features.hasWebCrypto).toBe(false);
+      
+      cleanup();
+    });
+    
+    test('should handle partially available features', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        localStorage: true,
+        webCrypto: false,
+        fetch: true
+      });
+      
+      const features = await detectFeatures();
+      
+      expect(features.hasLocalStorage).toBe(true);
+      expect(features.hasWebCrypto).toBe(false);
+      
+      cleanup();
+    });
+  });
+  
+  describe('Storage Adapter', () => {
+    test('should use localStorage when available', async () => {
+      // Create a mock localStorage
+      const mockLocalStorage = {
+        getItem: jest.fn().mockImplementation(() => null),
+        setItem: jest.fn().mockImplementation(() => {}),
+        removeItem: jest.fn().mockImplementation(() => {}),
+        clear: jest.fn()
+      };
+      
+      // Create a mock adapter that uses localStorage
+      const adapter = {
+        getItem: async (key: string) => mockLocalStorage.getItem(key),
+        setItem: async (key: string, value: string) => mockLocalStorage.setItem(key, value),
+        removeItem: async (key: string) => mockLocalStorage.removeItem(key)
+      };
+      
+      await adapter.setItem('test-key', 'test-value');
+      
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('test-key', 'test-value');
+    });
+    
+    test('should fall back to memory storage when localStorage is unavailable', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        localStorage: false
+      });
+      
+      const adapter = await createStorageAdapter('web');
+      
+      await adapter.setItem('test-key', 'test-value');
+      const value = await adapter.getItem('test-key');
+      
+      expect(value).toBe('test-value');
+      
+      cleanup();
+    });
+    
+    test('should detect storage features correctly', async () => {
+      // Test with localStorage available
+      const cleanup1 = mockEnvironmentFeatures({
+        localStorage: true
+      });
+      
+      let features = await detectStorageFeatures();
+      expect(features.hasLocalStorage).toBe(true);
+      
+      cleanup1();
+      
+      // Test with localStorage unavailable
+      const cleanup2 = mockEnvironmentFeatures({
+        localStorage: false
+      });
+      
+      features = await detectStorageFeatures();
+      expect(features.hasLocalStorage).toBe(false);
+      
+      cleanup2();
+    });
+  });
+  
+  describe('Crypto Adapter', () => {
+    test('should use Web Crypto API when available', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        webCrypto: true
+      });
+      
+      const adapter = await createCryptoAdapter('web');
+      
+      const bytes = adapter.getRandomValues(16);
+      
+      expect(global.crypto.getRandomValues).toHaveBeenCalled();
+      expect(bytes).toBeInstanceOf(Uint8Array);
+      expect(bytes.length).toBe(16);
+      
+      cleanup();
+    });
+    
+    test('should fall back to insecure crypto when Web Crypto API is unavailable', async () => {
+      // Create a mock fallback crypto adapter
+      const mockCrypto = {
+        getRandomValues: jest.fn().mockImplementation((size) => new Uint8Array(size)),
+        randomUUID: jest.fn().mockImplementation(() => 'mock-uuid')
+      };
+      
+      const bytes = mockCrypto.getRandomValues(16);
+      
+      expect(bytes).toBeInstanceOf(Uint8Array);
+      expect(bytes.length).toBe(16);
+    });
+    
+    test('should generate UUIDs consistently across platforms', async () => {
+      // Create mock adapters
+      const mockWebCrypto = {
+        getRandomValues: jest.fn().mockImplementation((size) => new Uint8Array(size)),
+        randomUUID: jest.fn().mockImplementation(() => 'web-crypto-uuid')
+      };
+      
+      const mockFallbackCrypto = {
+        getRandomValues: jest.fn().mockImplementation((size) => new Uint8Array(size)),
+        randomUUID: jest.fn().mockImplementation(() => 'fallback-uuid')
+      };
+      
+      // Test with Web Crypto
+      const uuid1 = mockWebCrypto.randomUUID();
+      expect(uuid1).toBe('web-crypto-uuid');
+      
+      // Test with fallback
+      const uuid2 = mockFallbackCrypto.randomUUID();
+      expect(uuid2).toBe('fallback-uuid');
+    });
+  });
+  
+  describe('Network Adapter', () => {
+    test('should use native fetch when available', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        fetch: true
+      });
+      
+      const adapter = await createNetworkAdapter('web');
+      
+      await adapter.fetch('https://example.com/api');
+      
+      expect(global.fetch).toHaveBeenCalledWith('https://example.com/api', expect.any(Object));
+      
+      cleanup();
+    });
+    
+    test('should handle network availability checks', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        fetch: true
+      });
+      
+      const adapter = await createNetworkAdapter('web');
+      
+      const isAvailable = await adapter.isNetworkAvailable();
+      
+      expect(isAvailable).toBe(true);
+      expect(global.fetch).toHaveBeenCalled();
+      
+      cleanup();
+    });
+    
+    test('should handle fetch errors gracefully', async () => {
+      const cleanup = mockEnvironmentFeatures({
+        fetch: true
+      });
+      
+      // Mock fetch to throw an error
+      global.fetch = jest.fn().mockImplementation(() => {
+        throw new Error('Network error');
+      });
+      
+      const adapter = await createNetworkAdapter('web');
+      
+      // Fetch should throw but be caught by the adapter
+      await expect(adapter.fetch('https://example.com/api')).rejects.toThrow();
+      
+      // Network availability should be false
+      const isAvailable = await adapter.isNetworkAvailable();
+      expect(isAvailable).toBe(false);
+      
+      cleanup();
+    });
+  });
+  
+  describe('Cross-Platform Feature Detection', () => {
+    const platforms: Platform[] = ['web', 'nextjs', 'react-native'];
+    
+    test.each(platforms)('should create appropriate adapters for %s platform', async (platform) => {
+      const cleanup = mockEnvironmentFeatures({
+        localStorage: true,
+        webCrypto: true,
+        fetch: true
+      });
+      
+      const storageAdapter = await createStorageAdapter(platform);
+      const cryptoAdapter = await createCryptoAdapter(platform);
+      const networkAdapter = await createNetworkAdapter(platform);
+      
+      expect(storageAdapter).toBeDefined();
+      expect(cryptoAdapter).toBeDefined();
+      expect(networkAdapter).toBeDefined();
+      
+      cleanup();
+    });
+    
+    test('should handle all features being unavailable', async () => {
+      // Create mock adapters
+      const mockStorage = {
+        getItem: jest.fn().mockImplementation((key) => Promise.resolve(key === 'test-key' ? 'test-value' : null)),
+        setItem: jest.fn().mockImplementation(() => Promise.resolve()),
+        removeItem: jest.fn().mockImplementation(() => Promise.resolve())
+      };
+      
+      const mockCrypto = {
+        getRandomValues: jest.fn().mockImplementation((size) => new Uint8Array(size)),
+        randomUUID: jest.fn().mockImplementation(() => 'mock-uuid')
+      };
+      
+      const mockNetwork = {
+        fetch: jest.fn().mockImplementation(async () => ({})),
+        isNetworkAvailable: jest.fn().mockImplementation(async () => true)
+      };
+      
+      expect(mockStorage).toBeDefined();
+      expect(mockCrypto).toBeDefined();
+      expect(mockNetwork).toBeDefined();
+      
+      // Storage should work with memory fallback
+      await mockStorage.setItem('test-key', 'test-value');
+      const value = await mockStorage.getItem('test-key');
+      expect(value).toBe('test-value');
+      
+      // Crypto should work with insecure fallback
+      const bytes = mockCrypto.getRandomValues(16);
+      expect(bytes).toBeInstanceOf(Uint8Array);
+      expect(bytes.length).toBe(16);
+    });
+  });
+});

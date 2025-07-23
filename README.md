@@ -577,7 +577,7 @@ bun test
 
 ## 📦 Package Structure
 
-```
+```sh
 @d-sports/wallet/
 ├── core              # Core wallet functionality
 ├── nextjs            # Next.js specific exports

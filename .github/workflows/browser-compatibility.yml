@@ -1,0 +1,64 @@
+name: Browser Compatibility Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  browser-compatibility:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build packages
+        run: npm run build
+      
+      - name: Validate browser bundle
+        run: npm run validate-browser-bundle
+      
+      - name: Run browser compatibility tests
+        run: npm run test:browser-compatibility
+      
+      - name: Run platform adapter tests
+        run: npm run test:platform-adapters
+      
+      - name: Run runtime feature detection tests
+        run: npm run test:runtime-features
+      
+      - name: Analyze bundle
+        run: npm run analyze-bundle
+      
+      - name: Monitor bundle size
+        run: npm run monitor-bundle-size
+      
+      - name: Generate bundle size report
+        run: npm run monitor-bundle-size:report
+      
+      - name: Upload bundle size report
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundle-size-report
+          path: dist/bundle-size-report.html
+      
+      - name: Upload bundle stats
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundle-stats
+          path: dist/stats-*.html

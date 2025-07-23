@@ -9,6 +9,11 @@
             "date": 1753163402146,
             "name": "j:\\projects\\wallet\\logs\\mcp-puppeteer-2025-07-22.log",
             "hash": "5b61968ea128006401c949c407af3e43d815c163089d1b79a387d8622b3cbce2"
+        },
+        {
+            "date": 1753305765029,
+            "name": "j:\\projects\\wallet\\logs\\mcp-puppeteer-2025-07-23.log",
+            "hash": "4510c3c459261f397c632e5cbeb44b51387445a59757c509ac202c52c4dca360"
         }
     ],
     "hashType": "sha256"

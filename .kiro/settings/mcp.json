@@ -67,7 +67,7 @@
         "puppeteer-mcp-server"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "puppeteer_connect_active_tab"
       ]
