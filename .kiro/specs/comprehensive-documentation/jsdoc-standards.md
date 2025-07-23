@@ -159,7 +159,7 @@ const weightedAverage = tokens.reduce((acc, token) => {
 | `@module` | Identifies the module | `@module core/wallet` |
 | `@author` | Identifies the author | `@author D-Sports Engineering Team` |
 | `@version` | Identifies the version | `@version 1.0.0` |
-| `@since` | Identifies creation date | `@since 2024-07-20` |
+| `@since` | Identifies creation date | `@since 2025-07-23` |
 | `@param` | Describes a parameter | `@param {string} id - Wallet identifier` |
 | `@returns` | Describes return value | `@returns {boolean} Success status` |
 | `@throws` | Describes exceptions | `@throws {Error} If wallet not found` |

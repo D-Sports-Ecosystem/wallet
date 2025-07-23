@@ -4,7 +4,7 @@
  * @module components/ui
  * @author D-Sports Engineering Team
  * @version 1.0.0
- * @since 2024-07-23
+ * @since 2025-07-23
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';

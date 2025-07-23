@@ -6,7 +6,7 @@
  * @exports All public APIs for cross-platform usage
  * @author D-Sports Engineering Team
  * @version 1.1.1
- * @since 2024-07-20
+ * @since 2025-07-23
  */
 
 /**

@@ -205,7 +205,7 @@ The documentation will be structured as follows:
  * @module components/ui
  * @author D-Sports Engineering Team
  * @version 1.0.0
- * @since 2024-07-20
+ * @since 2025-07-23
  */
 
 import React from 'react';
@@ -304,7 +304,7 @@ Button.displayName = 'Button';
  * @module utils
  * @author D-Sports Engineering Team
  * @version 1.0.0
- * @since 2024-07-20
+ * @since 2025-07-23
  */
 
 import { Platform, PlatformAdapter } from '../types';

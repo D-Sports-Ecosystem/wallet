@@ -1,4 +1,4 @@
-import { Platform } from '../types';
+import { Platform } from "../types";
 
 /**
  * Storage adapter interface for cross-platform storage operations
@@ -10,14 +10,14 @@ export interface StorageAdapter {
    * @returns The stored value or null if not found
    */
   getItem(key: string): Promise<string | null>;
-  
+
   /**
    * Set an item in storage
    * @param key The key to store
    * @param value The value to store
    */
   setItem(key: string, value: string): Promise<void>;
-  
+
   /**
    * Remove an item from storage
    * @param key The key to remove
@@ -30,15 +30,15 @@ export interface StorageAdapter {
  */
 export class MemoryStorageAdapter implements StorageAdapter {
   private storage = new Map<string, string>();
-  
+
   async getItem(key: string): Promise<string | null> {
     return this.storage.get(key) || null;
   }
-  
+
   async setItem(key: string, value: string): Promise<void> {
     this.storage.set(key, value);
   }
-  
+
   async removeItem(key: string): Promise<void> {
     this.storage.delete(key);
   }
@@ -55,20 +55,20 @@ export class LocalStorageAdapter implements StorageAdapter {
       return null;
     }
   }
-  
+
   async setItem(key: string, value: string): Promise<void> {
     try {
       localStorage.setItem(key, value);
     } catch (error) {
-      console.warn('Failed to write to localStorage:', error);
+      console.warn("Failed to write to localStorage:", error);
     }
   }
-  
+
   async removeItem(key: string): Promise<void> {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      console.warn("Failed to remove from localStorage:", error);
     }
   }
 }
@@ -78,33 +78,33 @@ export class LocalStorageAdapter implements StorageAdapter {
  */
 export class AsyncStorageAdapter implements StorageAdapter {
   private asyncStorage: any;
-  
+
   constructor(asyncStorage: any) {
     this.asyncStorage = asyncStorage;
   }
-  
+
   async getItem(key: string): Promise<string | null> {
     try {
       return await this.asyncStorage.getItem(key);
     } catch (error) {
-      console.warn('Failed to read from AsyncStorage:', error);
+      console.warn("Failed to read from AsyncStorage:", error);
       return null;
     }
   }
-  
+
   async setItem(key: string, value: string): Promise<void> {
     try {
       await this.asyncStorage.setItem(key, value);
     } catch (error) {
-      console.warn('Failed to write to AsyncStorage:', error);
+      console.warn("Failed to write to AsyncStorage:", error);
     }
   }
-  
+
   async removeItem(key: string): Promise<void> {
     try {
       await this.asyncStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from AsyncStorage:', error);
+      console.warn("Failed to remove from AsyncStorage:", error);
     }
   }
 }
@@ -120,22 +120,22 @@ export async function detectStorageFeatures(): Promise<{
     hasLocalStorage: false,
     hasAsyncStorage: false,
   };
-  
+
   // Check for localStorage
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
       features.hasLocalStorage = window.localStorage !== undefined;
       // Verify localStorage actually works (private browsing can throw)
       if (features.hasLocalStorage) {
-        const testKey = '__storage_test__';
-        localStorage.setItem(testKey, 'test');
+        const testKey = "__storage_test__";
+        localStorage.setItem(testKey, "test");
         localStorage.removeItem(testKey);
       }
     } catch {
       features.hasLocalStorage = false;
     }
   }
-  
+
   // Check for AsyncStorage
   try {
     const AsyncStorage = await importAsyncStorage();
@@ -143,7 +143,7 @@ export async function detectStorageFeatures(): Promise<{
   } catch {
     features.hasAsyncStorage = false;
   }
-  
+
   return features;
 }
 
@@ -153,10 +153,10 @@ export async function detectStorageFeatures(): Promise<{
 async function importAsyncStorage(): Promise<any> {
   try {
     // Use dynamic import with a variable to prevent direct static analysis
-    const storageModuleName = '@react-native-' + 'async-storage/async-storage';
-    
+    const storageModuleName = "@react-native-" + "async-storage/async-storage";
+
     return await import(/* webpackIgnore: true */ storageModuleName)
-      .then(module => module.default)
+      .then((module) => module.default)
       .catch(() => null);
   } catch {
     return null;
@@ -166,26 +166,31 @@ async function importAsyncStorage(): Promise<any> {
 /**
  * Create a storage adapter based on the platform and available features
  */
-export async function createStorageAdapter(platform: Platform): Promise<StorageAdapter> {
+export async function createStorageAdapter(
+  platform: Platform
+): Promise<StorageAdapter> {
   const features = await detectStorageFeatures();
-  
+
   // React Native with AsyncStorage
-  if (platform === 'react-native' && features.hasAsyncStorage) {
+  if (platform === "react-native" && features.hasAsyncStorage) {
     try {
       const AsyncStorage = await importAsyncStorage();
       if (AsyncStorage) {
         return new AsyncStorageAdapter(AsyncStorage);
       }
     } catch (error) {
-      console.warn('Failed to initialize AsyncStorage adapter:', error);
+      console.warn("Failed to initialize AsyncStorage adapter:", error);
     }
   }
-  
+
   // Browser or Next.js with localStorage
-  if ((platform === 'web' || platform === 'nextjs') && features.hasLocalStorage) {
+  if (
+    (platform === "web" || platform === "nextjs") &&
+    features.hasLocalStorage
+  ) {
     return new LocalStorageAdapter();
   }
-  
+
   // Memory fallback for any platform
   console.warn(`Using memory storage fallback for platform: ${platform}`);
   return new MemoryStorageAdapter();
