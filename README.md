@@ -2,6 +2,54 @@
 
 > **⚠️ IMPORTANT: IN PROGRESS - This package is currently being updated to fix build issues. Please use with caution.**
 
+<!-- TOC -->
+- [✨ Features](#-features)
+- [🚀 Installation](#-installation)
+  - [Platform-specific Dependencies](#platform-specific-dependencies)
+- [🏃‍♂️ Quick Start](#️-quick-start)
+  - [🚀 Super Quick Start (5 minutes)](#-super-quick-start-5-minutes)
+  - [Production Setup](#production-setup)
+  - [Next.js](#nextjs)
+  - [React Native](#react-native)
+- [📚 Usage Examples](#-usage-examples)
+  - [Basic Wallet Connection](#basic-wallet-connection)
+  - [Custom Social Login](#custom-social-login)
+  - [Rainbow Kit Integration](#rainbow-kit-integration)
+  - [Wagmi Integration](#wagmi-integration)
+- [🔧 API Reference](#-api-reference)
+  - [DSportsWallet](#dsportswallet)
+    - [Constructor Options](#constructor-options)
+    - [Methods](#methods)
+    - [Events](#events)
+  - [React Hooks](#react-hooks)
+    - [useDSportsWallet](#usedsportswallet)
+    - [useSocialLogin](#usesociallogin)
+- [⚙️ Configuration](#️-configuration)
+  - [Custom Social Login Configuration](#custom-social-login-configuration)
+  - [Supported Social Providers](#supported-social-providers)
+  - [Setting Up OAuth Applications](#setting-up-oauth-applications)
+    - [Google OAuth Setup](#google-oauth-setup)
+    - [Facebook OAuth Setup](#facebook-oauth-setup)
+    - [Twitter OAuth Setup](#twitter-oauth-setup)
+  - [Theme Configuration](#theme-configuration)
+  - [OAuth Callback Page](#oauth-callback-page)
+  - [Deep Linking (React Native)](#deep-linking-react-native)
+- [💰 Cost Comparison](#-cost-comparison)
+- [🛠️ Development](#️-development)
+  - [Setup](#setup)
+  - [Build](#build)
+  - [Test](#test)
+  - [Development Scripts](#development-scripts)
+- [📦 Package Structure](#-package-structure)
+- [🔒 Security Features](#-security-features)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [🔄 Quick Start → Production Migration](#-quick-start--production-migration)
+  - [Development to Production Path](#development-to-production-path)
+  - [D-Sports OAuth Service](#d-sports-oauth-service)
+<!-- /TOC -->
+
 A powerful, multi-platform wallet SDK for React, Next.js, and React Native applications with **free, custom social login** and support for Rainbow Kit and Wagmi. 100% D-Sports branded with no vendor dependencies.
 
 ## ✨ Features
@@ -31,11 +79,13 @@ bun add @d-sports/wallet
 ### Platform-specific Dependencies
 
 **For Next.js/React:**
+
 ```bash
 # No additional dependencies required!
 ```
 
 **For React Native:**
+
 ```bash
 npm install react-native-keychain react-native-url-polyfill
 ```
@@ -68,6 +118,7 @@ console.log('🎊 Wallet connected with zero OAuth setup!');
 ```
 
 **Perfect for:**
+
 - 🧪 **Prototyping** and proof of concepts
 - 👨‍💻 **Development** and testing
 - 🎓 **Learning** and tutorials
@@ -380,6 +431,7 @@ interface CustomSocialLoginConfig {
 ### Setting Up OAuth Applications
 
 #### Google OAuth Setup
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
 3. Enable Google+ API
@@ -388,6 +440,7 @@ interface CustomSocialLoginConfig {
 6. Copy the **Client ID**
 
 #### Facebook OAuth Setup
+
 1. Go to [Facebook Developers](https://developers.facebook.com/)
 2. Create a new app
 3. Set up Facebook Login
@@ -395,6 +448,7 @@ interface CustomSocialLoginConfig {
 5. Copy the **App ID**
 
 #### Twitter OAuth Setup
+
 1. Go to [Twitter Developer Portal](https://developer.twitter.com/)
 2. Create a new app
 3. Set up OAuth 2.0
@@ -568,6 +622,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 ### Development to Production Path
 
 1. **Start with Quick Start** (5 minutes):
+
    ```typescript
    const wallet = createDSportsWalletQuickStart({
      projectId: 'your-project-id',
@@ -577,10 +632,11 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 2. **Create Your OAuth Apps** (30 minutes):
    - [Google OAuth Setup](#google-oauth-setup)
-   - [Facebook OAuth Setup](#facebook-oauth-setup) 
+   - [Facebook OAuth Setup](#facebook-oauth-setup)
    - [Twitter OAuth Setup](#twitter-oauth-setup)
 
 3. **Switch to Production Config**:
+
    ```typescript
    const wallet = createDSportsWallet({
      projectId: 'your-project-id',
@@ -618,6 +674,7 @@ const productionConfig = validateSocialLoginConfig(myConfig, 'production');
 ```
 
 **Managed OAuth includes:**
+
 - ✅ **Google** - Ready to use
 - ✅ **Facebook** - Ready to use  
 - ✅ **Twitter** - Ready to use
@@ -626,6 +683,7 @@ const productionConfig = validateSocialLoginConfig(myConfig, 'production');
 - ⚠️ **Apple** - Requires individual setup
 
 **Benefits:**
+
 - 🚀 **Instant setup** - No OAuth configuration
 - 🛡️ **Production warnings** - Automatic validation
 - 🔄 **Easy migration** - Same API, different config
