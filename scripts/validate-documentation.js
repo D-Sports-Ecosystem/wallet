@@ -261,8 +261,8 @@ function formatReportAsMarkdown(report) {
           .forEach(example => {
             markdown += `- Line ${example.lineNumber}:\n`;
             markdown += `  - Errors:\n`;
-            example.errors.forEach(error => {
-              markdown += `    - ${error}\n`;
+            example.errors.forEach(err => {
+              markdown += `    - ${err}\n`;
             });
             markdown += `  - Code:\n`;
             markdown += `\`\`\`typescript\n${example.code}\n\`\`\`\n\n`;

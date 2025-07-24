@@ -7,7 +7,9 @@
       ],
       "env": {},
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [
+        "fetch"
+      ]
     },
     "memory": {
       "command": "npx",

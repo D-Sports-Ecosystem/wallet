@@ -7,7 +7,7 @@
  * @since 2025-07-23
  */
 
-module.exports = {
+export default {
   plugins: ["jsdoc", "eslint-plugin-tsdoc"],
   extends: [
     "plugin:jsdoc/recommended"

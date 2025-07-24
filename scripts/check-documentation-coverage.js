@@ -199,10 +199,10 @@ function formatReportAsMarkdown(report) {
     
     // Find directories with lowest coverage
     const lowCoverageDirs = Object.entries(report.directoryCoverage)
-      .filter(([_, dirReport]) => dirReport.coverage < config.minCoverage)
-      .sort(([_, a], [_, b]) => a.coverage - b.coverage)
+      .filter(([, dirReport]) => dirReport.coverage < config.minCoverage)
+      .sort(([, a], [, b]) => a.coverage - b.coverage)
       .slice(0, 3)
-      .map(([dir, _]) => dir);
+      .map(([dir]) => dir);
     
     if (lowCoverageDirs.length > 0) {
       markdown += `- 🎯 Priority directories to document: ${lowCoverageDirs.join(', ')}\n`;

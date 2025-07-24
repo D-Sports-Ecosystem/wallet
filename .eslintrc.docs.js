@@ -7,9 +7,14 @@
  * @since 2025-07-23
  */
 
-const docRules = require('./.kiro/specs/comprehensive-documentation/eslint-docs-config');
+import docRulesModule from './.kiro/specs/comprehensive-documentation/eslint-docs-config.js';
+const docRules = docRulesModule.default || docRulesModule;
 
-module.exports = {
+export default {
+  ignores: [
+    "node_modules/**",
+    "dist/**"
+  ],
   root: true,
   parser: "@typescript-eslint/parser",
   extends: [
