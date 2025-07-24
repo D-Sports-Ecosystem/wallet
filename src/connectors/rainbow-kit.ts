@@ -1,3 +1,13 @@
+/**
+ * @file rainbow-kit.ts
+ * @description Rainbow Kit connector implementation for D-Sports wallet integration.
+ * Provides wallet connection capabilities with Rainbow Kit compatibility.
+ * @module connectors/rainbow-kit
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { EventEmitter } from '../utils/event-emitter';
 import { 
   WalletConnector, 
@@ -10,22 +20,121 @@ import {
 } from '../types';
 import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 
+/**
+ * Configuration interface for the D-Sports Rainbow Kit connector.
+ * Extends the standard Rainbow Kit connector options with D-Sports specific features.
+ * 
+ * @interface
+ * @extends {RainbowKitConnectorOptions}
+ * @property {CustomSocialLoginProvider} [customSocialLoginProvider] - Optional social login provider for OAuth-based wallet connections
+ */
 export interface DSportsRainbowKitConnectorConfig extends RainbowKitConnectorOptions {
   customSocialLoginProvider?: CustomSocialLoginProvider;
 }
 
+/**
+ * D-Sports Rainbow Kit connector implementation.
+ * Provides wallet connection capabilities with Rainbow Kit compatibility,
+ * including social login integration.
+ * 
+ * @class
+ * @implements {WalletConnector}
+ * 
+ * @example
+ * ```typescript
+ * // Create a Rainbow Kit connector
+ * const connector = new DSportsRainbowKitConnector({
+ *   chains: [
+ *     { id: 1, name: 'Ethereum', network: 'ethereum' }
+ *   ],
+ *   customSocialLoginProvider: socialLoginProvider
+ * });
+ * 
+ * // Connect to the wallet
+ * const account = await connector.connect();
+ * console.log(`Connected to: ${account.address}`);
+ * ```
+ */
 export class DSportsRainbowKitConnector implements WalletConnector {
+  /**
+   * Unique identifier for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly id = 'dsports-wallet';
+  
+  /**
+   * Display name for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly name = 'D-Sports Wallet';
+  
+  /**
+   * Indicates if the connector is ready to use
+   * @public
+   * @readonly
+   * @type {boolean}
+   */
   public readonly ready = true;
+  
+  /**
+   * Base64 encoded SVG icon for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly icon = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2RjEiLz4KPHBhdGggZD0iTTI0IDEySDM2VjM2SDI0VjEyWiIgZmlsbD0iI0Y5RkJGRiIvPgo8cGF0aCBkPSJNMTIgMTJIMjRWMjRIMTJWMTJaIiBmaWxsPSIjRjlGQkZGIi8+CjxwYXRoIGQ9Ik0xMiAyNEgyNFYzNkgxMlYyNFoiIGZpbGw9IiNGOUZCRkYiLz4KPC9zdmc+';
 
+  /**
+   * Configuration options for the connector
+   * @private
+   * @type {DSportsRainbowKitConnectorConfig}
+   */
   private config: DSportsRainbowKitConnectorConfig;
+  
+  /**
+   * Ethereum provider instance
+   * @private
+   * @type {any}
+   */
   private provider?: any;
+  
+  /**
+   * Connected wallet address
+   * @private
+   * @type {string}
+   */
   private account?: string;
+  
+  /**
+   * Connected chain ID
+   * @private
+   * @type {number}
+   */
   private chainId?: number;
+  
+  /**
+   * Connection status flag
+   * @private
+   * @type {boolean}
+   */
   private isConnected = false;
+  
+  /**
+   * Social login provider for OAuth-based wallet connections
+   * @private
+   * @type {CustomSocialLoginProvider}
+   */
   private customSocialLoginProvider?: CustomSocialLoginProvider;
+  
+  /**
+   * Event emitter for connector events
+   * @private
+   * @type {EventEmitter}
+   */
   private eventEmitter = new EventEmitter<{
     connect: ConnectorData;
     disconnect: void;
@@ -34,19 +143,99 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     message: { type: string; data?: any };
   }>();
 
+  /**
+   * Creates a new DSportsRainbowKitConnector instance.
+   * 
+   * @constructor
+   * @param {DSportsRainbowKitConnectorConfig} config - Configuration options for the connector
+   * 
+   * @example
+   * ```typescript
+   * const connector = new DSportsRainbowKitConnector({
+   *   chains: [
+   *     { id: 1, name: 'Ethereum', network: 'ethereum' }
+   *   ]
+   * });
+   * ```
+   */
   constructor(config: DSportsRainbowKitConnectorConfig) {
     this.config = config;
     this.customSocialLoginProvider = config.customSocialLoginProvider;
   }
 
+  /**
+   * Registers an event listener for connector events.
+   * 
+   * @public
+   * @template K
+   * @param {K} event - The event name to listen for
+   * @param {ConnectorEvents[K]} listener - The event listener function
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * connector.on('connect', (data) => {
+   *   console.log(`Connected to: ${data.account}`);
+   * });
+   * ```
+   */
   on<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void {
     this.eventEmitter.on(event, listener as any);
   }
 
+  /**
+   * Removes an event listener for connector events.
+   * 
+   * @public
+   * @template K
+   * @param {K} event - The event name to remove listener from
+   * @param {ConnectorEvents[K]} listener - The event listener function to remove
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * const handleConnect = (data) => {
+   *   console.log(`Connected to: ${data.account}`);
+   * };
+   * 
+   * // Add listener
+   * connector.on('connect', handleConnect);
+   * 
+   * // Remove listener
+   * connector.off('connect', handleConnect);
+   * ```
+   */
   off<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void {
     this.eventEmitter.off(event, listener as any);
   }
 
+  /**
+   * Connects to a wallet using the Rainbow Kit connector.
+   * Supports both standard wallet connection and social login.
+   * 
+   * @public
+   * @async
+   * @param {Object} [config] - Connection configuration options
+   * @param {number} [config.chainId] - Optional chain ID to connect to
+   * @param {boolean} [config.socialLogin] - Whether to use social login for connection
+   * @returns {Promise<ConnectorData>} Connection data including account and chain information
+   * @throws {Error} If connection fails
+   * 
+   * @example
+   * ```typescript
+   * // Connect to default chain
+   * const data = await connector.connect();
+   * console.log(`Connected to: ${data.account}`);
+   * 
+   * // Connect to specific chain
+   * const data = await connector.connect({ chainId: 137 });
+   * console.log(`Connected to Polygon: ${data.account}`);
+   * 
+   * // Connect with social login
+   * const data = await connector.connect({ socialLogin: true });
+   * console.log(`Connected with social login: ${data.account}`);
+   * ```
+   */
   async connect(config?: { chainId?: number; socialLogin?: boolean }): Promise<ConnectorData> {
     try {
       if (config?.socialLogin && this.customSocialLoginProvider) {
@@ -95,6 +284,22 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     }
   }
 
+  /**
+   * Disconnects from the currently connected wallet.
+   * Clears all connection data and emits a disconnect event.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<void>}
+   * @throws {Error} If disconnection fails
+   * 
+   * @example
+   * ```typescript
+   * // Disconnect from wallet
+   * await connector.disconnect();
+   * console.log('Wallet disconnected');
+   * ```
+   */
   async disconnect(): Promise<void> {
     try {
       this.account = undefined;
@@ -113,6 +318,24 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     }
   }
 
+  /**
+   * Gets the currently connected wallet address.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<string>} The connected wallet address
+   * @throws {Error} If no wallet is connected
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const address = await connector.getAccount();
+   *   console.log(`Connected address: ${address}`);
+   * } catch (error) {
+   *   console.error('No wallet connected');
+   * }
+   * ```
+   */
   async getAccount(): Promise<string> {
     if (!this.account) {
       throw new Error('No account connected');
@@ -120,6 +343,24 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     return this.account;
   }
 
+  /**
+   * Gets the currently connected chain ID.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<number>} The connected chain ID
+   * @throws {Error} If no chain is connected
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const chainId = await connector.getChainId();
+   *   console.log(`Connected to chain: ${chainId}`);
+   * } catch (error) {
+   *   console.error('No chain connected');
+   * }
+   * ```
+   */
   async getChainId(): Promise<number> {
     if (!this.chainId) {
       throw new Error('No chain connected');
@@ -127,6 +368,21 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     return this.chainId;
   }
 
+  /**
+   * Gets the Ethereum provider instance.
+   * Creates a mock provider if one doesn't exist yet.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<any>} The Ethereum provider instance
+   * 
+   * @example
+   * ```typescript
+   * const provider = await connector.getProvider();
+   * const accounts = await provider.request({ method: 'eth_accounts' });
+   * console.log(`Accounts: ${accounts}`);
+   * ```
+   */
   async getProvider(): Promise<any> {
     if (!this.provider) {
       // Create a mock provider for demonstration
@@ -156,6 +412,21 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     return this.provider;
   }
 
+  /**
+   * Gets a signer instance for the connected wallet.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<any>} The signer instance
+   * 
+   * @example
+   * ```typescript
+   * const signer = await connector.getSigner();
+   * const address = await signer.getAddress();
+   * const signature = await signer.signMessage('Hello, D-Sports!');
+   * console.log(`Signature: ${signature}`);
+   * ```
+   */
   async getSigner(): Promise<any> {
     const provider = await this.getProvider();
     return {
@@ -171,11 +442,48 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     };
   }
 
+  /**
+   * Checks if the wallet is already authorized.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<boolean>} True if the wallet is authorized, false otherwise
+   * 
+   * @example
+   * ```typescript
+   * const isAuthorized = await connector.isAuthorized();
+   * if (isAuthorized) {
+   *   console.log('Wallet is already authorized');
+   * } else {
+   *   console.log('Wallet needs to be connected');
+   * }
+   * ```
+   */
   async isAuthorized(): Promise<boolean> {
     const storedAccount = localStorage.getItem('dsports-wallet-account');
     return !!storedAccount;
   }
 
+  /**
+   * Switches the connected wallet to a different blockchain network.
+   * 
+   * @public
+   * @async
+   * @param {number} chainId - The chain ID to switch to
+   * @returns {Promise<void>}
+   * @throws {Error} If the chain is not configured or switching fails
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   // Switch to Polygon (chain ID 137)
+   *   await connector.switchChain(137);
+   *   console.log('Switched to Polygon');
+   * } catch (error) {
+   *   console.error('Failed to switch chain:', error);
+   * }
+   * ```
+   */
   async switchChain(chainId: number): Promise<void> {
     const chain = this.config.chains.find(c => c.id === chainId);
     if (!chain) {
@@ -192,6 +500,14 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     });
   }
 
+  /**
+   * Connects to a wallet using social login.
+   * 
+   * @private
+   * @async
+   * @returns {Promise<ConnectorData>} Connection data including account and chain information
+   * @throws {Error} If social login provider is not configured or login fails
+   */
   private async connectWithSocialLogin(): Promise<ConnectorData> {
     if (!this.customSocialLoginProvider) {
       throw new Error('Custom social login provider not configured');
@@ -225,12 +541,27 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     return connectorData;
   }
 
+  /**
+   * Prompts the user to choose a social login provider.
+   * In a real implementation, this would show a modal or UI prompt.
+   * 
+   * @private
+   * @async
+   * @returns {Promise<SocialProvider>} The selected social provider
+   */
   private async promptSocialProvider(): Promise<SocialProvider> {
     // In a real implementation, this would show a modal or prompt
     // For now, we'll default to Google
     return 'google';
   }
 
+  /**
+   * Generates a deterministic Ethereum address from social login information.
+   * 
+   * @private
+   * @param {SocialLoginResult} socialResult - The social login result
+   * @returns {string} The generated Ethereum address
+   */
   private generateAddressFromSocialLogin(socialResult: SocialLoginResult): string {
     // Generate a deterministic address based on social login info
     const data = `${socialResult.provider}-${socialResult.user.id}`;
@@ -246,6 +577,12 @@ export class DSportsRainbowKitConnector implements WalletConnector {
     return `0x${hex}${'0'.repeat(32)}`;
   }
 
+  /**
+   * Generates a random Ethereum address for mock wallet connections.
+   * 
+   * @private
+   * @returns {string} The generated Ethereum address
+   */
   private generateMockAddress(): string {
     // Generate a random mock address
     const randomBytes = new Uint8Array(20);
@@ -256,7 +593,34 @@ export class DSportsRainbowKitConnector implements WalletConnector {
   }
 }
 
-// Rainbow Kit connector factory
+/**
+ * Factory function to create a Rainbow Kit compatible connector.
+ * This function returns a connector configuration that can be used with Rainbow Kit.
+ * 
+ * @function
+ * @param {DSportsRainbowKitConnectorConfig} config - Configuration options for the connector
+ * @returns {Function} A function that returns the connector configuration
+ * 
+ * @example
+ * ```typescript
+ * import { createDSportsRainbowKitConnector } from '@d-sports/wallet/connectors';
+ * import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+ * 
+ * const dsportsWallet = createDSportsRainbowKitConnector({
+ *   chains: [
+ *     { id: 1, name: 'Ethereum', network: 'ethereum' }
+ *   ],
+ *   customSocialLoginProvider: socialLoginProvider
+ * });
+ * 
+ * const connectors = connectorsForWallets([
+ *   {
+ *     groupName: 'Recommended',
+ *     wallets: [dsportsWallet]
+ *   }
+ * ]);
+ * ```
+ */
 export function createDSportsRainbowKitConnector(config: DSportsRainbowKitConnectorConfig) {
   return () => ({
     id: 'dsports-wallet',

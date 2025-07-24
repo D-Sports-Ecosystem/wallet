@@ -1,4 +1,13 @@
-// Browser-specific entry point - excludes server-side utilities
+/**
+ * @file index.ts
+ * @description Browser-specific entry point for the D-Sports wallet SDK.
+ * Provides browser-optimized implementations and excludes server-side utilities.
+ * @module browser
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import "../index.css";
 
 // Core wallet functionality (client-side only)
@@ -97,7 +106,29 @@ import {
   WagmiConnectorOptions,
 } from "../types";
 
-// Browser-specific wallet factory
+/**
+ * Creates a D-Sports wallet instance optimized for browser environments.
+ * Configures the wallet with the appropriate platform adapter and connectors.
+ * 
+ * @function
+ * @param {DSportsWalletOptions} options - Configuration options for the wallet
+ * @returns {DSportsWallet} A configured D-Sports wallet instance
+ * 
+ * @example
+ * ```typescript
+ * // Create a wallet for browser environment
+ * const wallet = createDSportsWallet({
+ *   projectId: 'your-project-id',
+ *   chains: [mainnet, polygon],
+ *   metadata: {
+ *     name: 'My D-Sports App',
+ *     description: 'A D-Sports wallet integration',
+ *     url: 'https://myapp.com',
+ *     icons: ['https://myapp.com/icon.png']
+ *   }
+ * });
+ * ```
+ */
 export function createDSportsWallet(
   options: DSportsWalletOptions
 ): DSportsWallet {
@@ -172,7 +203,26 @@ export function createDSportsWallet(
   return wallet;
 }
 
-// Quick start wallet factory (uses D-Sports managed OAuth)
+/**
+ * Creates a D-Sports wallet instance with quick start OAuth configuration.
+ * Uses D-Sports managed OAuth credentials for rapid development and testing.
+ * 
+ * @function
+ * @param {Omit<DSportsWalletOptions, "socialLogin">} options - Configuration options for the wallet (excluding socialLogin)
+ * @returns {DSportsWallet} A configured D-Sports wallet instance with managed OAuth
+ * 
+ * @example
+ * ```typescript
+ * // Create a wallet with quick start OAuth
+ * const wallet = createDSportsWalletQuickStart({
+ *   projectId: 'your-project-id',
+ *   chains: [mainnet, polygon]
+ * });
+ * 
+ * // Connect with social login
+ * await wallet.connect('dsports-wallet', { socialLogin: true });
+ * ```
+ */
 export function createDSportsWalletQuickStart(
   options: Omit<DSportsWalletOptions, "socialLogin">
 ): DSportsWallet {

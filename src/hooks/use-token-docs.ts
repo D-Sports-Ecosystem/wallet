@@ -1,5 +1,29 @@
+/**
+ * @file use-token-docs.ts
+ * @description React hook for fetching cryptocurrency token documentation using Context7 MCP.
+ * Provides structured access to token information, whitepapers, and technical details.
+ * @module hooks/use-token-docs
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { useState, useEffect } from 'react';
 
+/**
+ * Structured token documentation information.
+ * Contains comprehensive details about a cryptocurrency token.
+ * 
+ * @interface
+ * @property {string} name - Full name of the token
+ * @property {string} symbol - Token symbol (e.g., BTC, ETH)
+ * @property {string} description - General description of the token
+ * @property {string} website - Official website URL
+ * @property {string} whitepaper - URL to the token's whitepaper
+ * @property {string} technology - Technical details about the token's implementation
+ * @property {string} useCase - Information about the token's use cases
+ * @property {string} marketInfo - Market-related information about the token
+ */
 interface TokenDocumentation {
   name: string;
   symbol: string;
@@ -11,13 +35,53 @@ interface TokenDocumentation {
   marketInfo: string;
 }
 
+/**
+ * Configuration options for the useTokenDocs hook.
+ * 
+ * @interface
+ * @property {string} symbol - Token symbol to fetch documentation for (e.g., BTC, ETH)
+ * @property {number} [maxTokens=5000] - Maximum number of tokens to retrieve from the documentation
+ */
 interface UseTokenDocsOptions {
   symbol: string;
   maxTokens?: number;
 }
 
 /**
- * Hook to fetch token documentation using Context7 MCP
+ * React hook to fetch cryptocurrency token documentation using Context7 MCP.
+ * Provides structured access to token information, whitepapers, and technical details.
+ */
+/**
+ * React hook to fetch cryptocurrency token documentation using Context7 MCP.
+ * 
+ * @function
+ * @param {UseTokenDocsOptions} options - Configuration options for the hook
+ * @param {string} options.symbol - Token symbol to fetch documentation for (e.g., BTC, ETH)
+ * @param {number} [options.maxTokens=5000] - Maximum number of tokens to retrieve from the documentation
+ * @returns {{docs: TokenDocumentation | null, isLoading: boolean, error: Error | null}} Hook result object
+ * 
+ * @example
+ * ```tsx
+ * // Fetch Bitcoin documentation
+ * const { docs, isLoading, error } = useTokenDocs({ symbol: 'BTC' });
+ * 
+ * if (isLoading) {
+ *   return <div>Loading documentation...</div>;
+ * }
+ * 
+ * if (error) {
+ *   return <div>Error: {error.message}</div>;
+ * }
+ * 
+ * return (
+ *   <div>
+ *     <h1>{docs?.name} ({docs?.symbol})</h1>
+ *     <p>{docs?.description}</p>
+ *     <a href={docs?.website}>Official Website</a>
+ *     <a href={docs?.whitepaper}>Whitepaper</a>
+ *   </div>
+ * );
+ * ```
  */
 export function useTokenDocs({ symbol, maxTokens = 5000 }: UseTokenDocsOptions): {
   docs: TokenDocumentation | null;
@@ -73,7 +137,14 @@ export function useTokenDocs({ symbol, maxTokens = 5000 }: UseTokenDocsOptions):
 }
 
 /**
- * Parse the documentation content into a structured format
+ * Parse the documentation content into a structured format.
+ * Extracts relevant sections from the raw documentation text.
+ * 
+ * @private
+ * @function
+ * @param {string} content - Raw documentation content from Context7
+ * @param {string} symbol - Token symbol for fallback values
+ * @returns {TokenDocumentation} Structured token documentation
  */
 function parseDocumentation(content: string, symbol: string): TokenDocumentation {
   // Default documentation structure

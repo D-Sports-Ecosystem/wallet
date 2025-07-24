@@ -1,3 +1,13 @@
+/**
+ * @file custom-social-login.ts
+ * @description Custom social login provider for D-Sports wallet integration.
+ * Enables wallet creation and authentication through various OAuth providers.
+ * @module providers/custom-social-login
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { EventEmitter } from '../utils/event-emitter';
 import { 
   CustomSocialLoginConfig, 
@@ -7,6 +17,16 @@ import {
 } from '../types';
 import { ethers } from 'ethers';
 
+/**
+ * Event map for the CustomSocialLoginProvider.
+ * Defines the events that can be emitted by the provider.
+ * 
+ * @interface
+ * @property {SocialLoginResult} loginSuccess - Emitted when login is successful
+ * @property {Error} loginError - Emitted when login fails
+ * @property {{ provider: SocialProvider }} loginStart - Emitted when login process starts
+ * @property {void} logout - Emitted when user logs out
+ */
 export interface CustomSocialLoginEventMap {
   'loginSuccess': SocialLoginResult;
   'loginError': Error;
@@ -14,17 +34,101 @@ export interface CustomSocialLoginEventMap {
   'logout': void;
 }
 
+/**
+ * Custom social login provider for D-Sports wallet integration.
+ * Enables wallet creation and authentication through various OAuth providers
+ * including Google, Facebook, Twitter, Discord, GitHub, and Apple.
+ * 
+ * @class
+ * @extends {EventEmitter<CustomSocialLoginEventMap>}
+ * 
+ * @example
+ * ```typescript
+ * // Create a social login provider
+ * const adapter = new WebPlatformAdapter();
+ * const socialLogin = new CustomSocialLoginProvider({
+ *   appSecret: 'your-app-secret',
+ *   redirectUri: 'https://your-app.com/auth/callback',
+ *   providers: {
+ *     google: { clientId: 'your-google-client-id' },
+ *     facebook: { clientId: 'your-facebook-client-id' }
+ *   }
+ * }, adapter);
+ * 
+ * // Login with Google
+ * const result = await socialLogin.login('google');
+ * console.log(`Logged in with wallet: ${result.walletAddress}`);
+ * ```
+ */
 export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEventMap> {
+  /**
+   * Configuration options for the social login provider
+   * @private
+   * @type {CustomSocialLoginConfig}
+   */
   private config: CustomSocialLoginConfig;
+  
+  /**
+   * Platform-specific adapter for storage and other platform capabilities
+   * @private
+   * @type {PlatformAdapter}
+   */
   private adapter: PlatformAdapter;
+  
+  /**
+   * Reference to the OAuth popup window
+   * @private
+   * @type {Window}
+   */
   private popup?: Window;
 
+  /**
+   * Creates a new CustomSocialLoginProvider instance.
+   * 
+   * @constructor
+   * @param {CustomSocialLoginConfig} config - Configuration options for the social login provider
+   * @param {PlatformAdapter} adapter - Platform-specific adapter for storage and other capabilities
+   * 
+   * @example
+   * ```typescript
+   * const adapter = new WebPlatformAdapter();
+   * const socialLogin = new CustomSocialLoginProvider({
+   *   appSecret: 'your-app-secret',
+   *   redirectUri: 'https://your-app.com/auth/callback',
+   *   providers: {
+   *     google: { clientId: 'your-google-client-id' }
+   *   }
+   * }, adapter);
+   * ```
+   */
   constructor(config: CustomSocialLoginConfig, adapter: PlatformAdapter) {
     super();
     this.config = config;
     this.adapter = adapter;
   }
 
+  /**
+   * Initiates the social login process with the specified provider.
+   * Handles platform-specific login flows and generates a deterministic wallet.
+   * 
+   * @public
+   * @async
+   * @param {SocialProvider} provider - The social provider to login with (e.g., 'google', 'facebook')
+   * @returns {Promise<SocialLoginResult>} The login result including wallet address
+   * @throws {Error} If login fails
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   // Login with Google
+   *   const result = await socialLogin.login('google');
+   *   console.log(`Logged in with: ${result.user.email}`);
+   *   console.log(`Wallet address: ${result.walletAddress}`);
+   * } catch (error) {
+   *   console.error('Login failed:', error);
+   * }
+   * ```
+   */
   public async login(provider: SocialProvider): Promise<SocialLoginResult> {
     this.emit('loginStart', { provider });
 
@@ -60,6 +164,16 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     }
   }
 
+  /**
+   * Handles the web-based OAuth login flow.
+   * Opens a popup window for the OAuth provider and listens for the callback.
+   * 
+   * @private
+   * @async
+   * @param {SocialProvider} provider - The social provider to login with
+   * @returns {Promise<any>} The authentication result
+   * @throws {Error} If the popup fails to open or the user cancels the login
+   */
   private async loginWeb(provider: SocialProvider): Promise<any> {
     const authUrl = this.buildAuthUrl(provider);
     
@@ -104,6 +218,16 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     });
   }
 
+  /**
+   * Handles the React Native OAuth login flow.
+   * Currently provides a basic implementation with fallback to web-based flow.
+   * 
+   * @private
+   * @async
+   * @param {SocialProvider} provider - The social provider to login with
+   * @returns {Promise<any>} The authentication result
+   * @throws {Error} If the login flow fails or is not implemented for React Native
+   */
   private async loginReactNative(provider: SocialProvider): Promise<any> {
     const authUrl = this.buildAuthUrl(provider);
     
@@ -128,6 +252,14 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     }
   }
 
+  /**
+   * Builds the OAuth authorization URL for the specified provider.
+   * 
+   * @private
+   * @param {SocialProvider} provider - The social provider to build the URL for
+   * @returns {string} The OAuth authorization URL
+   * @throws {Error} If the provider is not configured
+   */
   private buildAuthUrl(provider: SocialProvider): string {
     const config = this.config.providers[provider];
     if (!config) {
@@ -169,11 +301,26 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     return `${baseUrls[provider]}?${params.toString()}`;
   }
 
+  /**
+   * Generates a random state string for OAuth CSRF protection.
+   * 
+   * @private
+   * @returns {string} A random state string
+   */
   private generateState(): string {
     return Math.random().toString(36).substring(2, 15) + 
            Math.random().toString(36).substring(2, 15);
   }
 
+  /**
+   * Generates a deterministic Ethereum wallet from social login data.
+   * Uses the user's social ID and email combined with the app secret to create a unique private key.
+   * 
+   * @private
+   * @async
+   * @param {any} authResult - The authentication result from the social provider
+   * @returns {Promise<{address: string, privateKey: string}>} The generated wallet address and private key
+   */
   private async generateWalletFromSocial(authResult: any): Promise<{address: string, privateKey: string}> {
     // Create deterministic seed from social login data
     const socialData = `${authResult.user.id}:${authResult.user.email}:${this.config.appSecret || 'dsports-default-secret'}`;
@@ -197,6 +344,24 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     };
   }
 
+  /**
+   * Logs out the current user by clearing stored data.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<void>}
+   * @throws {Error} If logout fails
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await socialLogin.logout();
+   *   console.log('User logged out');
+   * } catch (error) {
+   *   console.error('Logout failed:', error);
+   * }
+   * ```
+   */
   public async logout(): Promise<void> {
     try {
       await this.clearStoredData();
@@ -207,6 +372,24 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     }
   }
 
+  /**
+   * Gets the stored user information if available.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<SocialLoginResult | null>} The stored user information or null if not found
+   * 
+   * @example
+   * ```typescript
+   * const user = await socialLogin.getStoredUser();
+   * if (user) {
+   *   console.log(`User is logged in: ${user.user.email}`);
+   *   console.log(`Wallet address: ${user.walletAddress}`);
+   * } else {
+   *   console.log('No user is logged in');
+   * }
+   * ```
+   */
   public async getStoredUser(): Promise<SocialLoginResult | null> {
     const token = await this.adapter.storage.getItem('dsports-social-token');
     const userStr = await this.adapter.storage.getItem('dsports-social-user');
@@ -230,6 +413,28 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     }
   }
 
+  /**
+   * Gets an Ethereum wallet instance from social login result.
+   * Uses the stored private key or regenerates it if not available.
+   * 
+   * @public
+   * @async
+   * @param {SocialLoginResult} socialResult - The social login result
+   * @returns {Promise<ethers.Wallet>} The Ethereum wallet instance
+   * 
+   * @example
+   * ```typescript
+   * const user = await socialLogin.getStoredUser();
+   * if (user) {
+   *   const wallet = await socialLogin.getWalletFromSocial(user);
+   *   console.log(`Wallet address: ${wallet.address}`);
+   *   
+   *   // Sign a message
+   *   const signature = await wallet.signMessage('Hello, D-Sports!');
+   *   console.log(`Signature: ${signature}`);
+   * }
+   * ```
+   */
   public async getWalletFromSocial(socialResult: SocialLoginResult): Promise<ethers.Wallet> {
     if (socialResult.privateKey) {
       return new ethers.Wallet(socialResult.privateKey);
@@ -240,6 +445,14 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     return new ethers.Wallet(walletData.privateKey);
   }
 
+  /**
+   * Stores the login result in the platform's storage.
+   * 
+   * @private
+   * @async
+   * @param {SocialLoginResult} result - The login result to store
+   * @returns {Promise<void>}
+   */
   private async storeLoginResult(result: SocialLoginResult): Promise<void> {
     await this.adapter.storage.setItem('dsports-social-token', result.token);
     await this.adapter.storage.setItem('dsports-social-user', JSON.stringify({
@@ -251,12 +464,33 @@ export class CustomSocialLoginProvider extends EventEmitter<CustomSocialLoginEve
     }));
   }
 
+  /**
+   * Clears all stored login data.
+   * 
+   * @private
+   * @async
+   * @returns {Promise<void>}
+   */
   private async clearStoredData(): Promise<void> {
     await this.adapter.storage.removeItem('dsports-social-token');
     await this.adapter.storage.removeItem('dsports-social-user');
   }
 
-  // OAuth callback handler for web platforms
+  /**
+   * Static handler for OAuth callbacks in web platforms.
+   * Processes the OAuth callback URL and posts messages to the parent window.
+   * 
+   * @public
+   * @static
+   * @param {string} url - The OAuth callback URL to process
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * // In your OAuth callback page
+   * CustomSocialLoginProvider.handleOAuthCallback(window.location.href);
+   * ```
+   */
   public static handleOAuthCallback(url: string): void {
     const urlParams = new URLSearchParams(url.split('?')[1]);
     const code = urlParams.get('code');

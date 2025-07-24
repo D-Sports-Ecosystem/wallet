@@ -1,8 +1,19 @@
+/**
+ * @file token-background-service.ts
+ * @description Background service for token data synchronization.
+ * Manages token updates when the application is in the background.
+ * @module services/token-background-service
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { tokenUpdateService, TokenUpdateConfig } from './token-update-service';
 import { tokenSyncService } from '../utils/token-sync';
 
 /**
- * Configuration for the token background service
+ * Configuration for the token background service.
+ * Controls how the service behaves when the application is in the background.
  */
 export interface TokenBackgroundServiceConfig {
   /**
@@ -42,17 +53,92 @@ export interface TokenBackgroundServiceConfig {
 }
 
 /**
- * Background service for token data synchronization
+ * Background service for token data synchronization.
+ * Manages token updates when the application is in the background using Web Workers.
+ * Implements the Singleton pattern to ensure only one instance exists.
+ * 
+ * @class
+ * 
+ * @example
+ * ```typescript
+ * // Get the default token background service
+ * const service = tokenBackgroundService;
+ * 
+ * // Configure the service
+ * service.updateConfig({
+ *   backgroundSync: true,
+ *   backgroundRefreshInterval: 300000, // 5 minutes
+ *   updateConfig: {
+ *     symbols: ['BTC', 'ETH', 'SOL']
+ *   }
+ * });
+ * 
+ * // Start the service
+ * service.start();
+ * 
+ * // Force an immediate sync
+ * service.forceSync();
+ * ```
  */
 export class TokenBackgroundService {
+  /**
+   * Singleton instance of the TokenBackgroundService
+   * @private
+   * @static
+   * @type {TokenBackgroundService}
+   */
   private static instance: TokenBackgroundService;
+  
+  /**
+   * Service configuration with all required fields
+   * @private
+   * @type {Required<TokenBackgroundServiceConfig>}
+   */
   private config: Required<TokenBackgroundServiceConfig>;
+  
+  /**
+   * Web Worker for background processing
+   * @private
+   * @type {Worker | null}
+   */
   private worker: Worker | null = null;
+  
+  /**
+   * Flag indicating whether the service is active
+   * @private
+   * @type {boolean}
+   */
   private isActive: boolean = false;
+  
+  /**
+   * Count of consecutive synchronization failures
+   * @private
+   * @type {number}
+   */
   private failureCount: number = 0;
+  
+  /**
+   * Timestamp of the last successful synchronization
+   * @private
+   * @type {number}
+   */
   private lastSyncTime: number = 0;
+  
+  /**
+   * Event handler for visibility change events
+   * @private
+   * @type {() => void}
+   */
   private visibilityChangeHandler: () => void;
   
+  /**
+   * Private constructor to enforce the Singleton pattern.
+   * Initializes the service with the provided configuration.
+   * 
+   * @private
+   * @constructor
+   * @param {TokenBackgroundServiceConfig} [config={}] - Service configuration options
+   */
   private constructor(config: TokenBackgroundServiceConfig = {}) {
     // Set default configuration
     this.config = {
@@ -74,7 +160,25 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Get the singleton instance of TokenBackgroundService
+   * Gets the singleton instance of TokenBackgroundService.
+   * Creates a new instance if one doesn't exist yet.
+   * 
+   * @public
+   * @static
+   * @param {TokenBackgroundServiceConfig} [config] - Optional configuration for the service
+   * @returns {TokenBackgroundService} The singleton instance
+   * 
+   * @example
+   * ```typescript
+   * // Get the default instance
+   * const service = TokenBackgroundService.getInstance();
+   * 
+   * // Get the instance with custom configuration
+   * const customService = TokenBackgroundService.getInstance({
+   *   backgroundSync: true,
+   *   backgroundRefreshInterval: 300000 // 5 minutes
+   * });
+   * ```
    */
   public static getInstance(config?: TokenBackgroundServiceConfig): TokenBackgroundService {
     if (!TokenBackgroundService.instance) {
@@ -87,7 +191,29 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Update the service configuration
+   * Updates the service configuration.
+   * Restarts the service if the enabled state changes.
+   * 
+   * @public
+   * @param {Partial<TokenBackgroundServiceConfig>} config - New configuration options
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * // Update the background refresh interval
+   * service.updateConfig({ backgroundRefreshInterval: 300000 });
+   * 
+   * // Enable background sync
+   * service.updateConfig({ backgroundSync: true });
+   * 
+   * // Update token update configuration
+   * service.updateConfig({
+   *   updateConfig: {
+   *     symbols: ['BTC', 'ETH', 'SOL'],
+   *     currency: 'EUR'
+   *   }
+   * });
+   * ```
    */
   public updateConfig(config: Partial<TokenBackgroundServiceConfig>): void {
     const wasEnabled = this.config.enabled;
@@ -119,7 +245,18 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Start the background service
+   * Starts the background service.
+   * Initializes the token update service, sets up visibility change listeners,
+   * and initializes the web worker if supported.
+   * 
+   * @public
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * // Start the background service
+   * service.start();
+   * ```
    */
   public start(): void {
     if (this.isActive) {
@@ -147,7 +284,18 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Stop the background service
+   * Stops the background service.
+   * Stops the token update service, removes event listeners,
+   * and terminates the web worker if active.
+   * 
+   * @public
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * // Stop the background service
+   * service.stop();
+   * ```
    */
   public stop(): void {
     if (!this.isActive) {
@@ -174,7 +322,11 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Initialize web worker for background processing
+   * Initializes a web worker for background processing.
+   * Creates a worker from a blob URL with inline code.
+   * 
+   * @private
+   * @returns {void}
    */
   private initializeWorker(): void {
     // Only initialize worker if web workers are supported and enabled
@@ -265,7 +417,11 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Handle visibility change events for background sync
+   * Handles visibility change events for background sync.
+   * Adjusts the sync interval based on whether the app is in the foreground or background.
+   * 
+   * @private
+   * @returns {void}
    */
   private handleVisibilityChange(): void {
     if (!this.isActive || !this.worker) {
@@ -288,7 +444,12 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Perform background synchronization
+   * Performs background synchronization of token data.
+   * Updates the last sync time and handles failures.
+   * 
+   * @private
+   * @async
+   * @returns {Promise<void>}
    */
   private async performBackgroundSync(): Promise<void> {
     if (!this.isActive) {
@@ -326,24 +487,89 @@ export class TokenBackgroundService {
   }
   
   /**
-   * Check if the background service is active
+   * Checks if the background service is active.
+   * 
+   * @public
+   * @returns {boolean} True if the service is active, false otherwise
+   * 
+   * @example
+   * ```typescript
+   * // Check if the service is running
+   * if (service.isRunning()) {
+   *   console.log('Background service is active');
+   * } else {
+   *   console.log('Background service is inactive');
+   * }
+   * ```
    */
   public isRunning(): boolean {
     return this.isActive;
   }
   
   /**
-   * Force an immediate synchronization
+   * Forces an immediate synchronization of token data.
+   * 
+   * @public
+   * @async
+   * @returns {Promise<void>}
+   * 
+   * @example
+   * ```typescript
+   * // Force an immediate sync
+   * service.forceSync().then(() => {
+   *   console.log('Sync completed');
+   * }).catch(error => {
+   *   console.error('Sync failed:', error);
+   * });
+   * ```
    */
   public async forceSync(): Promise<void> {
     return this.performBackgroundSync();
   }
 }
 
-// Export singleton instance
+/**
+ * Singleton instance of the TokenBackgroundService.
+ * Use this for most applications.
+ * 
+ * @constant
+ * @type {TokenBackgroundService}
+ * 
+ * @example
+ * ```typescript
+ * // Import the singleton instance
+ * import { tokenBackgroundService } from './token-background-service';
+ * 
+ * // Configure and use the service
+ * tokenBackgroundService.updateConfig({ backgroundSync: true });
+ * tokenBackgroundService.start();
+ * ```
+ */
 export const tokenBackgroundService = TokenBackgroundService.getInstance();
 
-// Export a function to create a custom token background service
+/**
+ * Creates a custom token background service with the specified configuration.
+ * This is a convenience function that uses the singleton pattern internally.
+ * 
+ * @function
+ * @param {TokenBackgroundServiceConfig} config - Configuration for the token background service
+ * @returns {TokenBackgroundService} The configured token background service
+ * 
+ * @example
+ * ```typescript
+ * // Create a custom token background service
+ * const service = createTokenBackgroundService({
+ *   backgroundSync: true,
+ *   backgroundRefreshInterval: 300000, // 5 minutes
+ *   updateConfig: {
+ *     symbols: ['BTC', 'ETH', 'SOL']
+ *   }
+ * });
+ * 
+ * // Start the service
+ * service.start();
+ * ```
+ */
 export function createTokenBackgroundService(config: TokenBackgroundServiceConfig): TokenBackgroundService {
   return TokenBackgroundService.getInstance(config);
 }

@@ -1,3 +1,13 @@
+/**
+ * @file platform-adapters.ts
+ * @description Platform-specific adapters for storage, crypto, and network operations.
+ * Provides a unified interface for platform-specific functionality across web, Next.js, and React Native.
+ * @module utils/platform-adapters
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { PlatformAdapter } from '../types';
 import {
   createPlatformAdapter,
@@ -11,17 +21,65 @@ import { BrowserCryptoAdapter, FallbackCryptoAdapter } from './crypto-adapter';
  * New code should use the factory pattern instead
  */
 
-// Create web platform adapter with dynamic imports
+/**
+ * Creates a web platform adapter with dynamic imports.
+ * This is the recommended way to create a platform adapter for web environments.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<PlatformAdapter>} A platform adapter for web environments
+ * 
+ * @example
+ * ```typescript
+ * // Create a web platform adapter
+ * const adapter = await createWebPlatformAdapter();
+ * 
+ * // Use the adapter
+ * await adapter.storage.setItem('key', 'value');
+ * ```
+ */
 export async function createWebPlatformAdapter(): Promise<PlatformAdapter> {
   return createCustomPlatformAdapter('web');
 }
 
-// Create Next.js platform adapter with dynamic imports
+/**
+ * Creates a Next.js platform adapter with dynamic imports.
+ * This is the recommended way to create a platform adapter for Next.js environments.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<PlatformAdapter>} A platform adapter for Next.js environments
+ * 
+ * @example
+ * ```typescript
+ * // Create a Next.js platform adapter
+ * const adapter = await createNextjsPlatformAdapter();
+ * 
+ * // Use the adapter
+ * await adapter.storage.setItem('key', 'value');
+ * ```
+ */
 export async function createNextjsPlatformAdapter(): Promise<PlatformAdapter> {
   return createCustomPlatformAdapter('nextjs');
 }
 
-// Create React Native platform adapter with dynamic imports
+/**
+ * Creates a React Native platform adapter with dynamic imports.
+ * This is the recommended way to create a platform adapter for React Native environments.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<PlatformAdapter>} A platform adapter for React Native environments
+ * 
+ * @example
+ * ```typescript
+ * // Create a React Native platform adapter
+ * const adapter = await createReactNativePlatformAdapter();
+ * 
+ * // Use the adapter
+ * await adapter.storage.setItem('key', 'value');
+ * ```
+ */
 export async function createReactNativePlatformAdapter(): Promise<PlatformAdapter> {
   return createCustomPlatformAdapter('react-native');
 }
@@ -372,7 +430,23 @@ export const reactNativePlatformAdapter: PlatformAdapter = {
   }
 };
 
-// Auto-detect platform adapter (synchronous version for backward compatibility)
+/**
+ * Auto-detects and returns a platform adapter based on the current environment.
+ * This is a synchronous version kept for backward compatibility.
+ * 
+ * @deprecated Use getDefaultPlatformAdapterAsync() instead
+ * @function
+ * @returns {PlatformAdapter} A platform adapter for the detected environment
+ * 
+ * @example
+ * ```typescript
+ * // Get a platform adapter for the current environment
+ * const adapter = getDefaultPlatformAdapter();
+ * 
+ * // Use the adapter
+ * await adapter.storage.setItem('key', 'value');
+ * ```
+ */
 export function getDefaultPlatformAdapter(): PlatformAdapter {
   console.warn('Using synchronous getDefaultPlatformAdapter. Please migrate to async getDefaultPlatformAdapterAsync.');
   if (typeof window !== 'undefined') {
@@ -394,7 +468,23 @@ export function getDefaultPlatformAdapter(): PlatformAdapter {
   }
 }
 
-// Async version of getDefaultPlatformAdapter (recommended)
+/**
+ * Asynchronously auto-detects and returns a platform adapter based on the current environment.
+ * This is the recommended way to get a platform adapter.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<PlatformAdapter>} A platform adapter for the detected environment
+ * 
+ * @example
+ * ```typescript
+ * // Get a platform adapter for the current environment
+ * const adapter = await getDefaultPlatformAdapterAsync();
+ * 
+ * // Use the adapter
+ * await adapter.storage.setItem('key', 'value');
+ * ```
+ */
 export async function getDefaultPlatformAdapterAsync(): Promise<PlatformAdapter> {
   return getFactoryDefaultAdapter();
 }

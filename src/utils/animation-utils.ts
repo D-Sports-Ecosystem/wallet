@@ -1,25 +1,56 @@
 /**
- * Cross-platform animation utilities with browser compatibility
- * Provides unified animation interface for React Native and web environments
+ * @file animation-utils.ts
+ * @description Cross-platform animation utilities with browser compatibility.
+ * Provides a unified animation interface for React Native and web environments.
+ * @module utils/animation-utils
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
  */
 
 import { detectPlatform } from './platform-adapter-factory';
 
-// Animation configuration interface
+/**
+ * Configuration options for animations.
+ * 
+ * @interface
+ * @property {number} [duration] - Animation duration in milliseconds
+ * @property {number} [delay] - Animation delay in milliseconds
+ * @property {('ease'|'ease-in'|'ease-out'|'ease-in-out'|'linear')} [easing] - Animation easing function
+ */
 export interface AnimationConfig {
   duration?: number;
   delay?: number;
   easing?: 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
 }
 
-// Unified animation builder interface
+/**
+ * Unified animation builder interface for creating animations.
+ * Provides a fluent API for configuring animations.
+ * 
+ * @interface
+ * @property {function} duration - Sets the animation duration
+ * @property {function} delay - Sets the animation delay
+ * @property {function} [easing] - Sets the animation easing function
+ */
 export interface AnimationBuilder {
   duration(duration: number): AnimationBuilder;
   delay(delay: number): AnimationBuilder;
   easing?(easing: AnimationConfig['easing']): AnimationBuilder;
 }
 
-// CSS animation class names for browser environments
+/**
+ * CSS animation class names for browser environments.
+ * Maps animation types to their corresponding CSS class names.
+ * 
+ * @interface
+ * @property {string} fadeIn - CSS class for fade in animation
+ * @property {string} fadeOut - CSS class for fade out animation
+ * @property {string} slideInRight - CSS class for slide in from right animation
+ * @property {string} slideInLeft - CSS class for slide in from left animation
+ * @property {string} bounceIn - CSS class for bounce in animation
+ * @property {string} shimmer - CSS class for shimmer animation
+ */
 export interface CSSAnimationClasses {
   fadeIn: string;
   fadeOut: string;
@@ -29,7 +60,16 @@ export interface CSSAnimationClasses {
   shimmer: string;
 }
 
-// Animation capabilities detection
+/**
+ * Animation capabilities detection result.
+ * Indicates which animation technologies are available in the current environment.
+ * 
+ * @interface
+ * @property {boolean} hasReanimated - Whether React Native Reanimated is available
+ * @property {boolean} hasCSSAnimations - Whether CSS animations are supported
+ * @property {boolean} hasWebAnimations - Whether Web Animations API is supported
+ * @property {boolean} hasTransitions - Whether CSS transitions are supported
+ */
 export interface AnimationCapabilities {
   hasReanimated: boolean;
   hasCSSAnimations: boolean;
@@ -37,7 +77,28 @@ export interface AnimationCapabilities {
   hasTransitions: boolean;
 }
 
-// Detect animation capabilities
+/**
+ * Detects animation capabilities available in the current environment.
+ * Checks for React Native Reanimated, CSS animations, Web Animations API, and CSS transitions.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<AnimationCapabilities>} Object indicating which animation technologies are available
+ * 
+ * @example
+ * ```typescript
+ * // Detect animation capabilities
+ * const capabilities = await detectAnimationCapabilities();
+ * 
+ * if (capabilities.hasReanimated) {
+ *   console.log('React Native Reanimated is available');
+ * }
+ * 
+ * if (capabilities.hasCSSAnimations) {
+ *   console.log('CSS animations are supported');
+ * }
+ * ```
+ */
 export async function detectAnimationCapabilities(): Promise<AnimationCapabilities> {
   const capabilities: AnimationCapabilities = {
     hasReanimated: false,
@@ -78,7 +139,22 @@ export async function detectAnimationCapabilities(): Promise<AnimationCapabiliti
   return capabilities;
 }
 
-// CSS-based animation fallbacks for browser environments
+/**
+ * CSS animation class names for browser environments.
+ * These classes are used as fallbacks when React Native Reanimated is not available.
+ * 
+ * @constant
+ * @type {CSSAnimationClasses}
+ * 
+ * @example
+ * ```typescript
+ * // Get the CSS class for fade in animation
+ * const fadeInClass = cssAnimationClasses.fadeIn;
+ * 
+ * // Apply the class to an element
+ * element.classList.add(fadeInClass);
+ * ```
+ */
 export const cssAnimationClasses: CSSAnimationClasses = {
   fadeIn: 'animate-fade-in',
   fadeOut: 'animate-fade-out',
@@ -167,7 +243,18 @@ function createFallbackAnimationBuilder(): AnimationBuilder {
   return builder;
 }
 
-// Unified animation interface
+/**
+ * Unified animation interface providing access to all available animations.
+ * Works across different platforms (web, Next.js, React Native) with a consistent API.
+ * 
+ * @interface
+ * @property {AnimationBuilder} FadeIn - Fade in animation
+ * @property {AnimationBuilder} FadeOut - Fade out animation
+ * @property {AnimationBuilder} SlideInRight - Slide in from right animation
+ * @property {AnimationBuilder} SlideInLeft - Slide in from left animation
+ * @property {AnimationBuilder} BounceIn - Bounce in animation
+ * @property {AnimationBuilder} Shimmer - Shimmer animation
+ */
 export interface UnifiedAnimations {
   FadeIn: AnimationBuilder;
   FadeOut: AnimationBuilder;
@@ -177,7 +264,30 @@ export interface UnifiedAnimations {
   Shimmer: AnimationBuilder;
 }
 
-// Load animations based on platform and capabilities
+/**
+ * Asynchronously loads animations based on platform and capabilities.
+ * Automatically selects the best animation implementation for the current environment.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<UnifiedAnimations>} Object containing all available animations
+ * 
+ * @example
+ * ```typescript
+ * // Load animations
+ * const animations = await loadUnifiedAnimations();
+ * 
+ * // Use fade in animation
+ * const fadeIn = animations.FadeIn.duration(300).delay(100);
+ * 
+ * // Apply animation to a React component
+ * return (
+ *   <Animated.View style={fadeIn.getStyle()}>
+ *     <Text>Hello World</Text>
+ *   </Animated.View>
+ * );
+ * ```
+ */
 export async function loadUnifiedAnimations(): Promise<UnifiedAnimations> {
   const capabilities = await detectAnimationCapabilities();
   const platform = detectPlatform();
@@ -222,7 +332,29 @@ export async function loadUnifiedAnimations(): Promise<UnifiedAnimations> {
   };
 }
 
-// Synchronous version for immediate access (uses CSS animations by default)
+/**
+ * Synchronously gets animations for immediate access.
+ * Uses CSS animations by default for web environments and tries to load Reanimated synchronously for React Native.
+ * 
+ * @function
+ * @returns {UnifiedAnimations} Object containing all available animations
+ * 
+ * @example
+ * ```typescript
+ * // Get animations synchronously
+ * const animations = getUnifiedAnimations();
+ * 
+ * // Use fade in animation
+ * const fadeIn = animations.FadeIn.duration(300);
+ * 
+ * // Apply animation to a React component
+ * return (
+ *   <div className={fadeIn.getClassName()}>
+ *     Hello World
+ *   </div>
+ * );
+ * ```
+ */
 export function getUnifiedAnimations(): UnifiedAnimations {
   const platform = detectPlatform();
 
@@ -266,8 +398,15 @@ export function getUnifiedAnimations(): UnifiedAnimations {
   };
 }
 
-// Legacy compatibility - keep existing exports but mark as deprecated
-/** @deprecated Use getUnifiedAnimations() instead */
+/**
+ * Legacy function for loading animations asynchronously.
+ * Kept for backward compatibility.
+ * 
+ * @deprecated Use getUnifiedAnimations() instead
+ * @async
+ * @function
+ * @returns {Promise<{FadeIn: AnimationBuilder, FadeOut: AnimationBuilder}>} Limited set of animations
+ */
 export async function loadSafeAnimations() {
   const unified = await loadUnifiedAnimations();
   return {
@@ -276,7 +415,14 @@ export async function loadSafeAnimations() {
   };
 }
 
-/** @deprecated Use getUnifiedAnimations() instead */
+/**
+ * Legacy function for getting animations synchronously.
+ * Kept for backward compatibility.
+ * 
+ * @deprecated Use getUnifiedAnimations() instead
+ * @function
+ * @returns {{FadeIn: AnimationBuilder, FadeOut: AnimationBuilder}} Limited set of animations
+ */
 export function getSafeAnimations() {
   const unified = getUnifiedAnimations();
   return {
@@ -285,6 +431,45 @@ export function getSafeAnimations() {
   };
 }
 
-// Export individual animations for convenience
+/**
+ * Pre-loaded animations for immediate use.
+ * Contains all available animations for the current environment.
+ * 
+ * @constant
+ * @type {UnifiedAnimations}
+ * 
+ * @example
+ * ```typescript
+ * // Use pre-loaded animations
+ * import { animations } from '@d-sports/wallet/utils/animation-utils';
+ * 
+ * // Apply fade in animation
+ * return (
+ *   <div className={animations.FadeIn.duration(300).getClassName()}>
+ *     Hello World
+ *   </div>
+ * );
+ * ```
+ */
 export const animations = getUnifiedAnimations();
+
+/**
+ * Individual animations exported for convenience.
+ * These are pre-loaded and ready to use.
+ * 
+ * @example
+ * ```typescript
+ * // Import individual animations
+ * import { FadeIn, SlideInRight } from '@d-sports/wallet/utils/animation-utils';
+ * 
+ * // Apply animations
+ * return (
+ *   <div className={FadeIn.duration(300).getClassName()}>
+ *     <div className={SlideInRight.duration(500).delay(100).getClassName()}>
+ *       Hello World
+ *     </div>
+ *   </div>
+ * );
+ * ```
+ */
 export const { FadeIn, FadeOut, SlideInRight, SlideInLeft, BounceIn, Shimmer } = animations;

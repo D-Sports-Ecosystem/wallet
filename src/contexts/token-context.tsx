@@ -1,7 +1,29 @@
+/**
+ * @file token-context.tsx
+ * @description React context for managing cryptocurrency token data.
+ * Provides token information, loading states, and data refresh functionality.
+ * @module contexts/token-context
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { TokenInfo } from '../services/token-service';
 import { tokenUpdateService, TokenUpdateConfig } from '../services/token-update-service';
 
+/**
+ * Token context type definition.
+ * Contains token data and related functionality.
+ * 
+ * @interface
+ * @property {TokenInfo[]} tokens - List of primary tokens to display
+ * @property {TokenInfo[]} availableTokens - List of all available tokens
+ * @property {boolean} isLoading - Whether token data is loading
+ * @property {Error | null} error - Error that occurred during data fetching, if any
+ * @property {function} refreshTokenData - Function to manually refresh token data
+ * @property {Date | null} lastUpdated - Timestamp of the last data update
+ */
 interface TokenContextType {
   tokens: TokenInfo[];
   availableTokens: TokenInfo[];
@@ -11,8 +33,23 @@ interface TokenContextType {
   lastUpdated: Date | null;
 }
 
+/**
+ * React context for token data.
+ * Provides token information throughout the component tree.
+ */
 const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
+/**
+ * Props for the TokenProvider component.
+ * 
+ * @interface
+ * @property {ReactNode} children - Child components
+ * @property {number} [refreshInterval=300000] - Data refresh interval in milliseconds (default: 5 minutes)
+ * @property {number} [cacheTTL=300000] - Cache time-to-live in milliseconds (default: 5 minutes)
+ * @property {string[]} [initialSymbols=['BTC', 'ETH', 'MATIC', 'USDC', 'BNB']] - Initial token symbols to fetch
+ * @property {string} [currency='USD'] - Currency for token prices
+ * @property {boolean} [autoStart=true] - Whether to start fetching data automatically
+ */
 interface TokenProviderProps {
   children: ReactNode;
   refreshInterval?: number; // in milliseconds
@@ -22,6 +59,27 @@ interface TokenProviderProps {
   autoStart?: boolean;
 }
 
+/**
+ * Provider component for token data.
+ * Manages token state and provides it to child components.
+ * 
+ * @component
+ * @param {TokenProviderProps} props - Component props
+ * @returns {JSX.Element} Provider component
+ * 
+ * @example
+ * ```tsx
+ * // Wrap your app with the TokenProvider
+ * return (
+ *   <TokenProvider 
+ *     refreshInterval={60000} 
+ *     initialSymbols={['BTC', 'ETH', 'SOL']}
+ *   >
+ *     <App />
+ *   </TokenProvider>
+ * );
+ * ```
+ */
 export const TokenProvider: React.FC<TokenProviderProps> = ({
   children,
   refreshInterval = 5 * 60 * 1000, // 5 minutes default
@@ -184,6 +242,37 @@ export const TokenProvider: React.FC<TokenProviderProps> = ({
   );
 };
 
+/**
+ * Hook to access token data from the TokenContext.
+ * Must be used within a TokenProvider component.
+ * 
+ * @function
+ * @returns {TokenContextType} Token context value
+ * @throws {Error} If used outside of a TokenProvider
+ * 
+ * @example
+ * ```tsx
+ * // Use token data in a component
+ * const { tokens, isLoading, refreshTokenData } = useTokens();
+ * 
+ * if (isLoading) {
+ *   return <div>Loading tokens...</div>;
+ * }
+ * 
+ * return (
+ *   <div>
+ *     <button onClick={refreshTokenData}>Refresh</button>
+ *     <ul>
+ *       {tokens.map(token => (
+ *         <li key={token.symbol}>
+ *           {token.name}: {token.price} {token.currency}
+ *         </li>
+ *       ))}
+ *     </ul>
+ *   </div>
+ * );
+ * ```
+ */
 export const useTokens = (): TokenContextType => {
   const context = useContext(TokenContext);
   if (context === undefined) {

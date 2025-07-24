@@ -1,3 +1,13 @@
+/**
+ * @file index.ts
+ * @description Server-specific entry point for the D-Sports wallet SDK.
+ * Provides server-optimized implementations for Node.js environments.
+ * @module server
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 // Server-specific entry point - includes server-side utilities
 // Note: This should only be used in Node.js environments
 
@@ -58,7 +68,29 @@ import {
   WagmiConnectorOptions,
 } from "../types";
 
-// Server-specific wallet factory
+/**
+ * Creates a D-Sports wallet instance optimized for server environments.
+ * Configures the wallet with the appropriate platform adapter and connectors.
+ * 
+ * @function
+ * @param {DSportsWalletOptions} options - Configuration options for the wallet
+ * @returns {DSportsWallet} A configured D-Sports wallet instance
+ * 
+ * @example
+ * ```typescript
+ * // Create a wallet for server environment
+ * const wallet = createDSportsWallet({
+ *   projectId: 'your-project-id',
+ *   chains: [mainnet, polygon],
+ *   metadata: {
+ *     name: 'My Server D-Sports App',
+ *     description: 'A D-Sports wallet integration for server',
+ *     url: 'https://myapp.com',
+ *     icons: ['https://myapp.com/icon.png']
+ *   }
+ * });
+ * ```
+ */
 export function createDSportsWallet(
   options: DSportsWalletOptions
 ): DSportsWallet {
@@ -217,7 +249,22 @@ export const polygon = {
   },
 };
 
-// Server-side utilities (Node.js only)
+/**
+ * Fetches token data in server environments.
+ * This function is only available in Node.js environments and will throw an error if called in a browser.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<any>} Token data from the server
+ * @throws {Error} If called in a browser environment
+ * 
+ * @example
+ * ```typescript
+ * // In a Node.js environment
+ * const tokenData = await getServerTokenData();
+ * console.log('Token data:', tokenData);
+ * ```
+ */
 export async function getServerTokenData() {
   // This would include server-side token data fetching
   // Only available in Node.js environments

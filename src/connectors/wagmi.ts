@@ -1,3 +1,13 @@
+/**
+ * @file wagmi.ts
+ * @description Wagmi connector implementation for D-Sports wallet integration.
+ * Provides wallet connection capabilities with Wagmi compatibility.
+ * @module connectors/wagmi
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import { EventEmitter } from '../utils/event-emitter';
 import { 
   WalletConnector, 
@@ -10,22 +20,121 @@ import {
 } from '../types';
 import { CustomSocialLoginProvider } from '../providers/custom-social-login';
 
+/**
+ * Configuration interface for the D-Sports Wagmi connector.
+ * Extends the standard Wagmi connector options with D-Sports specific features.
+ * 
+ * @interface
+ * @extends {WagmiConnectorOptions}
+ * @property {CustomSocialLoginProvider} [customSocialLoginProvider] - Optional social login provider for OAuth-based wallet connections
+ */
 export interface DSportsWagmiConnectorConfig extends WagmiConnectorOptions {
   customSocialLoginProvider?: CustomSocialLoginProvider;
 }
 
+/**
+ * D-Sports Wagmi connector implementation.
+ * Provides wallet connection capabilities with Wagmi compatibility,
+ * including social login integration.
+ * 
+ * @class
+ * @implements {WalletConnector}
+ * 
+ * @example
+ * ```typescript
+ * // Create a Wagmi connector
+ * const connector = new DSportsWagmiConnector({
+ *   chains: [
+ *     { id: 1, name: 'Ethereum', network: 'ethereum' }
+ *   ],
+ *   customSocialLoginProvider: socialLoginProvider
+ * });
+ * 
+ * // Connect to the wallet
+ * const account = await connector.connect();
+ * console.log(`Connected to: ${account.address}`);
+ * ```
+ */
 export class DSportsWagmiConnector implements WalletConnector {
+  /**
+   * Unique identifier for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly id = 'dsports-wallet';
+  
+  /**
+   * Display name for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly name = 'D-Sports Wallet';
+  
+  /**
+   * Indicates if the connector is ready to use
+   * @public
+   * @readonly
+   * @type {boolean}
+   */
   public readonly ready = true;
+  
+  /**
+   * Base64 encoded SVG icon for the connector
+   * @public
+   * @readonly
+   * @type {string}
+   */
   public readonly icon = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2RjEiLz4KPHBhdGggZD0iTTI0IDEySDM2VjM2SDI0VjEyWiIgZmlsbD0iI0Y5RkJGRiIvPgo8cGF0aCBkPSJNMTIgMTJIMjRWMjRIMTJWMTJaIiBmaWxsPSIjRjlGQkZGIi8+CjxwYXRoIGQ9Ik0xMiAyNEgyNFYzNkgxMlYyNFoiIGZpbGw9IiNGOUZCRkYiLz4KPC9zdmc+';
 
+  /**
+   * Configuration options for the connector
+   * @private
+   * @type {DSportsWagmiConnectorConfig}
+   */
   private config: DSportsWagmiConnectorConfig;
+  
+  /**
+   * Ethereum provider instance
+   * @private
+   * @type {any}
+   */
   private provider?: any;
+  
+  /**
+   * Connected wallet address
+   * @private
+   * @type {string}
+   */
   private account?: string;
+  
+  /**
+   * Connected chain ID
+   * @private
+   * @type {number}
+   */
   private chainId?: number;
+  
+  /**
+   * Connection status flag
+   * @private
+   * @type {boolean}
+   */
   private isConnected = false;
+  
+  /**
+   * Social login provider for OAuth-based wallet connections
+   * @private
+   * @type {CustomSocialLoginProvider}
+   */
   private customSocialLoginProvider?: CustomSocialLoginProvider;
+  
+  /**
+   * Event emitter for connector events
+   * @private
+   * @type {EventEmitter}
+   */
   private eventEmitter = new EventEmitter<{
     connect: ConnectorData;
     disconnect: void;
@@ -34,15 +143,68 @@ export class DSportsWagmiConnector implements WalletConnector {
     message: { type: string; data?: any };
   }>();
 
+  /**
+   * Creates a new DSportsWagmiConnector instance.
+   * 
+   * @constructor
+   * @param {DSportsWagmiConnectorConfig} config - Configuration options for the connector
+   * 
+   * @example
+   * ```typescript
+   * const connector = new DSportsWagmiConnector({
+   *   chains: [
+   *     { id: 1, name: 'Ethereum', network: 'ethereum' }
+   *   ]
+   * });
+   * ```
+   */
   constructor(config: DSportsWagmiConnectorConfig) {
     this.config = config;
     this.customSocialLoginProvider = config.customSocialLoginProvider;
   }
 
+  /**
+   * Registers an event listener for connector events.
+   * 
+   * @public
+   * @template K
+   * @param {K} event - The event name to listen for
+   * @param {ConnectorEvents[K]} listener - The event listener function
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * connector.on('connect', (data) => {
+   *   console.log(`Connected to: ${data.account}`);
+   * });
+   * ```
+   */
   on<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void {
     this.eventEmitter.on(event, listener as any);
   }
 
+  /**
+   * Removes an event listener for connector events.
+   * 
+   * @public
+   * @template K
+   * @param {K} event - The event name to remove listener from
+   * @param {ConnectorEvents[K]} listener - The event listener function to remove
+   * @returns {void}
+   * 
+   * @example
+   * ```typescript
+   * const handleConnect = (data) => {
+   *   console.log(`Connected to: ${data.account}`);
+   * };
+   * 
+   * // Add listener
+   * connector.on('connect', handleConnect);
+   * 
+   * // Remove listener
+   * connector.off('connect', handleConnect);
+   * ```
+   */
   off<K extends keyof ConnectorEvents>(event: K, listener: ConnectorEvents[K]): void {
     this.eventEmitter.off(event, listener as any);
   }

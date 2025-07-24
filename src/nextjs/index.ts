@@ -1,3 +1,13 @@
+/**
+ * @file index.ts
+ * @description Next.js-specific entry point for the D-Sports wallet SDK.
+ * Provides Next.js-optimized implementations with SSR compatibility.
+ * @module nextjs
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import React, { useState, useEffect } from 'react';
 import { DSportsWallet } from '../core/wallet';
 import { CustomSocialLoginProvider } from '../providers/custom-social-login';
@@ -12,7 +22,29 @@ import {
   Chain
 } from '../types';
 
-// Next.js specific wallet factory
+/**
+ * Creates a D-Sports wallet instance optimized for Next.js environments.
+ * Configures the wallet with the appropriate platform adapter and connectors.
+ * 
+ * @function
+ * @param {DSportsWalletOptions} options - Configuration options for the wallet
+ * @returns {DSportsWallet} A configured D-Sports wallet instance
+ * 
+ * @example
+ * ```typescript
+ * // Create a wallet for Next.js environment
+ * const wallet = createDSportsWallet({
+ *   projectId: 'your-project-id',
+ *   chains: [mainnet, polygon],
+ *   metadata: {
+ *     name: 'My Next.js D-Sports App',
+ *     description: 'A D-Sports wallet integration for Next.js',
+ *     url: 'https://mynextapp.com',
+ *     icons: ['https://mynextapp.com/icon.png']
+ *   }
+ * });
+ * ```
+ */
 export function createDSportsWallet(options: DSportsWalletOptions): DSportsWallet {
   const config: WalletConfig = {
     appName: options.metadata?.name || 'D-Sports App',
@@ -113,7 +145,34 @@ export function dsportsWagmiConnectorForNextjs(options: WagmiConnectorOptions) {
   });
 }
 
-// Next.js Hooks
+/**
+ * React hook for using a D-Sports wallet in Next.js applications.
+ * Provides reactive state updates and wallet methods.
+ * 
+ * @function
+ * @param {DSportsWallet} wallet - The D-Sports wallet instance
+ * @returns {Object} Wallet state and methods
+ * 
+ * @example
+ * ```tsx
+ * // Use the wallet in a Next.js component
+ * function WalletComponent() {
+ *   const wallet = useDSportsWallet(myWallet);
+ *   
+ *   return (
+ *     <div>
+ *       {wallet.isConnected ? (
+ *         <div>Connected: {wallet.account?.address}</div>
+ *       ) : (
+ *         <button onClick={() => wallet.connect('dsports-wallet')}>
+ *           Connect Wallet
+ *         </button>
+ *       )}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export function useDSportsWallet(wallet: DSportsWallet) {
   const [state, setState] = useState(wallet.getState());
 

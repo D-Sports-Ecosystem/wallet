@@ -49,7 +49,6 @@
 
 - [x] 4. Document scripts in scripts/
 
-
   - [x] 4.1 Document build and analysis scripts
 
     - Document analyze-bundle.js with function descriptions and usage
@@ -62,16 +61,17 @@
     - Document validation scripts with comprehensive JSDoc comments
     - _Requirements: 1.1, 1.2, 1.3, 3.4_
 
-- [ ] 5. Document core source files in src/
+- [x] 5. Document core source files in src/
 
-  - [ ] 5.1 Document core wallet functionality
+
+  - [x] 5.1 Document core wallet functionality
 
     - Document wallet.ts with class and method descriptions
     - Document wallet-store.ts with state management documentation
     - Add examples of wallet usage patterns
     - _Requirements: 1.1, 1.2, 3.1, 3.2, 3.3, 4.1_
 
-  - [ ] 5.2 Document connectors and providers
+  - [x] 5.2 Document connectors and providers
 
     - Document rainbow-kit.ts connector with comprehensive JSDoc comments
     - Document wagmi.ts connector with comprehensive JSDoc comments
@@ -79,28 +79,29 @@
     - Document dsports-oauth-service.ts with service documentation
     - _Requirements: 1.1, 1.2, 3.1, 3.2, 3.3, 4.2_
 
-  - [ ] 5.3 Document utility functions
+  - [x] 5.3 Document utility functions
 
     - Document platform-adapters.ts with adapter pattern documentation
     - Document event-emitter.ts with event handling documentation
     - Document animation-utils.ts with animation system documentation
     - _Requirements: 1.1, 1.2, 1.3, 4.1_
 
-  - [ ] 5.4 Document hooks and contexts
+  - [x] 5.4 Document hooks and contexts
 
     - Document use-token-docs.ts hook with usage examples
     - Document useAnimations.ts hook with comprehensive JSDoc comments
     - Document token-context.tsx with context API documentation
     - _Requirements: 1.1, 1.2, 3.1, 5.2_
 
-  - [ ] 5.5 Document services
+  - [x] 5.5 Document services
 
     - Document token-service.ts with service method documentation
     - Document token-update-service.ts with update mechanism documentation
     - Document token-background-service.ts with background processing documentation
     - _Requirements: 1.1, 1.2, 3.1, 3.2, 3.3, 4.1_
 
-  - [ ] 5.6 Document platform-specific implementations
+  - [x] 5.6 Document platform-specific implementations
+
     - Document browser/ directory with browser-specific documentation
     - Document nextjs/ directory with Next.js-specific documentation
     - Document react-native/ directory with React Native-specific documentation

@@ -1,3 +1,13 @@
+/**
+ * @file index.ts
+ * @description React Native-specific entry point for the D-Sports wallet SDK.
+ * Provides React Native-optimized implementations with mobile compatibility.
+ * @module react-native
+ * @author D-Sports Engineering Team
+ * @version 1.0.0
+ * @since 2025-07-23
+ */
+
 import React, { useState, useEffect } from "react";
 import { DSportsWallet } from "../core/wallet";
 import { CustomSocialLoginProvider } from "../providers/custom-social-login";
@@ -19,7 +29,29 @@ import {
   Chain,
 } from "../types";
 
-// React Native specific wallet factory
+/**
+ * Creates a D-Sports wallet instance optimized for React Native environments.
+ * Configures the wallet with the appropriate platform adapter and connectors.
+ * 
+ * @function
+ * @param {DSportsWalletOptions} options - Configuration options for the wallet
+ * @returns {DSportsWallet} A configured D-Sports wallet instance
+ * 
+ * @example
+ * ```typescript
+ * // Create a wallet for React Native environment
+ * const wallet = createDSportsWallet({
+ *   projectId: 'your-project-id',
+ *   chains: [mainnet, polygon],
+ *   metadata: {
+ *     name: 'My React Native D-Sports App',
+ *     description: 'A D-Sports wallet integration for React Native',
+ *     url: 'https://myapp.com',
+ *     icons: ['https://myapp.com/icon.png']
+ *   }
+ * });
+ * ```
+ */
 export function createDSportsWallet(
   options: DSportsWalletOptions,
 ): DSportsWallet {
@@ -232,7 +264,23 @@ export function withDSportsWallet<T extends object>(
   };
 }
 
-// React Native Deep Linking utilities
+/**
+ * Handles deep links for wallet connections in React Native.
+ * Parses the URL and triggers the appropriate wallet action.
+ * 
+ * @function
+ * @param {string} url - The deep link URL to handle
+ * @param {DSportsWallet} wallet - The D-Sports wallet instance
+ * @returns {Promise<any> | null} The result of the wallet action or null if no action was taken
+ * 
+ * @example
+ * ```typescript
+ * // In your deep link handler
+ * Linking.addEventListener('url', ({ url }) => {
+ *   handleDeepLink(url, wallet);
+ * });
+ * ```
+ */
 export function handleDeepLink(url: string, wallet: DSportsWallet) {
   const parsedUrl = new URL(url);
 
