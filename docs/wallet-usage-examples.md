@@ -1,345 +1,572 @@
-# D-Sports Wallet Usage Patterns
+# Wallet Usage Examples
 
-This document provides examples of common usage patterns for the D-Sports wallet system.
+This document provides practical examples of how to use the @d-sports/wallet package in different scenarios.
 
-## Basic Wallet Setup and Connection
+## Basic Usage
 
-```typescript
-import { DSportsWallet } from './wallet';
-import { WebPlatformAdapter } from '../utils/platform-adapters';
-import { RainbowKitConnector } from '../connectors/rainbow-kit';
-import { WagmiConnector } from '../connectors/wagmi';
+### Setting Up the Wallet Provider
 
-// Create a platform adapter for the current environment
-const adapter = new WebPlatformAdapter();
+```tsx
+import { WalletProvider } from '@d-sports/wallet';
 
-// Create a wallet instance with configuration
-const wallet = new DSportsWallet({
-  appName: 'D-Sports App',
-  chainId: 1, // Ethereum Mainnet
-  supportedChainIds: [1, 137, 56], // Ethereum, Polygon, BSC
-}, adapter);
-
-// Add wallet connectors
-wallet.addConnector(new RainbowKitConnector());
-wallet.addConnector(new WagmiConnector());
-
-// Connect to a wallet
-async function connectWallet() {
-  try {
-    const account = await wallet.connect('rainbow-kit');
-    console.log(`Connected to wallet: ${account.address}`);
-    return account;
-  } catch (error) {
-    console.error('Failed to connect wallet:', error);
-    throw error;
-  }
-}
-
-// Disconnect from a wallet
-async function disconnectWallet() {
-  try {
-    await wallet.disconnect();
-    console.log('Wallet disconnected');
-  } catch (error) {
-    console.error('Failed to disconnect wallet:', error);
-    throw error;
-  }
+function App() {
+  return (
+    <WalletProvider
+      appName="My App"
+      chains={[1, 137]} // Ethereum, Polygon
+      socialProviders={['google', 'twitter']}
+    >
+      <MyApp />
+    </WalletProvider>
+  );
 }
 ```
 
-## Event Handling
+### Connecting a Wallet
 
-```typescript
-// Set up event listeners
-wallet.on('connect', (account) => {
-  console.log(`Wallet connected: ${account.address}`);
-  console.log(`Chain ID: ${account.chainId}`);
-});
+```tsx
+import { useWallet } from '@d-sports/wallet';
 
-wallet.on('disconnect', () => {
-  console.log('Wallet disconnected');
-});
-
-wallet.on('chainChanged', (chainId) => {
-  console.log(`Chain changed to: ${chainId}`);
-});
-
-wallet.on('accountsChanged', (accounts) => {
-  console.log(`Account changed to: ${accounts[0]}`);
-});
-
-wallet.on('error', (error) => {
-  console.error('Wallet error:', error.message);
-});
-```
-
-## Chain Switching
-
-```typescript
-// Switch to a different blockchain network
-async function switchChain(chainId: number) {
-  try {
-    await wallet.switchChain(chainId);
-    console.log(`Switched to chain ID: ${chainId}`);
-  } catch (error) {
-    console.error('Failed to switch chain:', error);
-    throw error;
-  }
-}
-
-// Example: Switch to Polygon (chain ID 137)
-switchChain(137);
-```
-
-## State Management
-
-```typescript
-// Get the current wallet state
-function getWalletState() {
-  const state = wallet.getState();
-  console.log('Wallet state:', state);
-  
-  if (state.isConnecting) {
-    console.log('Wallet is connecting...');
-  } else if (state.isDisconnected) {
-    console.log('No wallet connected');
-  } else {
-    console.log(`Connected to wallet: ${state.account?.address}`);
-    console.log(`Chain ID: ${state.account?.chainId}`);
-  }
-  
-  return state;
-}
-
-// Check if a wallet is connected
-function checkConnection() {
-  const isConnected = wallet.isConnected();
-  console.log(`Wallet connected: ${isConnected}`);
+function ConnectButton() {
+  const { connect, isConnected, isConnecting, account } = useWallet();
   
   if (isConnected) {
-    const account = wallet.getAccount();
-    console.log(`Address: ${account?.address}`);
+    return <p>Connected: {account}</p>;
   }
   
-  return isConnected;
+  return (
+    <button 
+      onClick={() => connect('metamask')} 
+      disabled={isConnecting}
+    >
+      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+    </button>
+  );
 }
 ```
 
-## Integration with Zustand Store
+### Displaying Wallet Information
 
-```typescript
-import { useWalletStore } from './stores/wallet-store';
+```tsx
+import { useWallet } from '@d-sports/wallet';
 
-// Add a wallet to the store
-function addWalletToStore(address: string, label?: string) {
-  useWalletStore.getState().addWallet({
-    address,
-    label,
-    color: '#ff5500', // Optional color
-    icon: '💼', // Optional icon
-  });
-}
-
-// Remove a wallet from the store
-function removeWalletFromStore(address: string) {
-  useWalletStore.getState().removeWallet(address);
-}
-
-// Update wallet metadata
-function updateWalletMetadata(address: string, label: string, color: string, icon: string) {
-  useWalletStore.getState().updateWalletMeta(address, {
-    label,
-    color,
-    icon,
-  });
-}
-
-// React component example
-function WalletComponent() {
-  const { address, wallets, addWallet, removeWallet } = useWalletStore();
+function WalletInfo() {
+  const { isConnected, account, chainId, balance } = useWallet();
+  
+  if (!isConnected) {
+    return <p>Not connected</p>;
+  }
   
   return (
     <div>
-      <h2>Wallet Management</h2>
-      <p>Active wallet: {address || 'None'}</p>
-      <h3>Your Wallets ({wallets.length})</h3>
-      <ul>
-        {wallets.map((wallet) => (
-          <li key={wallet.address}>
-            {wallet.label || wallet.address.substring(0, 8) + '...'}
-            <button onClick={() => removeWallet(wallet.address)}>Remove</button>
-          </li>
-        ))}
-      </ul>
+      <h2>Wallet Information</h2>
+      <p>Account: {account}</p>
+      <p>Chain ID: {chainId}</p>
+      <p>Balance: {balance} ETH</p>
     </div>
   );
 }
 ```
 
-## Error Handling
+## Advanced Usage
 
-```typescript
-// Connect with proper error handling
-async function safeConnect(connectorId: string) {
-  try {
-    const account = await wallet.connect(connectorId);
-    return account;
-  } catch (error) {
-    // Handle specific error types
-    if (error.message.includes('User rejected')) {
-      console.log('User rejected the connection request');
-      // Handle user rejection
-    } else if (error.message.includes('Chain not supported')) {
-      console.log('Chain not supported, switching to supported chain');
-      // Handle chain switching
-    } else {
-      console.error('Unknown error during connection:', error);
-      // Handle generic errors
+### Using the Wallet Modal
+
+```tsx
+import { WalletModal, useWalletModal } from '@d-sports/wallet';
+
+function WalletConnect() {
+  const { isOpen, onOpen, onClose } = useWalletModal();
+  
+  return (
+    <>
+      <button onClick={onOpen}>Connect Wallet</button>
+      <WalletModal isOpen={isOpen} onClose={onClose} />
+    </>
+  );
+}
+```
+
+### Signing Messages
+
+```tsx
+import { useWallet } from '@d-sports/wallet';
+import { useState } from 'react';
+
+function MessageSigner() {
+  const { isConnected, signMessage } = useWallet();
+  const [message, setMessage] = useState('');
+  const [signature, setSignature] = useState('');
+  const [error, setError] = useState('');
+  
+  const handleSign = async () => {
+    try {
+      setError('');
+      const sig = await signMessage(message);
+      setSignature(sig);
+    } catch (err) {
+      setError(err.message);
     }
-    throw error;
+  };
+  
+  if (!isConnected) {
+    return <p>Connect your wallet to sign messages</p>;
   }
+  
+  return (
+    <div>
+      <h2>Sign Message</h2>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Enter message to sign"
+      />
+      <button onClick={handleSign}>Sign Message</button>
+      {signature && (
+        <div>
+          <h3>Signature:</h3>
+          <pre>{signature}</pre>
+        </div>
+      )}
+      {error && <p className="error">{error}</p>}
+    </div>
+  );
 }
 ```
 
-## Multi-Wallet Support
+### Sending Transactions
 
-```typescript
-// Connect multiple wallets sequentially
-async function connectMultipleWallets() {
-  const accounts = [];
+```tsx
+import { useWallet } from '@d-sports/wallet';
+import { useState } from 'react';
+
+function TransactionSender() {
+  const { isConnected, sendTransaction } = useWallet();
+  const [to, setTo] = useState('');
+  const [amount, setAmount] = useState('');
+  const [txHash, setTxHash] = useState('');
+  const [error, setError] = useState('');
   
-  try {
-    // Connect first wallet
-    const account1 = await wallet.connect('rainbow-kit');
-    accounts.push(account1);
-    
-    // Disconnect and connect second wallet
-    await wallet.disconnect();
-    const account2 = await wallet.connect('wagmi');
-    accounts.push(account2);
-    
-    return accounts;
-  } catch (error) {
-    console.error('Failed to connect multiple wallets:', error);
-    throw error;
+  const handleSend = async () => {
+    try {
+      setError('');
+      const hash = await sendTransaction({
+        to,
+        value: amount
+      });
+      setTxHash(hash);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
+  if (!isConnected) {
+    return <p>Connect your wallet to send transactions</p>;
   }
-}
-
-// Get all available connectors
-function listAvailableConnectors() {
-  const connectors = wallet.getConnectors();
-  console.log(`Available connectors: ${connectors.length}`);
   
-  connectors.forEach((connector) => {
-    console.log(`- ${connector.id}: ${connector.name}`);
-  });
-  
-  return connectors;
+  return (
+    <div>
+      <h2>Send Transaction</h2>
+      <div>
+        <label>
+          To Address:
+          <input
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            placeholder="0x..."
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          Amount (ETH):
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.01"
+            step="0.01"
+          />
+        </label>
+      </div>
+      <button onClick={handleSend}>Send Transaction</button>
+      {txHash && (
+        <div>
+          <h3>Transaction Hash:</h3>
+          <pre>{txHash}</pre>
+        </div>
+      )}
+      {error && <p className="error">{error}</p>}
+    </div>
+  );
 }
 ```
 
-## Platform-Specific Adapters
+### Switching Networks
 
-```typescript
-// Web platform
-import { WebPlatformAdapter } from '../utils/platform-adapters';
-const webAdapter = new WebPlatformAdapter();
-const webWallet = new DSportsWallet(config, webAdapter);
+```tsx
+import { useWallet } from '@d-sports/wallet';
 
-// Next.js platform
-import { NextPlatformAdapter } from '../utils/platform-adapters';
-const nextAdapter = new NextPlatformAdapter();
-const nextWallet = new DSportsWallet(config, nextAdapter);
-
-// React Native platform
-import { ReactNativePlatformAdapter } from '../utils/platform-adapters';
-const rnAdapter = new ReactNativePlatformAdapter();
-const rnWallet = new DSportsWallet(config, rnAdapter);
-```
-
-## Factory Pattern Usage
-
-```typescript
-import { createDSportsWallet } from './wallet-factory';
-
-// Create a wallet with default settings
-const wallet = createDSportsWallet({
-  appName: 'D-Sports App',
-});
-
-// Create a wallet with quick start settings for development
-import { createDSportsWalletQuickStart } from './wallet-factory';
-const devWallet = createDSportsWalletQuickStart();
-```
-
-## Complete Application Example
-
-```typescript
-import { DSportsWallet } from './wallet';
-import { WebPlatformAdapter } from '../utils/platform-adapters';
-import { RainbowKitConnector } from '../connectors/rainbow-kit';
-import { useWalletStore } from './stores/wallet-store';
-
-// Initialize wallet
-const adapter = new WebPlatformAdapter();
-const wallet = new DSportsWallet({
-  appName: 'D-Sports App',
-  chainId: 1,
-}, adapter);
-
-// Add connectors
-wallet.addConnector(new RainbowKitConnector());
-
-// Set up event listeners
-wallet.on('connect', (account) => {
-  console.log(`Connected: ${account.address}`);
-  // Add to wallet store
-  useWalletStore.getState().addWallet({
-    address: account.address,
-    label: `Wallet ${useWalletStore.getState().wallets.length + 1}`,
-  });
-});
-
-wallet.on('disconnect', () => {
-  console.log('Disconnected');
-  useWalletStore.getState().disconnectWallet();
-});
-
-// Connect function
-async function connectWallet() {
-  if (wallet.isConnected()) {
-    console.log('Already connected');
-    return wallet.getAccount();
+function NetworkSwitcher() {
+  const { isConnected, chainId, switchChain } = useWallet();
+  
+  const networks = [
+    { id: '1', name: 'Ethereum' },
+    { id: '137', name: 'Polygon' },
+    { id: '56', name: 'Binance Smart Chain' }
+  ];
+  
+  if (!isConnected) {
+    return <p>Connect your wallet to switch networks</p>;
   }
   
-  try {
-    return await wallet.connect('rainbow-kit');
-  } catch (error) {
-    console.error('Connection failed:', error);
-    throw error;
+  return (
+    <div>
+      <h2>Switch Network</h2>
+      <p>Current Network: {networks.find(n => n.id === chainId)?.name || chainId}</p>
+      <div>
+        {networks.map(network => (
+          <button
+            key={network.id}
+            onClick={() => switchChain(network.id)}
+            disabled={network.id === chainId}
+          >
+            Switch to {network.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Platform-Specific Examples
+
+### Next.js Integration
+
+```tsx
+// pages/_app.tsx
+import { NextWalletProvider } from '@d-sports/wallet/nextjs';
+import type { AppProps } from 'next/app';
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <NextWalletProvider
+      appName="My Next.js App"
+      chains={[1, 137]}
+      socialProviders={['google', 'twitter']}
+    >
+      <Component {...pageProps} />
+    </NextWalletProvider>
+  );
+}
+
+export default MyApp;
+```
+
+### React Native Integration
+
+```tsx
+// App.tsx
+import { RNWalletProvider } from '@d-sports/wallet/react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+const Stack = createStackNavigator();
+
+function App() {
+  return (
+    <RNWalletProvider
+      appName="My React Native App"
+      chains={[1, 137]}
+      socialProviders={['google', 'twitter']}
+    >
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Wallet" component={WalletScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </RNWalletProvider>
+  );
+}
+
+export default App;
+```
+
+## Social Login Examples
+
+### Google Login
+
+```tsx
+import { useWallet } from '@d-sports/wallet';
+
+function GoogleLoginButton() {
+  const { connect, isConnecting } = useWallet();
+  
+  const handleGoogleLogin = () => {
+    connect('google');
+  };
+  
+  return (
+    <button
+      onClick={handleGoogleLogin}
+      disabled={isConnecting}
+      className="google-login-button"
+    >
+      {isConnecting ? 'Connecting...' : 'Continue with Google'}
+    </button>
+  );
+}
+```
+
+### Twitter Login
+
+```tsx
+import { useWallet } from '@d-sports/wallet';
+
+function TwitterLoginButton() {
+  const { connect, isConnecting } = useWallet();
+  
+  const handleTwitterLogin = () => {
+    connect('twitter');
+  };
+  
+  return (
+    <button
+      onClick={handleTwitterLogin}
+      disabled={isConnecting}
+      className="twitter-login-button"
+    >
+      {isConnecting ? 'Connecting...' : 'Continue with Twitter'}
+    </button>
+  );
+}
+```
+
+## Token Management Examples
+
+### Displaying Token Balances
+
+```tsx
+import { useTokens } from '@d-sports/wallet';
+
+function TokenBalances() {
+  const { tokens, isLoading, error, refresh } = useTokens();
+  
+  if (isLoading) {
+    return <p>Loading tokens...</p>;
+  }
+  
+  if (error) {
+    return (
+      <div>
+        <p>Error loading tokens: {error.message}</p>
+        <button onClick={refresh}>Retry</button>
+      </div>
+    );
+  }
+  
+  return (
+    <div>
+      <h2>Token Balances</h2>
+      <button onClick={refresh}>Refresh</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Balance</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tokens.map(token => (
+            <tr key={token.symbol}>
+              <td>{token.name} ({token.symbol})</td>
+              <td>{token.balance}</td>
+              <td>{token.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
+
+### Token Price Chart
+
+```tsx
+import { useToken } from '@d-sports/wallet';
+import { LineChart } from 'react-chartjs-2';
+import { useState, useEffect } from 'react';
+
+function TokenPriceChart({ symbol }) {
+  const { token, isLoading } = useToken(symbol);
+  const [chartData, setChartData] = useState(null);
+  
+  useEffect(() => {
+    if (token) {
+      // Fetch historical price data
+      fetchHistoricalPrices(symbol).then(data => {
+        setChartData({
+          labels: data.map(d => d.date),
+          datasets: [
+            {
+              label: `${token.name} Price`,
+              data: data.map(d => d.price),
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }
+          ]
+        });
+      });
+    }
+  }, [token, symbol]);
+  
+  if (isLoading) {
+    return <p>Loading token data...</p>;
+  }
+  
+  if (!token) {
+    return <p>Token not found</p>;
+  }
+  
+  return (
+    <div>
+      <h2>{token.name} ({token.symbol}) Price Chart</h2>
+      {chartData ? (
+        <LineChart data={chartData} />
+      ) : (
+        <p>Loading chart data...</p>
+      )}
+      <div className="token-info">
+        <p>Current Price: {token.price}</p>
+        <p>24h Change: {token.percentChange24h}%</p>
+        <p>Market Cap: {token.marketCap}</p>
+      </div>
+    </div>
+  );
+}
+
+// Helper function to fetch historical prices
+async function fetchHistoricalPrices(symbol) {
+  // Implementation depends on your data source
+  // This is just a placeholder
+  return [
+    { date: '2023-01-01', price: 100 },
+    { date: '2023-01-02', price: 105 },
+    { date: '2023-01-03', price: 102 },
+    // ...more data
+  ];
+}
+```
+
+## Error Handling Examples
+
+### Error Boundary
+
+```tsx
+import React from 'react';
+
+class WalletErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Wallet error:', error, errorInfo);
+    // You can also log the error to an error reporting service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-container">
+          <h2>Something went wrong with the wallet</h2>
+          <p>{this.state.error.message}</p>
+          <button onClick={() => this.setState({ hasError: false, error: null })}>
+            Try Again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
   }
 }
 
-// Disconnect function
-async function disconnectWallet() {
-  if (!wallet.isConnected()) {
-    console.log('Not connected');
-    return;
-  }
-  
-  try {
-    await wallet.disconnect();
-  } catch (error) {
-    console.error('Disconnection failed:', error);
-    throw error;
-  }
+// Usage
+function App() {
+  return (
+    <WalletErrorBoundary>
+      <WalletProvider>
+        <MyApp />
+      </WalletProvider>
+    </WalletErrorBoundary>
+  );
 }
-
-// Export for use in application
-export {
-  wallet,
-  connectWallet,
-  disconnectWallet,
-};
 ```
+
+### Connection Error Handling
+
+```tsx
+import { useWallet } from '@d-sports/wallet';
+import { useState } from 'react';
+
+function WalletConnect() {
+  const { connect, isConnecting } = useWallet();
+  const [error, setError] = useState(null);
+  
+  const handleConnect = async (connector) => {
+    try {
+      setError(null);
+      await connect(connector);
+    } catch (err) {
+      setError(err);
+      console.error('Connection error:', err);
+    }
+  };
+  
+  return (
+    <div>
+      <h2>Connect Wallet</h2>
+      <div className="connector-buttons">
+        <button
+          onClick={() => handleConnect('metamask')}
+          disabled={isConnecting}
+        >
+          MetaMask
+        </button>
+        <button
+          onClick={() => handleConnect('walletconnect')}
+          disabled={isConnecting}
+        >
+          WalletConnect
+        </button>
+        <button
+          onClick={() => handleConnect('google')}
+          disabled={isConnecting}
+        >
+          Google
+        </button>
+      </div>
+      {error && (
+        <div className="error-message">
+          <p>Error: {error.message}</p>
+          <p>Please try again or use a different connection method.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Conclusion
+
+These examples demonstrate how to use the @d-sports/wallet package in various scenarios. For more detailed information, refer to the API documentation and other guides in this documentation set.

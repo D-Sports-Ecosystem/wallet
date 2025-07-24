@@ -1,339 +1,437 @@
-# Component State Management
+# State Management Documentation
 
-This document provides detailed information about state management patterns used in the UI components of the @d-sports/wallet project.
+This document provides a comprehensive overview of the state management approach in the @d-sports/wallet project.
 
-## State Management Approaches
+## Overview
 
-The UI components in this project use several state management approaches depending on the complexity and requirements of each component:
+The @d-sports/wallet project uses Zustand for state management, providing a simple yet powerful way to manage global state across the application. This document explains the state management architecture and provides examples of its implementation.
 
-### 1. Local Component State
+## State Management Architecture
 
-Simple components use React's `useState` hook for local state management. This is the most common approach for components that don't need to share state with other components.
+### Wallet Store
 
-#### Example: Button with Loading State
+The wallet store is the central state management solution for the @d-sports/wallet project. It manages all wallet-related state, including connection status, account information, and transaction history.
 
-```tsx
-function LoadingButton({ onClick, children }) {
-  const [isLoading, setIsLoading] = React.useState(false);
-  
-  const handleClick = async () => {
-    setIsLoading(true);
-    try {
-      await onClick();
-    } finally {
-      setIsLoading(false);
+```typescript
+import create from 'zustand';
+
+/**
+ * Wallet store interface
+ * 
+ * @interface WalletStore
+ * @property {boolean} isConnected - Whether the wallet is connected
+ * @property {string | null} account - The connected account address
+ * @property {string | null} chainId - The connected chain ID
+ * @property {string | null} balance - The account balance
+ * @property {Function} connect - Function to connect the wallet
+ * @property {Function} disconnect - Function to disconnect the wallet
+ * @property {Function} switchChain - Function to switch the connected chain
+ */
+interface WalletStore {
+  isConnected: boolean;
+  isConnecting: boolean;
+  account: string | null;
+  chainId: string | null;
+  balance: string | null;
+  error: Error | null;
+  connect: (connectorId: string) => Promise<void>;
+  disconnect: () => void;
+  switchChain: (chainId: string) => Promise<void>;
+}
+
+/**
+ * Create wallet store
+ * 
+ * @function createWalletStore
+ * @param {WalletConfig} config - Wallet configuration
+ * @returns {WalletStore} Wallet store
+ * 
+ * @example
+ * ```typescript
+ * const store = createWalletStore({
+ *   appName: 'My App',
+ *   chains: [1, 137],
+ *   socialProviders: ['google', 'twitter']
+ * });
+ * ```
+ */
+export const createWalletStore = (config: WalletConfig) => {
+  return create<WalletStore>((set, get) => ({
+    isConnected: false,
+    isConnecting: false,
+    account: null,
+    chainId: null,
+    balance: null,
+    error: null,
+    
+    connect: async (connectorId: string) => {
+      try {
+        set({ isConnecting: true, error: null });
+        
+        // Connect logic
+        const { account, chainId, balance } = await connectWallet(connectorId);
+        
+        set({
+          isConnected: true,
+          isConnecting: false,
+          account,
+          chainId,
+          balance
+        });
+      } catch (error) {
+        set({
+          isConnected: false,
+          isConnecting: false,
+          error: error as Error
+        });
+        throw error;
+      }
+    },
+    
+    disconnect: () => {
+      // Disconnect logic
+      disconnectWallet();
+      
+      set({
+        isConnected: false,
+        account: null,
+        chainId: null,
+        balance: null
+      });
+    },
+    
+    switchChain: async (chainId: string) => {
+      try {
+        // Switch chain logic
+        await switchWalletChain(chainId);
+        
+        set({ chainId });
+      } catch (error) {
+        set({ error: error as Error });
+        throw error;
+      }
     }
-  };
-  
-  return (
-    <Button 
-      onClick={handleClick} 
-      disabled={isLoading}
-    >
-      {isLoading ? <Spinner /> : children}
-    </Button>
-  );
-}
-```
-
-### 2. Context-Based State
-
-Components that need to share state with their children use React Context. This is common for compound components like Tabs, DropdownMenu, and other components that have multiple related subcomponents.
-
-#### Example: Tabs Component
-
-```tsx
-// Context definition
-const TabsContext = React.createContext<{
-  value: string;
-  onValueChange: (value: string) => void;
-} | null>(null);
-
-// Provider component
-const Tabs = ({ value, onValueChange, children }) => {
-  // Create a memoized context value to prevent unnecessary re-renders
-  const contextValue = React.useMemo(
-    () => ({ value, onValueChange }),
-    [value, onValueChange]
-  );
-  
-  return (
-    <TabsContext.Provider value={contextValue}>
-      {children}
-    </TabsContext.Provider>
-  );
-};
-
-// Consumer component
-const TabsTrigger = ({ value, children, ...props }) => {
-  const context = React.useContext(TabsContext);
-  
-  if (!context) {
-    throw new Error('TabsTrigger must be used within a Tabs component');
-  }
-  
-  const { value: selectedValue, onValueChange } = context;
-  const isSelected = selectedValue === value;
-  
-  return (
-    <button
-      data-state={isSelected ? 'active' : 'inactive'}
-      onClick={() => onValueChange(value)}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-```
-
-### 3. Controlled vs. Uncontrolled Components
-
-Components support both controlled and uncontrolled patterns to accommodate different use cases:
-
-#### Controlled Component (state managed by parent)
-
-```tsx
-function ControlledInput() {
-  const [value, setValue] = React.useState('');
-  
-  return (
-    <div>
-      <Input 
-        value={value} 
-        onChange={(e) => setValue(e.target.value)} 
-      />
-      <p>Current value: {value}</p>
-    </div>
-  );
-}
-```
-
-#### Uncontrolled Component (state managed internally)
-
-```tsx
-function UncontrolledInput() {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  
-  const handleSubmit = () => {
-    const value = inputRef.current?.value;
-    console.log('Submitted value:', value);
-  };
-  
-  return (
-    <div>
-      <Input ref={inputRef} defaultValue="Default value" />
-      <Button onClick={handleSubmit}>Submit</Button>
-    </div>
-  );
-}
-```
-
-### 4. Compound Component Pattern
-
-Complex UI components use the compound component pattern to create a flexible and intuitive API:
-
-```tsx
-// Usage example of compound components
-<Card>
-  <CardHeader>
-    <CardTitle>Card Title</CardTitle>
-    <CardDescription>Card Description</CardDescription>
-  </CardHeader>
-  <CardContent>
-    Content goes here
-  </CardContent>
-  <CardFooter>
-    <Button>Action</Button>
-  </CardFooter>
-</Card>
-```
-
-This pattern allows for flexible composition while maintaining a clear relationship between components.
-
-## State Transitions
-
-Components handle state transitions in several ways:
-
-### 1. Direct State Updates
-
-Simple state changes use direct updates via state setters:
-
-```tsx
-function Counter() {
-  const [count, setCount] = React.useState(0);
-  
-  // Direct state update
-  const increment = () => setCount(count + 1);
-  
-  // Functional update (safer for consecutive updates)
-  const incrementSafe = () => setCount(prev => prev + 1);
-  
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <Button onClick={increment}>Increment</Button>
-      <Button onClick={incrementSafe}>Increment (Safe)</Button>
-    </div>
-  );
-}
-```
-
-### 2. Derived State
-
-Some components compute derived state from props and context:
-
-```tsx
-function TabContent({ value, ...props }) {
-  const context = React.useContext(TabsContext);
-  
-  // Derived state based on context and props
-  const isSelected = context?.value === value;
-  
-  // Render based on derived state
-  if (!isSelected) return null;
-  
-  return <div {...props} />;
-}
-```
-
-### 3. Effect-Based Updates
-
-Side effects that update state are managed with `useEffect`:
-
-```tsx
-function AutosaveInput({ onSave }) {
-  const [value, setValue] = React.useState('');
-  const [isSaving, setIsSaving] = React.useState(false);
-  
-  // Effect to handle autosave
-  React.useEffect(() => {
-    if (!value) return;
-    
-    const timeoutId = setTimeout(() => {
-      setIsSaving(true);
-      onSave(value)
-        .finally(() => setIsSaving(false));
-    }, 1000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [value, onSave]);
-  
-  return (
-    <div>
-      <Input 
-        value={value} 
-        onChange={(e) => setValue(e.target.value)} 
-      />
-      {isSaving && <Spinner size="sm" />}
-    </div>
-  );
-}
-```
-
-## State Management Best Practices
-
-The UI components follow these best practices for state management:
-
-### 1. Single Source of Truth
-
-Each piece of state has a single source of truth, whether it's in a component, context, or external store.
-
-### 2. Minimize State
-
-Components only track the minimum amount of state needed, deriving other values when possible.
-
-### 3. Lift State Up
-
-When multiple components need to share state, the state is lifted to their closest common ancestor.
-
-### 4. Use Immutable Updates
-
-State updates always create new objects/arrays rather than mutating existing ones:
-
-```tsx
-// Good: Immutable update
-setItems([...items, newItem]);
-
-// Bad: Mutation
-items.push(newItem); // Don't do this!
-```
-
-### 5. Batch Related State
-
-Related state is grouped together using objects or custom hooks:
-
-```tsx
-// Grouping related state
-const [form, setForm] = React.useState({
-  name: '',
-  email: '',
-  password: ''
-});
-
-// Update grouped state
-const updateField = (field, value) => {
-  setForm(prev => ({
-    ...prev,
-    [field]: value
   }));
 };
 ```
 
-### 6. Use Reducers for Complex State
+### Token Store
 
-For complex state logic, `useReducer` is preferred over multiple `useState` calls:
+The token store manages token-related state, including token balances, prices, and transaction history.
 
-```tsx
-const initialState = { count: 0, isActive: false };
+```typescript
+import create from 'zustand';
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'increment':
-      return { ...state, count: state.count + 1 };
-    case 'decrement':
-      return { ...state, count: state.count - 1 };
-    case 'toggle':
-      return { ...state, isActive: !state.isActive };
-    default:
-      throw new Error();
-  }
+/**
+ * Token store interface
+ * 
+ * @interface TokenStore
+ * @property {TokenInfo[]} tokens - Array of token information
+ * @property {boolean} isLoading - Whether tokens are being loaded
+ * @property {Error | null} error - Error if token loading failed
+ * @property {Function} fetchTokens - Function to fetch tokens
+ * @property {Function} getTokenBySymbol - Function to get a token by symbol
+ */
+interface TokenStore {
+  tokens: TokenInfo[];
+  isLoading: boolean;
+  error: Error | null;
+  fetchTokens: () => Promise<void>;
+  getTokenBySymbol: (symbol: string) => TokenInfo | undefined;
 }
 
-function ComplexCounter() {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
-  
-  return (
-    <div>
-      <p>Count: {state.count}</p>
-      <p>Status: {state.isActive ? 'Active' : 'Inactive'}</p>
-      <Button onClick={() => dispatch({ type: 'increment' })}>+</Button>
-      <Button onClick={() => dispatch({ type: 'decrement' })}>-</Button>
-      <Button onClick={() => dispatch({ type: 'toggle' })}>Toggle</Button>
-    </div>
-  );
-}
-```
-
-## Platform-Specific State Considerations
-
-The UI components handle state differently based on the platform (web vs. React Native):
-
-```tsx
-function PlatformAwareInput({ value, onChange }) {
-  // Handle platform-specific state updates
-  const handleChange = (e) => {
-    if (isReactNative()) {
-      // React Native provides the value directly
-      onChange(e);
-    } else {
-      // Web provides an event object
-      onChange(e.target.value);
+/**
+ * Create token store
+ * 
+ * @function createTokenStore
+ * @returns {TokenStore} Token store
+ * 
+ * @example
+ * ```typescript
+ * const store = createTokenStore();
+ * ```
+ */
+export const createTokenStore = () => {
+  return create<TokenStore>((set, get) => ({
+    tokens: [],
+    isLoading: false,
+    error: null,
+    
+    fetchTokens: async () => {
+      try {
+        set({ isLoading: true, error: null });
+        
+        // Fetch tokens logic
+        const tokens = await fetchTokenData();
+        
+        set({
+          tokens,
+          isLoading: false
+        });
+      } catch (error) {
+        set({
+          isLoading: false,
+          error: error as Error
+        });
+        throw error;
+      }
+    },
+    
+    getTokenBySymbol: (symbol: string) => {
+      return get().tokens.find(token => token.symbol === symbol);
     }
-  };
+  }));
+};
+```
+
+## State Management Hooks
+
+### useWallet Hook
+
+The `useWallet` hook provides access to the wallet state and methods.
+
+```typescript
+/**
+ * Hook for accessing wallet state and methods
+ * 
+ * @function useWallet
+ * @returns {WalletStore} Wallet store state and methods
+ * 
+ * @example
+ * ```tsx
+ * function WalletStatus() {
+ *   const { isConnected, account, connect, disconnect } = useWallet();
+ *   
+ *   return (
+ *     <div>
+ *       {isConnected ? (
+ *         <>
+ *           <p>Connected: {account}</p>
+ *           <button onClick={disconnect}>Disconnect</button>
+ *         </>
+ *       ) : (
+ *         <button onClick={() => connect('metamask')}>Connect</button>
+ *       )}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
+export function useWallet() {
+  const store = useContext(WalletContext);
   
-  return <Input value={value} onChange={handleChange} />;
+  if (!store) {
+    throw new Error('useWallet must be used within a WalletProvider');
+  }
+  
+  return useStore(store);
 }
 ```
 
-This document provides a comprehensive overview of the state management patterns used in the UI components of the @d-sports/wallet project.
+### useTokens Hook
+
+The `useTokens` hook provides access to the token state and methods.
+
+```typescript
+/**
+ * Hook for accessing token state and methods
+ * 
+ * @function useTokens
+ * @returns {TokenStore} Token store state and methods
+ * 
+ * @example
+ * ```tsx
+ * function TokenList() {
+ *   const { tokens, isLoading, error, fetchTokens } = useTokens();
+ *   
+ *   useEffect(() => {
+ *     fetchTokens();
+ *   }, [fetchTokens]);
+ *   
+ *   if (isLoading) return <p>Loading...</p>;
+ *   if (error) return <p>Error: {error.message}</p>;
+ *   
+ *   return (
+ *     <ul>
+ *       {tokens.map(token => (
+ *         <li key={token.symbol}>
+ *           {token.name} ({token.symbol}): {token.balance}
+ *         </li>
+ *       ))}
+ *     </ul>
+ *   );
+ * }
+ * ```
+ */
+export function useTokens() {
+  const store = useContext(TokenContext);
+  
+  if (!store) {
+    throw new Error('useTokens must be used within a TokenProvider');
+  }
+  
+  return useStore(store);
+}
+```
+
+## State Persistence
+
+The wallet state is persisted to local storage to maintain the user's session across page reloads.
+
+```typescript
+import { persist } from 'zustand/middleware';
+
+/**
+ * Create persistent wallet store
+ * 
+ * @function createPersistentWalletStore
+ * @param {WalletConfig} config - Wallet configuration
+ * @returns {WalletStore} Persistent wallet store
+ * 
+ * @example
+ * ```typescript
+ * const store = createPersistentWalletStore({
+ *   appName: 'My App',
+ *   chains: [1, 137],
+ *   socialProviders: ['google', 'twitter']
+ * });
+ * ```
+ */
+export const createPersistentWalletStore = (config: WalletConfig) => {
+  return create(
+    persist(
+      (set, get) => ({
+        // Wallet store implementation
+      }),
+      {
+        name: 'wallet-storage',
+        getStorage: () => localStorage,
+        partialize: (state) => ({
+          account: state.account,
+          chainId: state.chainId,
+          isConnected: state.isConnected
+        })
+      }
+    )
+  );
+};
+```
+
+## State Selectors
+
+State selectors are used to optimize component re-renders by selecting only the needed state.
+
+```typescript
+/**
+ * Select wallet connection status
+ * 
+ * @function selectIsConnected
+ * @param {WalletStore} state - Wallet store state
+ * @returns {boolean} Whether the wallet is connected
+ * 
+ * @example
+ * ```tsx
+ * function ConnectionStatus() {
+ *   const isConnected = useWallet(selectIsConnected);
+ *   
+ *   return <p>Status: {isConnected ? 'Connected' : 'Disconnected'}</p>;
+ * }
+ * ```
+ */
+export const selectIsConnected = (state: WalletStore) => state.isConnected;
+
+/**
+ * Select wallet account
+ * 
+ * @function selectAccount
+ * @param {WalletStore} state - Wallet store state
+ * @returns {string | null} Wallet account
+ * 
+ * @example
+ * ```tsx
+ * function AccountDisplay() {
+ *   const account = useWallet(selectAccount);
+ *   
+ *   return account ? <p>Account: {account}</p> : null;
+ * }
+ * ```
+ */
+export const selectAccount = (state: WalletStore) => state.account;
+```
+
+## State Updates
+
+State updates are handled through actions defined in the store.
+
+```typescript
+/**
+ * Update wallet balance
+ * 
+ * @function updateBalance
+ * @param {string} balance - New balance
+ * @returns {void}
+ * 
+ * @example
+ * ```typescript
+ * const { updateBalance } = useWallet();
+ * updateBalance('1.5');
+ * ```
+ */
+updateBalance: (balance: string) => {
+  set({ balance });
+},
+
+/**
+ * Update wallet chain
+ * 
+ * @function updateChain
+ * @param {string} chainId - New chain ID
+ * @returns {void}
+ * 
+ * @example
+ * ```typescript
+ * const { updateChain } = useWallet();
+ * updateChain('1');
+ * ```
+ */
+updateChain: (chainId: string) => {
+  set({ chainId });
+}
+```
+
+## State Subscriptions
+
+State subscriptions are used to react to state changes.
+
+```typescript
+/**
+ * Subscribe to wallet state changes
+ * 
+ * @function subscribeToWalletChanges
+ * @param {Function} callback - Callback function
+ * @returns {Function} Unsubscribe function
+ * 
+ * @example
+ * ```typescript
+ * const unsubscribe = subscribeToWalletChanges((state) => {
+ *   console.log('Wallet state changed:', state);
+ * });
+ * 
+ * // Later
+ * unsubscribe();
+ * ```
+ */
+export function subscribeToWalletChanges(callback: (state: WalletStore) => void) {
+  const store = useContext(WalletContext);
+  
+  if (!store) {
+    throw new Error('subscribeToWalletChanges must be used within a WalletProvider');
+  }
+  
+  return store.subscribe(callback);
+}
+```
+
+## Conclusion
+
+The state management approach in the @d-sports/wallet project provides a simple, efficient, and flexible way to manage application state. By using Zustand, the project benefits from a minimal API with maximum flexibility, allowing for easy integration with React components and hooks.

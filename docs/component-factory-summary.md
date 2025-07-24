@@ -1,90 +1,192 @@
-# Component Factory Dynamic Imports Implementation Summary
+# Component Factory Documentation Summary
+
+This document provides a summary of the component factory pattern used in the @d-sports/wallet project.
 
 ## Overview
-Successfully refactored the component factory system to replace direct `require()` calls with dynamic imports and proper error handling for React Native components.
 
-## Key Changes Made
+The component factory pattern is used to create platform-specific components while maintaining a consistent API across different platforms. This allows the @d-sports/wallet package to support multiple platforms (Web, Next.js, React Native) with a unified API.
 
-### 1. Enhanced Component Factory (`src/utils/component-factory.ts`)
-- **Replaced direct `require()` calls** with dynamic imports using `import()` syntax
-- **Added proper error handling** with custom `ComponentFactoryError` class
-- **Implemented graceful fallbacks** when React Native components are unavailable
-- **Created type-safe component factory interface** with `ComponentFactory` interface
-- **Added both async and sync component loading** methods for different use cases
-- **Implemented singleton pattern** with caching to avoid repeated loading
+## Factory Functions
 
-### 2. Updated Platform Adapter (`src/utils/platform-adapter.ts`)
-- **Refactored React Native component loading** to use dynamic imports
-- **Added proper error handling** with console warnings for missing components
-- **Maintained backward compatibility** with synchronous access patterns
+### createWalletButton
 
-### 3. Fixed UI Components
-- **Updated tabs component** (`src/components/ui/tabs.tsx`) to use component factory
-- **Updated card component** (`src/components/ui/card.tsx`) to use component factory
-- **Updated avatar component** (`src/components/ui/avatar.tsx`) to use component factory
+```typescript
+/**
+ * Creates a WalletButton component for the current platform
+ * 
+ * @function createWalletButton
+ * @param {PlatformAdapter} adapter - Platform adapter for the current environment
+ * @returns {React.FC<WalletButtonProps>} WalletButton component for the current platform
+ * 
+ * @example
+ * ```tsx
+ * const WalletButton = createWalletButton(webAdapter);
+ * 
+ * function ConnectButton() {
+ *   return <WalletButton>Connect Wallet</WalletButton>;
+ * }
+ * ```
+ */
+```
 
-### 4. Enhanced Animation Utils (`src/utils/animation-utils.ts`)
-- **Added async loading function** `loadSafeAnimations()` for proper dynamic imports
-- **Maintained synchronous fallback** for immediate access
-- **Improved error handling** with console warnings
+### createWalletModal
 
-### 5. Fixed React Native Index (`src/react-native/index.ts`)
-- **Updated keychain utilities** to use dynamic imports with type assertions
-- **Fixed URL polyfill setup** to use dynamic imports
-- **Added proper TypeScript compatibility** using type assertions instead of module declarations
-- **Maintained both async and sync versions** for different use cases
+```typescript
+/**
+ * Creates a WalletModal component for the current platform
+ * 
+ * @function createWalletModal
+ * @param {PlatformAdapter} adapter - Platform adapter for the current environment
+ * @returns {React.FC<WalletModalProps>} WalletModal component for the current platform
+ * 
+ * @example
+ * ```tsx
+ * const WalletModal = createWalletModal(webAdapter);
+ * 
+ * function App() {
+ *   const [isOpen, setIsOpen] = useState(false);
+ *   return (
+ *     <>
+ *       <button onClick={() => setIsOpen(true)}>Open Wallet</button>
+ *       <WalletModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+ *     </>
+ *   );
+ * }
+ * ```
+ */
+```
 
-### 6. Updated Page Components
-- **Token selection page** (`src/components/token-selection-page.tsx`)
-- **Send page** (`src/components/send-page.tsx`)
-- **Receive page** (`src/components/receive-page.tsx`)
-- All now use dynamic imports for React Native Reanimated with proper fallbacks
+### createWalletProvider
 
-## Technical Benefits
+```typescript
+/**
+ * Creates a WalletProvider component for the current platform
+ * 
+ * @function createWalletProvider
+ * @param {PlatformAdapter} adapter - Platform adapter for the current environment
+ * @returns {React.FC<WalletProviderProps>} WalletProvider component for the current platform
+ * 
+ * @example
+ * ```tsx
+ * const WalletProvider = createWalletProvider(webAdapter);
+ * 
+ * function App() {
+ *   return (
+ *     <WalletProvider
+ *       appName="My App"
+ *       chains={[1, 137]}
+ *       socialProviders={['google', 'twitter']}
+ *     >
+ *       <MyApp />
+ *     </WalletProvider>
+ *   );
+ * }
+ * ```
+ */
+```
 
-### Error Handling
-- **Graceful degradation** when React Native dependencies are missing
-- **Detailed error logging** for debugging purposes
-- **Type-safe error classes** with proper error context
+## Platform-Specific Implementations
 
-### Performance
-- **Lazy loading** of React Native components only when needed
-- **Caching mechanism** to avoid repeated imports
-- **Concurrent loading support** with promise deduplication
+### Web Implementation
 
-### Compatibility
-- **Cross-platform support** with automatic fallbacks
-- **TypeScript compatibility** with proper type assertions
-- **Backward compatibility** maintained for existing code
+```typescript
+/**
+ * Web-specific implementation of the WalletButton component
+ * 
+ * @component
+ * @param {WalletButtonProps} props - Component props
+ * @returns {JSX.Element} Web-specific WalletButton component
+ */
+```
 
-### Developer Experience
-- **Clear error messages** when components fail to load
-- **Consistent API** across all component loading methods
-- **Comprehensive test coverage** with 10 passing tests
+### Next.js Implementation
 
-## Files Modified
-1. `src/utils/component-factory.ts` - Main component factory implementation
-2. `src/utils/platform-adapter.ts` - Platform-specific component loading
-3. `src/components/ui/tabs.tsx` - UI component updates
-4. `src/components/ui/card.tsx` - UI component updates
-5. `src/components/ui/avatar.tsx` - UI component updates (fixed by user)
-6. `src/utils/animation-utils.ts` - Animation utilities
-7. `src/react-native/index.ts` - React Native specific utilities
-8. `src/components/token-selection-page.tsx` - Page component updates
-9. `src/components/send-page.tsx` - Page component updates
-10. `src/components/receive-page.tsx` - Page component updates
+```typescript
+/**
+ * Next.js-specific implementation of the WalletButton component
+ * 
+ * @component
+ * @param {WalletButtonProps} props - Component props
+ * @returns {JSX.Element} Next.js-specific WalletButton component
+ */
+```
 
-## Tests Added
-- `src/utils/__tests__/component-factory.test.ts` - Comprehensive test suite with 10 test cases covering:
-  - Component loading functionality
-  - Error handling scenarios
-  - Async/sync compatibility
-  - Factory pattern implementation
-  - Individual component exports
+### React Native Implementation
 
-## Verification
-- ✅ All tests passing (10/10)
-- ✅ TypeScript compilation successful
-- ✅ No breaking changes to existing API
-- ✅ Proper error handling implemented
-- ✅ Graceful fallbacks working correctly
+```typescript
+/**
+ * React Native-specific implementation of the WalletButton component
+ * 
+ * @component
+ * @param {WalletButtonProps} props - Component props
+ * @returns {JSX.Element} React Native-specific WalletButton component
+ */
+```
+
+## Usage Examples
+
+### Web Usage
+
+```tsx
+import { createDSportsWallet, createWebPlatformAdapter } from '@d-sports/wallet';
+
+const adapter = createWebPlatformAdapter();
+const wallet = createDSportsWallet({
+  appName: 'My App',
+  adapter
+});
+
+const WalletButton = wallet.components.WalletButton;
+
+function ConnectButton() {
+  return <WalletButton>Connect Wallet</WalletButton>;
+}
+```
+
+### Next.js Usage
+
+```tsx
+import { NextWalletProvider } from '@d-sports/wallet/nextjs';
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <NextWalletProvider>
+      <Component {...pageProps} />
+    </NextWalletProvider>
+  );
+}
+```
+
+### React Native Usage
+
+```tsx
+import { RNWalletProvider } from '@d-sports/wallet/react-native';
+
+function App() {
+  return (
+    <RNWalletProvider>
+      <RootNavigator />
+    </RNWalletProvider>
+  );
+}
+```
+
+## Benefits of the Component Factory Pattern
+
+1. **Platform Abstraction**: Hides platform-specific implementation details behind a unified API
+2. **Code Reuse**: Shares common logic across platforms while allowing platform-specific optimizations
+3. **Maintainability**: Makes it easier to maintain and update components across platforms
+4. **Extensibility**: Allows for easy addition of new platforms or components
+5. **Testing**: Facilitates testing by allowing platform-specific mocks and stubs
+
+## Implementation Details
+
+The component factory pattern is implemented using the following approach:
+
+1. Define common interfaces for components and their props
+2. Create platform-specific implementations of each component
+3. Create factory functions that return the appropriate implementation based on the platform adapter
+4. Export the factory functions as part of the public API
+5. Use the factory functions to create components in the application
+
+This approach allows for a consistent API across platforms while still taking advantage of platform-specific features and optimizations.

@@ -113,7 +113,6 @@ export {
   useFadeAnimation,
   useSlideAnimation,
   useBounceAnimation,
-  useShimmerAnimation,
 } from "./hooks/useAnimations";
 
 // Animation components
