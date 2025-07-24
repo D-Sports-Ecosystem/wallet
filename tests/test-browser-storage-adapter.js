@@ -13,7 +13,7 @@ if (typeof window === 'undefined') {
 }
 
 // Import the storage adapter factory
-import('./src/utils/storage-adapter.js').then(async (module) => {
+import('../src/utils/storage-adapter.js').then(async (module) => {
   const { createStorageAdapter, MemoryStorageAdapter } = module;
   
   console.log('Testing storage adapters...');

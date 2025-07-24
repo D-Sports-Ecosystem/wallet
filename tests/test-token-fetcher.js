@@ -1,14 +1,4 @@
-// Test the browser-safe token fetcher functionality
-
-// Mock browser environment
-global.window = {
-  localStorage: {
-    getItem: (key) => null,
-    setItem: (key, value) => {},
-    removeItem: (key) => {}
-  }
-};
-global.document = {};
+// Test the token fetcher functionality directly
 
 // Import the token fetcher functions
 const {
@@ -18,9 +8,9 @@ const {
   getAllTokenSymbols,
   clearTokenData,
   isTokenDataStale
-} = require('./src/utils/browser-token-fetcher');
+} = require('../src/utils/token-fetcher.ts');
 
-console.log('Testing browser-safe token fetcher functions...');
+console.log('Testing token fetcher functions...');
 
 try {
   // Test getting token data
@@ -39,8 +29,8 @@ try {
   const isStale = isTokenDataStale();
   console.log('✅ isTokenDataStale works, is stale:', isStale);
   
-  console.log('✅ All browser-safe token fetcher functions work correctly!');
+  console.log('✅ All token fetcher functions work correctly!');
   
 } catch (error) {
-  console.error('❌ Error testing browser-safe token fetcher:', error.message);
+  console.error('❌ Error testing token fetcher:', error.message);
 }

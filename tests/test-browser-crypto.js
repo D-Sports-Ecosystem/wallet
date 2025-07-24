@@ -2,7 +2,7 @@
 // This file can be run in a browser environment to test the crypto adapter
 
 // Import the crypto adapter
-import { createCryptoAdapter } from './src/utils/crypto-adapter.js';
+import { createCryptoAdapter } from '../src/utils/crypto-adapter.js';
 
 async function runTests() {
   const results = document.getElementById('results');

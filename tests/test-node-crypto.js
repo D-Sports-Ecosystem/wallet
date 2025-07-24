@@ -1,5 +1,5 @@
 // Node.js test script for crypto adapter
-const { createCryptoAdapter } = require('./src/utils/crypto-adapter');
+const { createCryptoAdapter } = require('../src/utils/crypto-adapter');
 
 async function runTests() {
   console.log('Starting crypto adapter tests in Node.js...');

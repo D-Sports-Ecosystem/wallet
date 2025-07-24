@@ -1,5 +1,5 @@
 // Simple browser test for network adapter
-import { createNetworkAdapter } from './src/utils/network-adapter.js';
+import { createNetworkAdapter } from '../src/utils/network-adapter.js';
 
 async function testNetworkAdapter() {
   console.log('Testing browser network adapter...');

@@ -36,7 +36,7 @@ try {
   console.log('Testing browser compatibility...');
   
   // Try to require the built package
-  const pkg = require('./dist/index.js');
+  const pkg = require('../dist/index.js');
   
   console.log('✅ Package loaded successfully in browser-like environment');
   console.log('Available exports:', Object.keys(pkg));
