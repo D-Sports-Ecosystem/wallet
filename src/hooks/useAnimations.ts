@@ -276,7 +276,7 @@ export function useBounceAnimation() {
  * // Apply animation to a loading placeholder
  * return (
  *   <div {...props} className="h-10 w-full bg-gray-200">
- *     {/* Loading placeholder */}
+ *     <span>Loading placeholder</span>
  *   </div>
  * );
  * ```
