@@ -1,6 +1,6 @@
 [?9001h[?1004h[?25l[2J[m[H]0;C:\WINDOWS\system32\cmd.exe [?25h[94m➤ [mYN0000: · [1mYarn 4.9.3
-[22m[94m➤ [90mYN0000[m: ┌ Resolution step[94m
-➤ [90mYN0000[m: ⠙[?25l[94m➤ [90mYN0000[m: ⠙ [38;2;215;135;95mroot-workspace-0b6124[38;2;0;175;175m@workspace:.[K[m
+[?25l[22m[94m➤ [90mYN0000[m: ┌ Resolution step[94m
+➤ [90mYN0000[m: ⠙ [38;2;215;135;95mroot-workspace-0b6124[38;2;0;175;175m@workspace:.[K[m
 [K
 [K
 [K
@@ -147,7 +147,7 @@
 [K
 [K
 [K
-[K[4;1H[?25h[?25l[3;1H[?25h[?25l[94m➤ [90mYN0000[m: ⠹ [38;2;215;135;95mstrip-ansi[38;2;0;175;175m@npm:^6.0.0[K[m
+[K[4;1H[?25h[?25l[3;1H[?25h[?25l[94m➤ [90mYN0000[m: ⠹ [38;2;215;95;0m@isaacs/[38;2;215;135;95mbalanced-match[38;2;0;175;175m@npm:^4.0.1[K[m
 [K
 [K
 [K
@@ -196,10 +196,110 @@
 [K
 [K
 [K
-[K[4;1H[?25h[?25l[3;1H[?25h[?25l[94m➤ [m]8;id=50056-1;https://yarnpkg.com/advanced/error-codes#yn0085---updated_resolution_record\YN0085]8;;\: │ [38;2;95;175;0m+ [38;2;215;135;95mrimraf[38;2;135;175;255m@npm:6.0.1[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mbalanced-match[38;2;135;175;255m@npm:4.0.1[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mbrace-expansion[38;2;135;175;255m@npm:5.0.0[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mcliui[38;2;135;175;255m@npm:8.0.2[m, [38;2;215;135;95mansi-regex[38;2;135;175;255m@npm:5.0.1[m, [38;2;215;135;95mansi-regex[38;2;135;175;255m@npm:6.2.0[m, and [38;2;255;215;0m29 [mmore.[K[94m
-➤ [90mYN0000[m: └ Completed in 0s 284ms[K[94m
+[K[4;1H[?25h[?25l[3;1H[?25h[94m➤ [90mYN0000[m: ⠸ [38;2;215;95;0m@isaacs/[38;2;215;135;95mbalanced-match[38;2;0;175;175m@npm:^4.0.1
+[?25l[m[3;1H[?25h[94m➤ [90mYN0000[m: ⠼ [38;2;215;95;0m@isaacs/[38;2;215;135;95mbalanced-match[38;2;0;175;175m@npm:^4.0.1
+[?25l[m[94m[3;1H➤ [90mYN0000[m: ⠼ [38;2;215;95;0m@isaacs/[38;2;215;135;95mcliui[38;2;0;175;175m@npm:^8.0.2[K[m
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[4;1H[?25h[?25l[3;1H[?25h[?25l[94m➤ [90mYN0000[m: ⠴ [38;2;215;135;95mansi-styles[38;2;0;175;175m@npm:^6.1.0[K[m
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[4;1H[?25h[?25l[3;1H[?25h[?25l[94m➤ [m]8;id=30004-1;https://yarnpkg.com/advanced/error-codes#yn0085---updated_resolution_record\YN0085]8;;\: │ [38;2;95;175;0m+ [38;2;215;135;95mrimraf[38;2;135;175;255m@npm:6.0.1[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mbalanced-match[38;2;135;175;255m@npm:4.0.1[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mbrace-expansion[38;2;135;175;255m@npm:5.0.0[m, [38;2;215;95;0m@isaacs/[38;2;215;135;95mcliui[38;2;135;175;255m@npm:8.0.2[m, [38;2;215;135;95mansi-regex[38;2;135;175;255m@npm:5.0.1[m, [38;2;215;135;95mansi-regex[38;2;135;175;255m@npm:6.2.0[m, and [38;2;255;215;0m29 [mmore.[K[94m
+➤ [90mYN0000[m: └ Completed in 0s 574ms[K[94m
 ➤ [90mYN0000[m: ┌ Fetch step[K[94m
-➤ [90mYN0000[m: ⠸ =================================-----------------------------------------------[K
+➤ [90mYN0000[m: ⠦ =========================================================================-------[K
 [K
 [K
 [K
@@ -293,9 +393,85 @@
 [K
 [K[8;1H[?25h[93m➤ [mYN0000: │ ESM support for PnP uses the experimental loader API and is therefore experimental
 [?25l[94m➤ [90mYN0000[m: └ Completed[93m
-➤ [mYN0000: · Done with warnings in 0s 399ms[12;1H[?25h[36m[1m
+➤ [mYN0000: · Done with warnings in 0s 785ms[12;1H[?25h[36m[1m
 src/index.ts[22m → [1mdist/index.js, dist/index.esm.js[22m...
 [m[32mcreated [1mdist/index.js, dist/index.esm.js[22m in [1m8.1s
 [m[36m[1m
 src/browser/index.ts[22m → [1mdist/browser/index.js, dist/browser/index.esm.js[22m...
-[m^C^C[?9001l[?1004l
+[m[32mcreated [1mdist/browser/index.js, dist/browser/index.esm.js[22m in [1m4.6s
+[m[36m[1m
+src/server/index.ts[22m → [1mdist/server/index.js, dist/server/index.esm.js[22m...
+[m[32mcreated [1mdist/server/index.js, dist/server/index.esm.js[22m in [1m5.8s
+[m[36m[1m
+src/nextjs/index.ts[22m → [1mdist/nextjs/index.js, dist/nextjs/index.esm.js[22m...
+[m[32mcreated [1mdist/nextjs/index.js, dist/nextjs/index.esm.js[22m in [1m3.7s
+[m[36m[1m
+src/react-native/index.ts[22m → [1mdist/react-native/index.js, dist/react-native/index.esm.js[22m...
+[m[33m[1m(!) Unresolved dependencies
+[m[90mhttps://rollupjs.org/troubleshooting/#warning-treating-module-as-external-dependency[m[1m
+crypto[22m (imported by "src/utils/crypto-adapter.ts" and "src/utils/platform-adapter-factory.ts")[32m
+created [1mdist/react-native/index.js, dist/react-native/index.esm.js[22m in [1m4.3s
+[m[?25lValidating browser bundle files for Node.js module references...[32;1H[?25h[?25lValidating dist\browser\index.js (0.13 KB):
+  ✅ No Node.js module references found[35;1HValidating dist\browser\index.esm.js (0.07 KB):
+  ✅ No Node.js module references found[38;1H✅ All browser bundle files are valid! No Node.js module references found.
+[?25h[?25lMonitoring bundle sizes across platforms...[41;1H[?25h[?25l
+=== BROWSER PLATFORM ===[44;1Hindex.js (0.13 KB):
+  ℹ️ Size unchanged since 2025-07-23[47;1Hindex.esm.js (0.07 KB):
+  ℹ️ Size unchanged since 2025-07-23[50;1H=== SERVER PLATFORM ===[52;1Hindex.js (172.82 KB):[?25h
+  ℹ️ Size unchanged since 2025-07-23
+
+index.esm.js (172.25 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+=== NEXTJS PLATFORM ===
+
+index.js (27.78 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+index.esm.js (27.58 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+=== REACTNATIVE PLATFORM ===
+
+index.js (26.09 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+index.esm.js (26.01 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+=== CORE PLATFORM ===
+
+index.js (0.13 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+index.esm.js (0.07 KB):
+  ℹ️ Size unchanged since 2025-07-23
+
+=== SUMMARY ===
+
+Bundle Size Summary:
+
+BROWSER:
+  index.js: 0.13 KB
+  index.esm.js: 0.07 KB
+
+SERVER:
+  index.js: 172.82 KB
+  index.esm.js: 172.25 KB
+
+NEXTJS:
+  index.js: 27.78 KB
+  index.esm.js: 27.58 KB
+
+REACTNATIVE:
+  index.js: 26.09 KB
+  index.esm.js: 26.01 KB
+
+CORE:
+  index.js: 0.13 KB
+  index.esm.js: 0.07 KB
+
+✅ All bundle sizes are within acceptable limits.
+
+Size history updated. Run with --report to generate a visual report.
+[?9001l[?1004l
