@@ -10,3 +10,10 @@ temp-examples/
 
 yarn.lock
 .yarn
+
+.turbo
+.turbo/
+.turbo/turbo.json
+.turbo.json
+
+.kiro\settings\bundle-size-history.json
