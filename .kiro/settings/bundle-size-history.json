@@ -248,10 +248,85 @@
           "index.esm.js": 0.07
         }
       }
+    },
+    {
+      "date": "2025-08-26T09:33:49.889Z",
+      "sizes": {
+        "browser": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        },
+        "server": {
+          "index.js": 172.82,
+          "index.esm.js": 172.25
+        },
+        "nextjs": {
+          "index.js": 27.78,
+          "index.esm.js": 27.58
+        },
+        "reactNative": {
+          "index.js": 26.09,
+          "index.esm.js": 26.01
+        },
+        "core": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        }
+      }
+    },
+    {
+      "date": "2025-08-26T09:54:22.903Z",
+      "sizes": {
+        "browser": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        },
+        "server": {
+          "index.js": 172.82,
+          "index.esm.js": 172.25
+        },
+        "nextjs": {
+          "index.js": 27.78,
+          "index.esm.js": 27.58
+        },
+        "reactNative": {
+          "index.js": 26.09,
+          "index.esm.js": 26.01
+        },
+        "core": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        }
+      }
+    },
+    {
+      "date": "2025-08-26T09:57:05.376Z",
+      "sizes": {
+        "browser": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        },
+        "server": {
+          "index.js": 172.82,
+          "index.esm.js": 172.25
+        },
+        "nextjs": {
+          "index.js": 27.78,
+          "index.esm.js": 27.58
+        },
+        "reactNative": {
+          "index.js": 26.09,
+          "index.esm.js": 26.01
+        },
+        "core": {
+          "index.js": 0.13,
+          "index.esm.js": 0.07
+        }
+      }
     }
   ],
   "current": {
-    "date": "2025-08-26T09:33:49.889Z",
+    "date": "2025-08-26T10:02:56.683Z",
     "sizes": {
       "browser": {
         "index.js": 0.13,
